@@ -1,0 +1,697 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="credit_tradeModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="buyers">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="fio" Type="varchar" MaxLength="150" Nullable="false" />
+        </EntityType>
+        <EntityType Name="goods">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="nom_id" Type="varchar" MaxLength="32" Nullable="false" />
+          <Property Name="parent_id" Type="varchar" MaxLength="32" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="512" Nullable="false" />
+          <Property Name="edizm" Type="varchar" MaxLength="16" Nullable="false" />
+          <Property Name="price" Type="numeric" Precision="7" Scale="2" Nullable="false" />
+          <Property Name="barcode" Type="varchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="leftovers">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="warehouse_id" Type="int" Nullable="false" />
+          <Property Name="good_id" Type="int" Nullable="false" />
+          <Property Name="amount" Type="numeric" Precision="9" Scale="3" Nullable="false" />
+        </EntityType>
+        <EntityType Name="postoffices">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="idx" Type="varchar" MaxLength="6" Nullable="false" />
+          <Property Name="name_ops" Type="varchar" MaxLength="128" />
+          <Property Name="post_id" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="posts">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="privilegies" Type="int" />
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="64" />
+        </EntityType>
+        <EntityType Name="request_rows">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="amount" Type="decimal" Precision="10" Scale="3" />
+          <Property Name="name" Type="varchar" MaxLength="256" />
+          <Property Name="ed_izm" Type="varchar" MaxLength="32" />
+          <Property Name="goods_id" Type="varchar" MaxLength="32" />
+          <Property Name="request_id" Type="int" />
+          <Property Name="price" Type="decimal" Precision="10" Scale="2" />
+          <Property Name="code" Type="varchar" MaxLength="30" />
+          <Property Name="fact_amount" Type="decimal" Precision="10" Scale="3" />
+          <Property Name="partner" Type="varchar" MaxLength="120" />
+        </EntityType>
+        <EntityType Name="requests">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="date" Type="datetime" />
+          <Property Name="username" Type="varchar" MaxLength="50" />
+          <Property Name="category" Type="int" />
+          <Property Name="comment" Type="varchar" MaxLength="1024" />
+          <Property Name="state_id" Type="int" />
+          <Property Name="user_id" Type="int" />
+          <Property Name="buyer_id" Type="int" />
+        </EntityType>
+        <EntityType Name="states">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="32" />
+        </EntityType>
+        <EntityType Name="users">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="username" Type="varchar" MaxLength="64" />
+          <Property Name="fio" Type="varchar" MaxLength="64" />
+          <Property Name="dpt" Type="varchar" MaxLength="256" />
+          <Property Name="signer" Type="varchar" MaxLength="64" />
+          <Property Name="post_id" Type="int" />
+        </EntityType>
+        <EntityType Name="warehouses">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="varchar" MaxLength="128" Nullable="false" />
+          <Property Name="postoffice_id" Type="int" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_leftovers_goods">
+          <End Role="goods" Type="Self.goods" Multiplicity="1" />
+          <End Role="leftovers" Type="Self.leftovers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="goods">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="leftovers">
+              <PropertyRef Name="good_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_leftovers_warehouses">
+          <End Role="warehouses" Type="Self.warehouses" Multiplicity="1" />
+          <End Role="leftovers" Type="Self.leftovers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="warehouses">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="leftovers">
+              <PropertyRef Name="warehouse_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_postoffices_posts">
+          <End Role="posts" Type="Self.posts" Multiplicity="1" />
+          <End Role="postoffices" Type="Self.postoffices" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="posts">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="postoffices">
+              <PropertyRef Name="post_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_request_rows_Request">
+          <End Role="requests" Type="Self.requests" Multiplicity="0..1" />
+          <End Role="request_rows" Type="Self.request_rows" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="requests">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="request_rows">
+              <PropertyRef Name="request_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_requests_buyers">
+          <End Role="buyers" Type="Self.buyers" Multiplicity="0..1" />
+          <End Role="requests" Type="Self.requests" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="buyers">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="requests">
+              <PropertyRef Name="buyer_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_requests_State">
+          <End Role="states" Type="Self.states" Multiplicity="0..1" />
+          <End Role="requests" Type="Self.requests" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="states">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="requests">
+              <PropertyRef Name="state_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_requests_User">
+          <End Role="users" Type="Self.users" Multiplicity="0..1" />
+          <End Role="requests" Type="Self.requests" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="requests">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_users_Post">
+          <End Role="posts" Type="Self.posts" Multiplicity="0..1" />
+          <End Role="users" Type="Self.users" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="posts">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="users">
+              <PropertyRef Name="post_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_warehouses_postoffices">
+          <End Role="postoffices" Type="Self.postoffices" Multiplicity="1" />
+          <End Role="warehouses" Type="Self.warehouses" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="postoffices">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="warehouses">
+              <PropertyRef Name="postoffice_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="credit_tradeModelStoreContainer">
+          <EntitySet Name="buyers" EntityType="Self.buyers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="goods" EntityType="Self.goods" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="leftovers" EntityType="Self.leftovers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="postoffices" EntityType="Self.postoffices" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="posts" EntityType="Self.posts" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="request_rows" EntityType="Self.request_rows" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="requests" EntityType="Self.requests" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="states" EntityType="Self.states" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="users" EntityType="Self.users" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="warehouses" EntityType="Self.warehouses" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_leftovers_goods" Association="Self.FK_leftovers_goods">
+            <End Role="goods" EntitySet="goods" />
+            <End Role="leftovers" EntitySet="leftovers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_leftovers_warehouses" Association="Self.FK_leftovers_warehouses">
+            <End Role="warehouses" EntitySet="warehouses" />
+            <End Role="leftovers" EntitySet="leftovers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_postoffices_posts" Association="Self.FK_postoffices_posts">
+            <End Role="posts" EntitySet="posts" />
+            <End Role="postoffices" EntitySet="postoffices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_request_rows_Request" Association="Self.FK_request_rows_Request">
+            <End Role="requests" EntitySet="requests" />
+            <End Role="request_rows" EntitySet="request_rows" />
+          </AssociationSet>
+          <AssociationSet Name="FK_requests_buyers" Association="Self.FK_requests_buyers">
+            <End Role="buyers" EntitySet="buyers" />
+            <End Role="requests" EntitySet="requests" />
+          </AssociationSet>
+          <AssociationSet Name="FK_requests_State" Association="Self.FK_requests_State">
+            <End Role="states" EntitySet="states" />
+            <End Role="requests" EntitySet="requests" />
+          </AssociationSet>
+          <AssociationSet Name="FK_requests_User" Association="Self.FK_requests_User">
+            <End Role="users" EntitySet="users" />
+            <End Role="requests" EntitySet="requests" />
+          </AssociationSet>
+          <AssociationSet Name="FK_users_Post" Association="Self.FK_users_Post">
+            <End Role="posts" EntitySet="posts" />
+            <End Role="users" EntitySet="users" />
+          </AssociationSet>
+          <AssociationSet Name="FK_warehouses_postoffices" Association="Self.FK_warehouses_postoffices">
+            <End Role="postoffices" EntitySet="postoffices" />
+            <End Role="warehouses" EntitySet="warehouses" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="credit_tradeModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="DbContext" annotation:LazyLoadingEnabled="true" >
+          <EntitySet Name="buyers" EntityType="credit_tradeModel.buyer" />
+          <EntitySet Name="goods" EntityType="credit_tradeModel.good" />
+          <EntitySet Name="leftovers" EntityType="credit_tradeModel.leftover" />
+          <EntitySet Name="postoffices" EntityType="credit_tradeModel.postoffice" />
+          <EntitySet Name="posts" EntityType="credit_tradeModel.post" />
+          <EntitySet Name="request_rows" EntityType="credit_tradeModel.request_rows" />
+          <EntitySet Name="requests" EntityType="credit_tradeModel.request" />
+          <EntitySet Name="states" EntityType="credit_tradeModel.state" />
+          <EntitySet Name="users" EntityType="credit_tradeModel.user" />
+          <EntitySet Name="warehouses" EntityType="credit_tradeModel.warehouse" />
+          <AssociationSet Name="FK_leftovers_goods" Association="credit_tradeModel.FK_leftovers_goods">
+            <End Role="good" EntitySet="goods" />
+            <End Role="leftover" EntitySet="leftovers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_leftovers_warehouses" Association="credit_tradeModel.FK_leftovers_warehouses">
+            <End Role="warehouse" EntitySet="warehouses" />
+            <End Role="leftover" EntitySet="leftovers" />
+          </AssociationSet>
+          <AssociationSet Name="FK_postoffices_posts" Association="credit_tradeModel.FK_postoffices_posts">
+            <End Role="post" EntitySet="posts" />
+            <End Role="postoffice" EntitySet="postoffices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_warehouses_postoffices" Association="credit_tradeModel.FK_warehouses_postoffices">
+            <End Role="postoffice" EntitySet="postoffices" />
+            <End Role="warehouse" EntitySet="warehouses" />
+          </AssociationSet>
+          <AssociationSet Name="FK_requests_post" Association="credit_tradeModel.FK_requests_post">
+            <End Role="post" EntitySet="posts" />
+            <End Role="request" EntitySet="requests" />
+          </AssociationSet>
+          <AssociationSet Name="FK_users_Post" Association="credit_tradeModel.FK_users_Post">
+            <End Role="post" EntitySet="posts" />
+            <End Role="user" EntitySet="users" />
+          </AssociationSet>
+          <AssociationSet Name="FK_request_rows_Request" Association="credit_tradeModel.FK_request_rows_Request">
+            <End Role="request" EntitySet="requests" />
+            <End Role="request_rows" EntitySet="request_rows" />
+          </AssociationSet>
+          <AssociationSet Name="FK_requests_State" Association="credit_tradeModel.FK_requests_State">
+            <End Role="state" EntitySet="states" />
+            <End Role="request" EntitySet="requests" />
+          </AssociationSet>
+          <AssociationSet Name="FK_requests_User" Association="credit_tradeModel.FK_requests_User">
+            <End Role="user" EntitySet="users" />
+            <End Role="request" EntitySet="requests" />
+          </AssociationSet>
+          <AssociationSet Name="FK_requests_buyers" Association="credit_tradeModel.FK_requests_buyers">
+            <End Role="buyer" EntitySet="buyers" />
+            <End Role="request" EntitySet="requests" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="buyer">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="fio" Type="String" Nullable="false" MaxLength="150" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="requests" Relationship="credit_tradeModel.FK_requests_buyers" FromRole="buyer" ToRole="request" />
+        </EntityType>
+        <EntityType Name="good">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="nom_id" Type="String" Nullable="false" MaxLength="32" FixedLength="false" Unicode="false" />
+          <Property Name="parent_id" Type="String" Nullable="false" MaxLength="32" FixedLength="false" Unicode="false" />
+          <Property Name="name" Type="String" Nullable="false" MaxLength="512" FixedLength="false" Unicode="false" />
+          <Property Name="edizm" Type="String" Nullable="false" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="price" Type="Decimal" Nullable="false" Precision="7" Scale="2" />
+          <Property Name="barcode" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="leftovers" Relationship="credit_tradeModel.FK_leftovers_goods" FromRole="good" ToRole="leftover" />
+        </EntityType>
+        <EntityType Name="leftover">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="warehouse_id" Type="Int32" Nullable="false" />
+          <Property Name="good_id" Type="Int32" Nullable="false" />
+          <Property Name="amount" Type="Decimal" Nullable="false" Precision="9" Scale="3" />
+          <NavigationProperty Name="good" Relationship="credit_tradeModel.FK_leftovers_goods" FromRole="leftover" ToRole="good" />
+          <NavigationProperty Name="warehouse" Relationship="credit_tradeModel.FK_leftovers_warehouses" FromRole="leftover" ToRole="warehouse" />
+        </EntityType>
+        <EntityType Name="postoffice">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="idx" Type="String" Nullable="false" MaxLength="6" FixedLength="false" Unicode="false" />
+          <Property Name="name_ops" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="post_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="post" Relationship="credit_tradeModel.FK_postoffices_posts" FromRole="postoffice" ToRole="post" />
+          <NavigationProperty Name="warehouses" Relationship="credit_tradeModel.FK_warehouses_postoffices" FromRole="postoffice" ToRole="warehouse" />
+        </EntityType>
+        <EntityType Name="post">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="privilegies" Type="Int32" />
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" MaxLength="64" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="postoffices" Relationship="credit_tradeModel.FK_postoffices_posts" FromRole="post" ToRole="postoffice" />
+          <NavigationProperty Name="requests" Relationship="credit_tradeModel.FK_requests_post" FromRole="post" ToRole="request" />
+          <NavigationProperty Name="users" Relationship="credit_tradeModel.FK_users_Post" FromRole="post" ToRole="user" />
+        </EntityType>
+        <EntityType Name="request_rows">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="amount" Type="Decimal" Precision="10" Scale="3" />
+          <Property Name="name" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="ed_izm" Type="String" MaxLength="32" FixedLength="false" Unicode="false" />
+          <Property Name="goods_id" Type="String" MaxLength="32" FixedLength="false" Unicode="false" />
+          <Property Name="request_id" Type="Int32" />
+          <Property Name="price" Type="Decimal" Precision="10" Scale="2" />
+          <Property Name="code" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="fact_amount" Type="Decimal" Precision="10" Scale="3" />
+          <Property Name="partner" Type="String" MaxLength="120" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="request" Relationship="credit_tradeModel.FK_request_rows_Request" FromRole="request_rows" ToRole="request" />
+        </EntityType>
+        <EntityType Name="request">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="date" Type="DateTime" Precision="3" />
+          <Property Name="username" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="category" Type="Int32" />
+          <Property Name="comment" Type="String" MaxLength="1024" FixedLength="false" Unicode="false" />
+          <Property Name="state_id" Type="Int32" />
+          <Property Name="user_id" Type="Int32" />
+          <Property Name="dest_id" Type="Int32" />
+          <NavigationProperty Name="post" Relationship="credit_tradeModel.FK_requests_post" FromRole="request" ToRole="post" />
+          <NavigationProperty Name="request_rows" Relationship="credit_tradeModel.FK_request_rows_Request" FromRole="request" ToRole="request_rows" />
+          <NavigationProperty Name="state" Relationship="credit_tradeModel.FK_requests_State" FromRole="request" ToRole="state" />
+          <NavigationProperty Name="user" Relationship="credit_tradeModel.FK_requests_User" FromRole="request" ToRole="user" />
+          <Property Name="buyer_id" Type="Int32" />
+          <NavigationProperty Name="buyer" Relationship="credit_tradeModel.FK_requests_buyers" FromRole="request" ToRole="buyer" />
+        </EntityType>
+        <EntityType Name="state">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" MaxLength="32" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="requests" Relationship="credit_tradeModel.FK_requests_State" FromRole="state" ToRole="request" />
+        </EntityType>
+        <EntityType Name="user">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="username" Type="String" MaxLength="64" FixedLength="false" Unicode="false" />
+          <Property Name="fio" Type="String" MaxLength="64" FixedLength="false" Unicode="false" />
+          <Property Name="dpt" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="signer" Type="String" MaxLength="64" FixedLength="false" Unicode="false" />
+          <Property Name="post_id" Type="Int32" />
+          <NavigationProperty Name="post" Relationship="credit_tradeModel.FK_users_Post" FromRole="user" ToRole="post" />
+          <NavigationProperty Name="requests" Relationship="credit_tradeModel.FK_requests_User" FromRole="user" ToRole="request" />
+        </EntityType>
+        <EntityType Name="warehouse">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="false" />
+          <Property Name="postoffice_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="leftovers" Relationship="credit_tradeModel.FK_leftovers_warehouses" FromRole="warehouse" ToRole="leftover" />
+          <NavigationProperty Name="postoffice" Relationship="credit_tradeModel.FK_warehouses_postoffices" FromRole="warehouse" ToRole="postoffice" />
+        </EntityType>
+        <Association Name="FK_leftovers_goods">
+          <End Type="credit_tradeModel.good" Role="good" Multiplicity="1" />
+          <End Type="credit_tradeModel.leftover" Role="leftover" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="good">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="leftover">
+              <PropertyRef Name="good_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_leftovers_warehouses">
+          <End Type="credit_tradeModel.warehouse" Role="warehouse" Multiplicity="1" />
+          <End Type="credit_tradeModel.leftover" Role="leftover" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="warehouse">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="leftover">
+              <PropertyRef Name="warehouse_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_postoffices_posts">
+          <End Type="credit_tradeModel.post" Role="post" Multiplicity="1" />
+          <End Type="credit_tradeModel.postoffice" Role="postoffice" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="post">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="postoffice">
+              <PropertyRef Name="post_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_warehouses_postoffices">
+          <End Type="credit_tradeModel.postoffice" Role="postoffice" Multiplicity="1" />
+          <End Type="credit_tradeModel.warehouse" Role="warehouse" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="postoffice">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="warehouse">
+              <PropertyRef Name="postoffice_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_requests_post">
+          <End Type="credit_tradeModel.post" Role="post" Multiplicity="0..1" />
+          <End Type="credit_tradeModel.request" Role="request" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="post">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="request">
+              <PropertyRef Name="dest_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_users_Post">
+          <End Type="credit_tradeModel.post" Role="post" Multiplicity="0..1" />
+          <End Type="credit_tradeModel.user" Role="user" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="post">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="user">
+              <PropertyRef Name="post_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_request_rows_Request">
+          <End Type="credit_tradeModel.request" Role="request" Multiplicity="0..1" />
+          <End Type="credit_tradeModel.request_rows" Role="request_rows" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="request">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="request_rows">
+              <PropertyRef Name="request_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_requests_State">
+          <End Type="credit_tradeModel.state" Role="state" Multiplicity="0..1" />
+          <End Type="credit_tradeModel.request" Role="request" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="state">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="request">
+              <PropertyRef Name="state_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_requests_User">
+          <End Type="credit_tradeModel.user" Role="user" Multiplicity="0..1" />
+          <End Type="credit_tradeModel.request" Role="request" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="user">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="request">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_requests_buyers">
+          <End Type="credit_tradeModel.buyer" Role="buyer" Multiplicity="0..1" />
+          <End Type="credit_tradeModel.request" Role="request" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="buyer">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="request">
+              <PropertyRef Name="buyer_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="credit_tradeModelStoreContainer" CdmEntityContainer="DbContext" >
+          <EntitySetMapping Name="buyers">
+            <EntityTypeMapping TypeName="credit_tradeModel.buyer">
+              <MappingFragment StoreEntitySet="buyers">
+                <ScalarProperty Name="fio" ColumnName="fio" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="goods">
+            <EntityTypeMapping TypeName="credit_tradeModel.good">
+              <MappingFragment StoreEntitySet="goods">
+                <ScalarProperty Name="barcode" ColumnName="barcode" />
+                <ScalarProperty Name="price" ColumnName="price" />
+                <ScalarProperty Name="edizm" ColumnName="edizm" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="parent_id" ColumnName="parent_id" />
+                <ScalarProperty Name="nom_id" ColumnName="nom_id" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="leftovers">
+            <EntityTypeMapping TypeName="credit_tradeModel.leftover">
+              <MappingFragment StoreEntitySet="leftovers">
+                <ScalarProperty Name="amount" ColumnName="amount" />
+                <ScalarProperty Name="good_id" ColumnName="good_id" />
+                <ScalarProperty Name="warehouse_id" ColumnName="warehouse_id" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="postoffices">
+            <EntityTypeMapping TypeName="credit_tradeModel.postoffice">
+              <MappingFragment StoreEntitySet="postoffices">
+                <ScalarProperty Name="post_id" ColumnName="post_id" />
+                <ScalarProperty Name="name_ops" ColumnName="name_ops" />
+                <ScalarProperty Name="idx" ColumnName="idx" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="posts">
+            <EntityTypeMapping TypeName="credit_tradeModel.post">
+              <MappingFragment StoreEntitySet="posts">
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="privilegies" ColumnName="privilegies" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="request_rows">
+            <EntityTypeMapping TypeName="credit_tradeModel.request_rows">
+              <MappingFragment StoreEntitySet="request_rows">
+                <ScalarProperty Name="partner" ColumnName="partner" />
+                <ScalarProperty Name="fact_amount" ColumnName="fact_amount" />
+                <ScalarProperty Name="code" ColumnName="code" />
+                <ScalarProperty Name="price" ColumnName="price" />
+                <ScalarProperty Name="request_id" ColumnName="request_id" />
+                <ScalarProperty Name="goods_id" ColumnName="goods_id" />
+                <ScalarProperty Name="ed_izm" ColumnName="ed_izm" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="amount" ColumnName="amount" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="requests">
+            <EntityTypeMapping TypeName="credit_tradeModel.request">
+              <MappingFragment StoreEntitySet="requests">
+                <ScalarProperty Name="buyer_id" ColumnName="buyer_id" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="state_id" ColumnName="state_id" />
+                <ScalarProperty Name="comment" ColumnName="comment" />
+                <ScalarProperty Name="category" ColumnName="category" />
+                <ScalarProperty Name="username" ColumnName="username" />
+                <ScalarProperty Name="date" ColumnName="date" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="states">
+            <EntityTypeMapping TypeName="credit_tradeModel.state">
+              <MappingFragment StoreEntitySet="states">
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="users">
+            <EntityTypeMapping TypeName="credit_tradeModel.user">
+              <MappingFragment StoreEntitySet="users">
+                <ScalarProperty Name="post_id" ColumnName="post_id" />
+                <ScalarProperty Name="signer" ColumnName="signer" />
+                <ScalarProperty Name="dpt" ColumnName="dpt" />
+                <ScalarProperty Name="fio" ColumnName="fio" />
+                <ScalarProperty Name="username" ColumnName="username" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="warehouses">
+            <EntityTypeMapping TypeName="credit_tradeModel.warehouse">
+              <MappingFragment StoreEntitySet="warehouses">
+                <ScalarProperty Name="postoffice_id" ColumnName="postoffice_id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
