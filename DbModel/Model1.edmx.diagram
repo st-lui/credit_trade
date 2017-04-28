@@ -4,27 +4,28 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="7c2179bace3144e6b757238f1579ffe2" Name="Diagram1" ZoomLevel="60" >
-        <EntityTypeShape EntityType="credit_tradeModel.buyer" Width="1.5" PointX="3" PointY="4.875" />
-        <EntityTypeShape EntityType="credit_tradeModel.good" Width="1.5" PointX="9.75" PointY="11.375" />
-        <EntityTypeShape EntityType="credit_tradeModel.leftover" Width="1.5" PointX="7.5" PointY="11.375" />
-        <EntityTypeShape EntityType="credit_tradeModel.postoffice" Width="1.5" PointX="3" PointY="11.375" />
-        <EntityTypeShape EntityType="credit_tradeModel.post" Width="1.5" PointX="0.75" PointY="5.25" />
-        <EntityTypeShape EntityType="credit_tradeModel.request_rows" Width="1.5" PointX="7.5" PointY="6.375" />
-        <EntityTypeShape EntityType="credit_tradeModel.request" Width="1.5" PointX="5.25" PointY="6" />
-        <EntityTypeShape EntityType="credit_tradeModel.state" Width="1.5" PointX="3" PointY="2.25" />
-        <EntityTypeShape EntityType="credit_tradeModel.user" Width="1.5" PointX="3" PointY="8" />
-        <EntityTypeShape EntityType="credit_tradeModel.warehouse" Width="1.5" PointX="5.25" PointY="11.375" />
-        <AssociationConnector Association="credit_tradeModel.FK_leftovers_goods" />
-        <AssociationConnector Association="credit_tradeModel.FK_leftovers_warehouses" />
-        <AssociationConnector Association="credit_tradeModel.FK_postoffices_posts" />
-        <AssociationConnector Association="credit_tradeModel.FK_warehouses_postoffices" />
-        <AssociationConnector Association="credit_tradeModel.FK_requests_post" />
-        <AssociationConnector Association="credit_tradeModel.FK_users_Post" />
-        <AssociationConnector Association="credit_tradeModel.FK_request_rows_Request" />
-        <AssociationConnector Association="credit_tradeModel.FK_requests_State" />
-        <AssociationConnector Association="credit_tradeModel.FK_requests_User" />
-        <AssociationConnector Association="credit_tradeModel.FK_requests_buyers" />
+      <Diagram DiagramId="7c2179bace3144e6b757238f1579ffe2" Name="Diagram1" ZoomLevel="89" >
+        <EntityTypeShape EntityType="DbModel.buyer" Width="1.5" PointX="3" PointY="4.875" />
+        <EntityTypeShape EntityType="DbModel.good" Width="1.5" PointX="9.75" PointY="11.375" />
+        <EntityTypeShape EntityType="DbModel.leftover" Width="1.5" PointX="7.5" PointY="11.375" />
+        <EntityTypeShape EntityType="DbModel.postoffice" Width="1.5" PointX="3" PointY="11.375" />
+        <EntityTypeShape EntityType="DbModel.post" Width="1.5" PointX="0.75" PointY="5.25" />
+        <EntityTypeShape EntityType="DbModel.request" Width="1.5" PointX="5.25" PointY="6" />
+        <EntityTypeShape EntityType="DbModel.state" Width="1.5" PointX="3" PointY="2.25" />
+        <EntityTypeShape EntityType="DbModel.user" Width="1.5" PointX="3" PointY="8" />
+        <EntityTypeShape EntityType="DbModel.warehouse" Width="1.5" PointX="5.25" PointY="11.375" />
+        <AssociationConnector Association="DbModel.FK_leftovers_goods" />
+        <AssociationConnector Association="DbModel.FK_leftovers_warehouses" />
+        <AssociationConnector Association="DbModel.FK_postoffices_posts" />
+        <AssociationConnector Association="DbModel.FK_warehouses_postoffices" />
+        <AssociationConnector Association="DbModel.FK_requests_post" />
+        <AssociationConnector Association="DbModel.FK_requests_State" />
+        <AssociationConnector Association="DbModel.FK_requests_User" />
+        <AssociationConnector Association="DbModel.FK_requests_buyers" />
+        <AssociationConnector Association="DbModel.FK_users_warehouses" />
+        <EntityTypeShape EntityType="DbModel.request_rows" Width="1.5" PointX="12" PointY="8.375" />
+        <AssociationConnector Association="DbModel.FK_request_rows_goods" />
+        <AssociationConnector Association="DbModel.FK_request_rows_Request" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

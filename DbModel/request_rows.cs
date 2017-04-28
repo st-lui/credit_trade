@@ -18,13 +18,14 @@ namespace DbModel
         public Nullable<decimal> amount { get; set; }
         public string name { get; set; }
         public string ed_izm { get; set; }
-        public string goods_id { get; set; }
+        public Nullable<int> goods_id { get; set; }
         public Nullable<int> request_id { get; set; }
         public Nullable<decimal> price { get; set; }
         public string code { get; set; }
         public Nullable<decimal> fact_amount { get; set; }
         public string partner { get; set; }
     
+        public virtual good good { get; set; }
         public virtual request request { get; set; }
     }
 }

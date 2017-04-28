@@ -13,10 +13,10 @@ namespace DbModel
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     
-    public partial class DbContext : DbContext
+    public partial class DataContext : DbContext
     {
-        public DbContext()
-            : base("name=DbContext")
+        public DataContext()
+            : base("name=DataContext")
         {
         }
     
@@ -30,10 +30,10 @@ namespace DbModel
         public virtual DbSet<leftover> leftovers { get; set; }
         public virtual DbSet<postoffice> postoffices { get; set; }
         public virtual DbSet<post> posts { get; set; }
-        public virtual DbSet<request_rows> request_rows { get; set; }
         public virtual DbSet<request> requests { get; set; }
         public virtual DbSet<state> states { get; set; }
         public virtual DbSet<user> users { get; set; }
         public virtual DbSet<warehouse> warehouses { get; set; }
+        public virtual DbSet<request_rows> request_rows { get; set; }
     }
 }
