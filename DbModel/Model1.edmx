@@ -11,6 +11,7 @@
           </Key>
           <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="fio" Type="varchar" MaxLength="150" Nullable="false" />
+          <Property Name="warehouse_id" Type="int" />
         </EntityType>
         <EntityType Name="goods">
           <Key>
@@ -61,9 +62,7 @@
           <Property Name="goods_id" Type="int" />
           <Property Name="request_id" Type="int" />
           <Property Name="price" Type="decimal" Precision="10" Scale="2" />
-          <Property Name="code" Type="varchar" MaxLength="30" />
-          <Property Name="fact_amount" Type="decimal" Precision="10" Scale="3" />
-          <Property Name="partner" Type="varchar" MaxLength="120" />
+          <Property Name="barcode" Type="varchar" MaxLength="20" />
         </EntityType>
         <EntityType Name="requests">
           <Key>
@@ -78,7 +77,7 @@
           <Property Name="user_id" Type="int" />
           <Property Name="buyer_id" Type="int" />
           <Property Name="pay_date" Type="datetime2" Precision="7" />
-          <Property Name="paid" Type="nchar" MaxLength="10" />
+          <Property Name="paid" Type="bit" />
         </EntityType>
         <EntityType Name="states">
           <Key>
@@ -106,6 +105,18 @@
           <Property Name="name" Type="varchar" MaxLength="128" Nullable="false" />
           <Property Name="postoffice_id" Type="int" Nullable="false" />
         </EntityType>
+        <Association Name="FK_buyers_warehouses">
+          <End Role="warehouses" Type="Self.warehouses" Multiplicity="0..1" />
+          <End Role="buyers" Type="Self.buyers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="warehouses">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="buyers">
+              <PropertyRef Name="warehouse_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_leftovers_goods">
           <End Role="goods" Type="Self.goods" Multiplicity="1" />
           <End Role="leftovers" Type="Self.leftovers" Multiplicity="*" />
@@ -139,18 +150,6 @@
             </Principal>
             <Dependent Role="postoffices">
               <PropertyRef Name="post_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_request_rows_goods">
-          <End Role="goods" Type="Self.goods" Multiplicity="0..1" />
-          <End Role="request_rows" Type="Self.request_rows" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="goods">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="request_rows">
-              <PropertyRef Name="goods_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -237,6 +236,10 @@
           <EntitySet Name="states" EntityType="Self.states" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="users" EntityType="Self.users" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="warehouses" EntityType="Self.warehouses" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_buyers_warehouses" Association="Self.FK_buyers_warehouses">
+            <End Role="warehouses" EntitySet="warehouses" />
+            <End Role="buyers" EntitySet="buyers" />
+          </AssociationSet>
           <AssociationSet Name="FK_leftovers_goods" Association="Self.FK_leftovers_goods">
             <End Role="goods" EntitySet="goods" />
             <End Role="leftovers" EntitySet="leftovers" />
@@ -248,10 +251,6 @@
           <AssociationSet Name="FK_postoffices_posts" Association="Self.FK_postoffices_posts">
             <End Role="posts" EntitySet="posts" />
             <End Role="postoffices" EntitySet="postoffices" />
-          </AssociationSet>
-          <AssociationSet Name="FK_request_rows_goods" Association="Self.FK_request_rows_goods">
-            <End Role="goods" EntitySet="goods" />
-            <End Role="request_rows" EntitySet="request_rows" />
           </AssociationSet>
           <AssociationSet Name="FK_request_rows_Request" Association="Self.FK_request_rows_Request">
             <End Role="requests" EntitySet="requests" />
@@ -288,10 +287,15 @@
           <EntitySet Name="leftovers" EntityType="DbModel.leftover" />
           <EntitySet Name="postoffices" EntityType="DbModel.postoffice" />
           <EntitySet Name="posts" EntityType="DbModel.post" />
+          <EntitySet Name="request_rows" EntityType="DbModel.request_rows" />
           <EntitySet Name="requests" EntityType="DbModel.request" />
           <EntitySet Name="states" EntityType="DbModel.state" />
           <EntitySet Name="users" EntityType="DbModel.user" />
           <EntitySet Name="warehouses" EntityType="DbModel.warehouse" />
+          <AssociationSet Name="FK_requests_buyers" Association="DbModel.FK_requests_buyers">
+            <End Role="buyer" EntitySet="buyers" />
+            <End Role="request" EntitySet="requests" />
+          </AssociationSet>
           <AssociationSet Name="FK_leftovers_goods" Association="DbModel.FK_leftovers_goods">
             <End Role="good" EntitySet="goods" />
             <End Role="leftover" EntitySet="leftovers" />
@@ -308,9 +312,9 @@
             <End Role="postoffice" EntitySet="postoffices" />
             <End Role="warehouse" EntitySet="warehouses" />
           </AssociationSet>
-          <AssociationSet Name="FK_requests_post" Association="DbModel.FK_requests_post">
-            <End Role="post" EntitySet="posts" />
+          <AssociationSet Name="FK_request_rows_Request" Association="DbModel.FK_request_rows_Request">
             <End Role="request" EntitySet="requests" />
+            <End Role="request_rows" EntitySet="request_rows" />
           </AssociationSet>
           <AssociationSet Name="FK_requests_State" Association="DbModel.FK_requests_State">
             <End Role="state" EntitySet="states" />
@@ -320,22 +324,13 @@
             <End Role="user" EntitySet="users" />
             <End Role="request" EntitySet="requests" />
           </AssociationSet>
-          <AssociationSet Name="FK_requests_buyers" Association="DbModel.FK_requests_buyers">
-            <End Role="buyer" EntitySet="buyers" />
-            <End Role="request" EntitySet="requests" />
-          </AssociationSet>
           <AssociationSet Name="FK_users_warehouses" Association="DbModel.FK_users_warehouses">
             <End Role="warehouse" EntitySet="warehouses" />
             <End Role="user" EntitySet="users" />
           </AssociationSet>
-          <EntitySet Name="request_rows" EntityType="DbModel.request_rows" />
-          <AssociationSet Name="FK_request_rows_goods" Association="DbModel.FK_request_rows_goods">
-            <End Role="good" EntitySet="goods" />
-            <End Role="request_rows" EntitySet="request_rows" />
-          </AssociationSet>
-          <AssociationSet Name="FK_request_rows_Request" Association="DbModel.FK_request_rows_Request">
-            <End Role="request" EntitySet="requests" />
-            <End Role="request_rows" EntitySet="request_rows" />
+          <AssociationSet Name="FK_buyers_warehouses" Association="DbModel.FK_buyers_warehouses">
+            <End Role="warehouse" EntitySet="warehouses" />
+            <End Role="buyer" EntitySet="buyers" />
           </AssociationSet>
         </EntityContainer>
         <EntityType Name="buyer">
@@ -345,12 +340,14 @@
           <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="fio" Type="String" Nullable="false" MaxLength="150" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="requests" Relationship="DbModel.FK_requests_buyers" FromRole="buyer" ToRole="request" />
+          <Property Name="warehouse_id" Type="Int32" />
+          <NavigationProperty Name="warehouse" Relationship="DbModel.FK_buyers_warehouses" FromRole="buyer" ToRole="warehouse" />
         </EntityType>
         <EntityType Name="good">
           <Key>
             <PropertyRef Name="id" />
           </Key>
-          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="nom_id" Type="String" Nullable="false" MaxLength="32" FixedLength="false" Unicode="false" />
           <Property Name="parent_id" Type="String" Nullable="false" MaxLength="32" FixedLength="false" Unicode="false" />
           <Property Name="name" Type="String" Nullable="false" MaxLength="512" FixedLength="false" Unicode="false" />
@@ -358,7 +355,6 @@
           <Property Name="price" Type="Decimal" Nullable="false" Precision="7" Scale="2" />
           <Property Name="barcode" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="leftovers" Relationship="DbModel.FK_leftovers_goods" FromRole="good" ToRole="leftover" />
-          <NavigationProperty Name="request_rows" Relationship="DbModel.FK_request_rows_goods" FromRole="good" ToRole="request_rows" />
         </EntityType>
         <EntityType Name="leftover">
           <Key>
@@ -390,7 +386,20 @@
           <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="name" Type="String" MaxLength="64" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="postoffices" Relationship="DbModel.FK_postoffices_posts" FromRole="post" ToRole="postoffice" />
-          <NavigationProperty Name="requests" Relationship="DbModel.FK_requests_post" FromRole="post" ToRole="request" />
+        </EntityType>
+        <EntityType Name="request_rows">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="amount" Type="Decimal" Precision="10" Scale="3" />
+          <Property Name="name" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
+          <Property Name="ed_izm" Type="String" MaxLength="32" FixedLength="false" Unicode="false" />
+          <Property Name="goods_id" Type="Int32" />
+          <Property Name="request_id" Type="Int32" />
+          <Property Name="price" Type="Decimal" Precision="10" Scale="2" />
+          <NavigationProperty Name="request" Relationship="DbModel.FK_request_rows_Request" FromRole="request_rows" ToRole="request" />
+          <Property Name="barcode" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="request">
           <Key>
@@ -403,15 +412,13 @@
           <Property Name="comment" Type="String" MaxLength="1024" FixedLength="false" Unicode="false" />
           <Property Name="state_id" Type="Int32" />
           <Property Name="user_id" Type="Int32" />
-          <Property Name="dest_id" Type="Int32" />
-          <NavigationProperty Name="post" Relationship="DbModel.FK_requests_post" FromRole="request" ToRole="post" />
+          <Property Name="buyer_id" Type="Int32" />
+          <Property Name="pay_date" Type="DateTime" Precision="7" Nullable="true" />
+          <Property Name="paid" Type="Boolean" />
+          <NavigationProperty Name="buyer" Relationship="DbModel.FK_requests_buyers" FromRole="request" ToRole="buyer" />
+          <NavigationProperty Name="request_rows" Relationship="DbModel.FK_request_rows_Request" FromRole="request" ToRole="request_rows" />
           <NavigationProperty Name="state" Relationship="DbModel.FK_requests_State" FromRole="request" ToRole="state" />
           <NavigationProperty Name="user" Relationship="DbModel.FK_requests_User" FromRole="request" ToRole="user" />
-          <Property Name="buyer_id" Type="Int32" />
-          <NavigationProperty Name="buyer" Relationship="DbModel.FK_requests_buyers" FromRole="request" ToRole="buyer" />
-          <Property Name="pay_date" Type="DateTime" Precision="7" />
-          <Property Name="paid" Type="String" MaxLength="10" FixedLength="true" Unicode="true" />
-          <NavigationProperty Name="request_rows" Relationship="DbModel.FK_request_rows_Request" FromRole="request" ToRole="request_rows" />
         </EntityType>
         <EntityType Name="state">
           <Key>
@@ -430,9 +437,8 @@
           <Property Name="fio" Type="String" MaxLength="64" FixedLength="false" Unicode="false" />
           <Property Name="dpt" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
           <Property Name="signer" Type="String" MaxLength="64" FixedLength="false" Unicode="false" />
-          <Property Name="post_id" Type="Int32" />
-          <NavigationProperty Name="requests" Relationship="DbModel.FK_requests_User" FromRole="user" ToRole="request" />
           <Property Name="warehouse_id" Type="Int32" />
+          <NavigationProperty Name="requests" Relationship="DbModel.FK_requests_User" FromRole="user" ToRole="request" />
           <NavigationProperty Name="warehouse" Relationship="DbModel.FK_users_warehouses" FromRole="user" ToRole="warehouse" />
         </EntityType>
         <EntityType Name="warehouse">
@@ -445,7 +451,20 @@
           <NavigationProperty Name="leftovers" Relationship="DbModel.FK_leftovers_warehouses" FromRole="warehouse" ToRole="leftover" />
           <NavigationProperty Name="postoffice" Relationship="DbModel.FK_warehouses_postoffices" FromRole="warehouse" ToRole="postoffice" />
           <NavigationProperty Name="users" Relationship="DbModel.FK_users_warehouses" FromRole="warehouse" ToRole="user" />
+          <NavigationProperty Name="buyers" Relationship="DbModel.FK_buyers_warehouses" FromRole="warehouse" ToRole="buyer" />
         </EntityType>
+        <Association Name="FK_requests_buyers">
+          <End Type="DbModel.buyer" Role="buyer" Multiplicity="0..1" />
+          <End Type="DbModel.request" Role="request" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="buyer">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="request">
+              <PropertyRef Name="buyer_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_leftovers_goods">
           <End Type="DbModel.good" Role="good" Multiplicity="1" />
           <End Type="DbModel.leftover" Role="leftover" Multiplicity="*" />
@@ -494,15 +513,15 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_requests_post">
-          <End Type="DbModel.post" Role="post" Multiplicity="0..1" />
-          <End Type="DbModel.request" Role="request" Multiplicity="*" />
+        <Association Name="FK_request_rows_Request">
+          <End Type="DbModel.request" Role="request" Multiplicity="0..1" />
+          <End Type="DbModel.request_rows" Role="request_rows" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="post">
+            <Principal Role="request">
               <PropertyRef Name="id" />
             </Principal>
-            <Dependent Role="request">
-              <PropertyRef Name="dest_id" />
+            <Dependent Role="request_rows">
+              <PropertyRef Name="request_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -530,18 +549,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_requests_buyers">
-          <End Type="DbModel.buyer" Role="buyer" Multiplicity="0..1" />
-          <End Type="DbModel.request" Role="request" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="buyer">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="request">
-              <PropertyRef Name="buyer_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_users_warehouses">
           <End Type="DbModel.warehouse" Role="warehouse" Multiplicity="0..1" />
           <End Type="DbModel.user" Role="user" Multiplicity="*" />
@@ -554,48 +561,19 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="request_rows">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="amount" Type="Decimal" Precision="10" Scale="3" />
-          <Property Name="name" Type="String" MaxLength="256" FixedLength="false" Unicode="false" />
-          <Property Name="ed_izm" Type="String" MaxLength="32" FixedLength="false" Unicode="false" />
-          <Property Name="goods_id" Type="Int32" />
-          <Property Name="request_id" Type="Int32" />
-          <Property Name="price" Type="Decimal" Precision="10" Scale="2" />
-          <Property Name="code" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="fact_amount" Type="Decimal" Precision="10" Scale="3" />
-          <Property Name="partner" Type="String" MaxLength="120" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="good" Relationship="DbModel.FK_request_rows_goods" FromRole="request_rows" ToRole="good" />
-          <NavigationProperty Name="request" Relationship="DbModel.FK_request_rows_Request" FromRole="request_rows" ToRole="request" />
-        </EntityType>
-        <Association Name="FK_request_rows_goods">
-          <End Type="DbModel.good" Role="good" Multiplicity="0..1" />
-          <End Type="DbModel.request_rows" Role="request_rows" Multiplicity="*" />
+        <Association Name="FK_buyers_warehouses">
+          <End Type="DbModel.warehouse" Role="warehouse" Multiplicity="0..1" />
+          <End Type="DbModel.buyer" Role="buyer" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="good">
+            <Principal Role="warehouse">
               <PropertyRef Name="id" />
             </Principal>
-            <Dependent Role="request_rows">
-              <PropertyRef Name="goods_id" />
+            <Dependent Role="buyer">
+              <PropertyRef Name="warehouse_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_request_rows_Request">
-          <End Type="DbModel.request" Role="request" Multiplicity="0..1" />
-          <End Type="DbModel.request_rows" Role="request_rows" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="request">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="request_rows">
-              <PropertyRef Name="request_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-      </Schema>
+        </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
@@ -604,6 +582,7 @@
           <EntitySetMapping Name="buyers">
             <EntityTypeMapping TypeName="DbModel.buyer">
               <MappingFragment StoreEntitySet="buyers">
+                <ScalarProperty Name="warehouse_id" ColumnName="warehouse_id" />
                 <ScalarProperty Name="fio" ColumnName="fio" />
                 <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
@@ -651,6 +630,20 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="request_rows">
+            <EntityTypeMapping TypeName="DbModel.request_rows">
+              <MappingFragment StoreEntitySet="request_rows">
+                <ScalarProperty Name="barcode" ColumnName="barcode" />
+                <ScalarProperty Name="price" ColumnName="price" />
+                <ScalarProperty Name="request_id" ColumnName="request_id" />
+                <ScalarProperty Name="goods_id" ColumnName="goods_id" />
+                <ScalarProperty Name="ed_izm" ColumnName="ed_izm" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="amount" ColumnName="amount" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="requests">
             <EntityTypeMapping TypeName="DbModel.request">
               <MappingFragment StoreEntitySet="requests">
@@ -692,22 +685,6 @@
               <MappingFragment StoreEntitySet="warehouses">
                 <ScalarProperty Name="postoffice_id" ColumnName="postoffice_id" />
                 <ScalarProperty Name="name" ColumnName="name" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="request_rows">
-            <EntityTypeMapping TypeName="DbModel.request_rows">
-              <MappingFragment StoreEntitySet="request_rows">
-                <ScalarProperty Name="partner" ColumnName="partner" />
-                <ScalarProperty Name="fact_amount" ColumnName="fact_amount" />
-                <ScalarProperty Name="code" ColumnName="code" />
-                <ScalarProperty Name="price" ColumnName="price" />
-                <ScalarProperty Name="request_id" ColumnName="request_id" />
-                <ScalarProperty Name="goods_id" ColumnName="goods_id" />
-                <ScalarProperty Name="ed_izm" ColumnName="ed_izm" />
-                <ScalarProperty Name="name" ColumnName="name" />
-                <ScalarProperty Name="amount" ColumnName="amount" />
                 <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>

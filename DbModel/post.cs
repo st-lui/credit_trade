@@ -18,7 +18,6 @@ namespace DbModel
         public post()
         {
             this.postoffices = new HashSet<postoffice>();
-            this.requests = new HashSet<request>();
         }
     
         public Nullable<int> privilegies { get; set; }
@@ -27,7 +26,5 @@ namespace DbModel
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<postoffice> postoffices { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<request> requests { get; set; }
     }
 }

@@ -27,16 +27,14 @@ namespace DbModel
         public string comment { get; set; }
         public Nullable<int> state_id { get; set; }
         public Nullable<int> user_id { get; set; }
-        public Nullable<int> dest_id { get; set; }
         public Nullable<int> buyer_id { get; set; }
         public Nullable<System.DateTime> pay_date { get; set; }
-        public string paid { get; set; }
+        public Nullable<bool> paid { get; set; }
     
-        public virtual post post { get; set; }
-        public virtual state state { get; set; }
-        public virtual user user { get; set; }
         public virtual buyer buyer { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<request_rows> request_rows { get; set; }
+        public virtual state state { get; set; }
+        public virtual user user { get; set; }
     }
 }

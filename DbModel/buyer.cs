@@ -22,8 +22,10 @@ namespace DbModel
     
         public int id { get; set; }
         public string fio { get; set; }
+        public Nullable<int> warehouse_id { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<request> requests { get; set; }
+        public virtual warehouse warehouse { get; set; }
     }
 }

@@ -25,7 +25,6 @@ namespace DbModel
         public string fio { get; set; }
         public string dpt { get; set; }
         public string signer { get; set; }
-        public Nullable<int> post_id { get; set; }
         public Nullable<int> warehouse_id { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
