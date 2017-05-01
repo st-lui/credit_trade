@@ -43,5 +43,21 @@ namespace DataAccess
 		{
 			return db.buyers.SingleOrDefault(x => x.fio == name);
 		}
+
+		public buyer CreateBuyer(int warehouse_id, string fio)
+		{
+			return new buyer()
+			{
+				fio = fio,
+				warehouse_id = warehouse_id
+			};
+		}
+
+		public IEnumerable<buyer> GetBuyers(int warehouse_id)
+		{
+			return db.buyers.Where(x => x.warehouse_id == warehouse_id).ToList();
+		}
+
+
 	}
 }

@@ -39,5 +39,11 @@ namespace DataAccess
 			return db.postoffices.SingleOrDefault(x => x.id == id);
 		}
 
+		//public IEnumerable<leftover> GetLeftovers(postoffice postoffice)
+		//{
+			
+		//	warehouse wh = db.postoffices.Include("warehouses").Single(x => x.idx == ops_idx).warehouses.Single(x => !x.name.ToLower().Contains("магазин"));
+		//}
+
 	}
 }

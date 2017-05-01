@@ -78,6 +78,7 @@
           <Property Name="buyer_id" Type="int" />
           <Property Name="pay_date" Type="datetime2" Precision="7" />
           <Property Name="paid" Type="bit" />
+          <Property Name="cost" Type="numeric" Precision="7" Scale="2" />
         </EntityType>
         <EntityType Name="states">
           <Key>
@@ -419,6 +420,7 @@
           <NavigationProperty Name="request_rows" Relationship="DbModel.FK_request_rows_Request" FromRole="request" ToRole="request_rows" />
           <NavigationProperty Name="state" Relationship="DbModel.FK_requests_State" FromRole="request" ToRole="state" />
           <NavigationProperty Name="user" Relationship="DbModel.FK_requests_User" FromRole="request" ToRole="user" />
+          <Property Name="cost" Type="Decimal" Precision="7" Scale="2" />
         </EntityType>
         <EntityType Name="state">
           <Key>
@@ -647,6 +649,7 @@
           <EntitySetMapping Name="requests">
             <EntityTypeMapping TypeName="DbModel.request">
               <MappingFragment StoreEntitySet="requests">
+                <ScalarProperty Name="cost" ColumnName="cost" />
                 <ScalarProperty Name="paid" ColumnName="paid" />
                 <ScalarProperty Name="pay_date" ColumnName="pay_date" />
                 <ScalarProperty Name="buyer_id" ColumnName="buyer_id" />

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -37,6 +38,63 @@ namespace DataAccess
 		public void Change(request item)
 		{
 			db.Entry(item).State=EntityState.Modified;
+		}
+
+		public request CreateRequest(DateTime date, string username, string comment, int user_id, int buyer_id)
+		{
+			return new request()
+			{
+				date = date,
+				username = username,
+				comment = comment,
+				user_id = user_id,
+				buyer_id = buyer_id,
+				paid=false,
+				pay_date = null,
+				cost = 0
+			};
+		}
+
+		public request CreateRequest(DateTime date, string username, string comment, int user_id, int buyer_id,IEnumerable<request_rows> requestRows)
+		{
+			var request = new request()
+			{
+				date = date,
+				username = username,
+				comment = comment,
+				user_id = user_id,
+				buyer_id = buyer_id,
+				paid = false,
+				pay_date = null,
+				cost = 0
+			};
+			foreach (var requestRow in requestRows)
+			{
+				request.request_rows.Add(requestRow);
+				requestRow.request = request;
+			}
+			return request;
+		}
+
+		public void MakePay(request request,DateTime date)
+		{
+			request.paid = true;
+			request.pay_date = date;
+		}
+
+		public void AddRequestRow(request request, request_rows requestRow)
+		{
+			request.request_rows.Add(requestRow);
+			requestRow.request = request;
+		}
+
+		public void CalculateCost(request request)
+		{
+			request.cost = 0;
+			foreach (var requestRow in request.request_rows)
+			{
+				request.cost += requestRow.amount*requestRow.price;
+			}
 		}
 	}
 }

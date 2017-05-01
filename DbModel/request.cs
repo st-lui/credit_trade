@@ -30,6 +30,7 @@ namespace DbModel
         public Nullable<int> buyer_id { get; set; }
         public Nullable<System.DateTime> pay_date { get; set; }
         public Nullable<bool> paid { get; set; }
+        public Nullable<decimal> cost { get; set; }
     
         public virtual buyer buyer { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

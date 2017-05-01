@@ -22,6 +22,7 @@ namespace DataAccess
 		public UnitOfWork()
 		{
 			db = new DataContext();
+			db.Configuration.LazyLoadingEnabled = false;
 			//if (db.DatabaseExists())
 			//	db.DeleteDatabase();
 			//db.CreateDatabase();
