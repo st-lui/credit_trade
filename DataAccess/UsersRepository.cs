@@ -37,12 +37,12 @@ namespace DataAccess
 
 		public user Get(int id)
 		{
-			return db.users.Include("postoffice").SingleOrDefault(x => x.id == id);
+			return db.users.Include("warehouse").SingleOrDefault(x => x.id == id);
 		}
 
 		public user Get(string name)
 		{
-			return db.users.Include("postoffice").SingleOrDefault(x => x.username == name);
+			return db.users.Include("warehouse").SingleOrDefault(x => x.username == name);
 		}
 
 		public user CreateUser(string fio, int warehouse_id, string username)
