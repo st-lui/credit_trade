@@ -1,0 +1,25 @@
+﻿@{
+    ViewBag.Title="Новый покупатель";
+    Layout = "layout.cshtml";
+}
+
+
+<h2>@ViewBag.Title</h2>
+
+<div class="row1">
+
+        <form action="@Url.Content("~/buyers/add")" method="post">
+            @Html.AntiForgeryToken()
+            <fieldset>
+                <legend>Заполните необходимые поля</legend>
+
+                <div class="form-group col-lg-6">
+                    <label class = "control-label">ФИО покупателя</label>
+                    <input type ="text" class = "form-control" id = "fio" name="fio"/>
+                </div>
+            </fieldset>
+            <button type="submit" class="btn btn-primary">Создать заявку</button>
+            <a class="btn btn-default" onclick="javascript: history.go(-1);">Назад</a>
+        </form>
+    </div>
+</div>

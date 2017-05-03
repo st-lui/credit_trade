@@ -141,7 +141,8 @@ namespace DataAccess
 			return new buyer()
 			{
 				fio =fio,
-				warehouse_id = currentUser.warehouse_id
+				warehouse_id = currentUser.warehouse_id,
+				warehouse = currentUser.warehouse
 			};
 		}
 

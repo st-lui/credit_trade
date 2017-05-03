@@ -1,0 +1,76 @@
+﻿@{
+    ViewBag.Title = "Покупатели";
+    Layout = "layout.cshtml";
+}
+<style type="text/css">
+    .dataTable_div {
+        width: 75% !important;
+    }
+</style>
+<h2>@ViewBag.Title</h2>
+<p>
+    <a id="add_buyer" href="@Url.Content("~/buyers/add")" class="btn btn-primary">Новый покупатель</a>
+</p>
+<div class="dataTable_div">
+    <table id="buyers_table" class="row-border">
+        <thead><tr><th>ФИО покупателя</th><th></th></tr></thead>
+        @foreach (var buyer in Model.Buyers)
+        {
+            <tr>
+                <td>
+                    @buyer.fio
+                </td>
+                <td>
+                    <a id="add_buyer" href="@Url.Content("~/requests/list/"+@buyer.id)" class="btn btn-primary">Показать заказы</a>
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+
+@*<div class="modal fade" tabindex="-1" role="dialog" id='buyer_new' data-backdrop='static'>
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Ввод нового покупателя</h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" id='accept-button' data-dismiss='modal' data-target='corr_new'>Сохранить</button>
+                </div>
+
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>*@
+<script language="javascript">
+    $(document).ready(function () {
+        $("#buyers_table").DataTable({
+            "language": {
+                "url": "@Url.Content("~/content/dataTables.ru.lang.json")"
+            },
+            "stripeClasses": ['bg-info', 'bg-danger', 'bg-info']
+        });
+        //$("#buyer_new").modal({ show: false });
+        //$("#add_buyer").click(function (parameters) {
+        //    $("#buyer_new").modal('show');
+        //});
+        //$('#accept-button').click(function () {
+        //    $.post("planController.php",
+        //        {
+        //            action: "correction_create",
+        //            values_id: $("#values_id").val(),
+        //            new_value: $("#corr_value").val(),
+        //            kind_name: $("#kind_name").val(),
+        //            month: $("#month").val(),
+        //            year: $("#year").val()
+        //        }).done(function (data) {
+        //            location.reload();
+        //        }).error;
+        //});
+    });
+</script>

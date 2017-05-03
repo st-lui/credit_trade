@@ -1,8 +1,10 @@
-﻿@Master['layout']
+﻿@{
+    ViewBag.Title = "Заказы";
+    Layout = "layout.cshtml";
+}
 
-@Section['Content']
-<h2>Welcome! @Model.username</h2>
-
+<h1>Welcome! @Model.username</h1>
+<h2>@ViewBag.Title</h2>
 <p>
 This is a quickstart project template for creating a Nancy demo application which can be hosted on http://samples.nancyfx.org. If you wish to contribute a sample to the website, this template is the fastest way to do it.
 </p>
@@ -35,4 +37,3 @@ This is a quickstart project template for creating a Nancy demo application whic
 <p>Have fun! :-)</p>
 
 <h3>- Team Nancy</h3>
-@EndSection

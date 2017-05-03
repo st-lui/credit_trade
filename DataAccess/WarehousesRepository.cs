@@ -43,5 +43,10 @@ namespace DataAccess
 		{
 			return db.warehouses.SingleOrDefault(x => x.name == name);
 		}
+
+		public IEnumerable<leftover> GetLeftovers(warehouse warehouse)
+		{
+			return warehouse.leftovers.ToList();
+		}
 	}
 }

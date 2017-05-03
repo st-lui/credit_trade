@@ -88,7 +88,7 @@ namespace DataAccess
 		{
 			get
 			{
-				if (buyersRepository != null)
+				if (buyersRepository == null)
 					buyersRepository = new BuyersRepository(db);
 				return buyersRepository;
 			}
@@ -98,7 +98,7 @@ namespace DataAccess
 		{
 			get
 			{
-				if (goodsRepository != null)
+				if (goodsRepository == null)
 					goodsRepository = new GoodsRepository(db);
 				return goodsRepository;
 			}
@@ -108,7 +108,7 @@ namespace DataAccess
 		{
 			get
 			{
-				if (leftoversRepository != null)
+				if (leftoversRepository == null)
 					leftoversRepository = new LeftoversRepository(db);
 				return leftoversRepository;
 			}
@@ -118,7 +118,7 @@ namespace DataAccess
 		{
 			get
 			{
-				if (postofficeRepository != null)
+				if (postofficeRepository == null)
 					postofficeRepository=new PostofficeRepository(db);
 					return postofficeRepository;
 			}
@@ -128,7 +128,7 @@ namespace DataAccess
 		{
 			get
 			{
-				if (warehousesRepository != null)
+				if (warehousesRepository == null)
 					warehousesRepository = new WarehousesRepository(db);
 					return warehousesRepository;
 			}

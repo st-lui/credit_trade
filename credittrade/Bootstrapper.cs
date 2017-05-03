@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using DataAccess;
 using DbModel;
 using Nancy;
@@ -40,6 +41,12 @@ namespace credittrade
 					return new string[] { "users" };
 				}
 			}
+
+			public user DbUser
+			{
+				get { return user; }
+			}
+
 			public override string ToString()
 			{
 				return string.Format("[User: UserName={1}, Ip={2}]", UserName, Ip);
@@ -50,6 +57,7 @@ namespace credittrade
 		{
 			base.ApplicationStartup(container, pipelines);
 			CookieBasedSessions.Enable(pipelines);
+			Nancy.Security.Csrf.Enable(pipelines);
 			pipelines.BeforeRequest += (ctx) =>
 			{
 
@@ -71,7 +79,11 @@ namespace credittrade
 				//Util.log.Info("Request from ip={0}\t PROXY={1}", userIp, proxy);
 				var dnsEntry = System.Net.Dns.GetHostEntry(userIp);
 				string hostName=dnsEntry.HostName;
-				string idx= "777000";
+				Regex regex = new Regex("r22-/d{6}-.*");
+				string idx = "658101";
+				if (regex.IsMatch(hostName))
+					idx = hostName.Substring(4,6);
+
 				UnitOfWork unitOfWork = new UnitOfWork();
 				var usr = unitOfWork.Users.Get(idx);
 				if (usr != null)

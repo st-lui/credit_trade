@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>@ViewBag.Title - Продажа товаров в кредит</title>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="~/content/bootstrap.css" rel="Stylesheet" />
+    <link href="~/content/default.min.css" rel="Stylesheet" />
+    <link href="~/content/DataTables/media/css/jquery.dataTables.min.css" rel="Stylesheet" />
+    @*<link href="~/content/DataTables/media/css/DataTables.bootstrap.min.css" rel="Stylesheet" />*@
+
+    <script src="~/Content/scripts/jquery.min.js"></script>
+    <script src="~/content/scripts/highlight.min.js"></script>
+    <script src="~/content/scripts/bootstrap.js"></script>
+    <script src="~/Content/scripts/DataTables/media/js/jquery.dataTables.js"></script>
+    @*<script src="~/Content/scripts/DataTables/media/js/dataTables.bootstrap.js"></script>*@
+
+    <script>
+        $(document).ready(function () {
+            hljs.tabReplace = '    ';
+            //hljs.initHighlightingOnLoad();
+        });
+    </script>
+
+    <style type="text/css">
+        body {
+            padding-top: 60px;
+            padding-bottom: 40px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <!--<a class="brand" href="~/">credittrade</a>-->
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="~/">Список заказов</a></li>
+                    <li><a href="~/requests/add">Новый заказ</a></li>
+                    <li><a href="~/buyers/list">Покупатели</a></li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        @RenderBody()
+    </div>
+</body>
+</html>
