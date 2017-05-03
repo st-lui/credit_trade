@@ -46,7 +46,9 @@ namespace DataAccess
 
 		public IEnumerable<leftover> GetLeftovers(warehouse warehouse)
 		{
-			return warehouse.leftovers.ToList();
+			if (!db.Entry(warehouse).Collection(x => x.leftovers).IsLoaded)
+				db.Entry(warehouse).Collection(x => x.leftovers).Load();
+			return warehouse.leftovers;
 		}
 	}
 }
