@@ -48,7 +48,11 @@ namespace DataAccess
 		{
 			if (!db.Entry(warehouse).Collection(x => x.leftovers).IsLoaded)
 				db.Entry(warehouse).Collection(x => x.leftovers).Load();
-			return warehouse.leftovers;
+			foreach (var warehouseLeftover in warehouse.leftovers)
+			{
+				db.Entry(warehouseLeftover).Reference<good>("good").Load();
+			}
+			return warehouse.leftovers.OrderBy(x=>x.good.parent_id).ToList();
 		}
 	}
 }

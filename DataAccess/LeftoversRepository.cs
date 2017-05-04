@@ -39,5 +39,9 @@ namespace DataAccess
 			return db.leftovers.SingleOrDefault(x => x.id == id);
 		}
 
+		public leftover GetWithGoods(int id)
+		{
+			return db.leftovers.Include("good").SingleOrDefault(x => x.id == id);
+		}
 	}
 }

@@ -3,5 +3,124 @@
     Layout = "layout.cshtml";
 }
 
+<style type="text/css">
+    .dataTable_div {
+        width: 65% !important;
+    }
+</style>
 <h2>@ViewBag.Title</h2>
-@Model.leftovers.Count
+
+<form action="@Url.Content("~/requests/add")" method="post">
+    <h3>Выберите покупателя</h3>
+    <select name="buyer" size="1">
+        @foreach (var buyer in Model.buyers)
+        {
+            <option value="@buyer.id">@buyer.fio</option>
+        }
+    </select>
+    <h3>Текущий заказ</h3>
+    @Html.AntiForgeryToken();
+    <div class="dataTable_div">
+        <table id="current_request_table" class="row-border">
+            <thead>
+                <tr>
+                    <td>Товар</td>
+                    <td>Цена</td>
+                    <td>Количество</td>
+                    <td>Стоимость</td>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody id="current_request_body"></tbody>
+        </table>
+    </div>
+    <input hidden id="request_info" name="request_info" />
+    <button type="submit" class="btn btn-primary">Создать заказ</button>
+</form>
+<h3>Выбор товара</h3>
+<div class="dataTable_div">
+    <table id="leftovers_table" class="row-border">
+        <thead>
+            <tr>
+                <td>Товар</td>
+                <td>Единица</td>
+                <td>Цена</td>
+                <td>Остаток</td>
+                <td>Расход по торговле в кредит</td>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var leftover in Model.leftovers)
+            {
+                <tr id="tr_@leftover.id">
+                    <td id="name">@leftover.good.name</td>
+                    <td id="edizm">@leftover.good.edizm</td>
+                    <td id="price">@leftover.good.price</td>
+                    <td id="amount">@leftover.amount</td>
+                    <td>0</td>
+                    <td><a id="leftover_@leftover.id" class="add_good btn-primary btn-sm" title="Добавить в заказ">+</a><span style="display: none" id="leftoveradd_@leftover.id"><input id="leftoveramount_@leftover.id" type="text" /><a class="btn-sm btn-primary" id="leftoverconfirm_@leftover.id">Подтвердить</a></span></td>
+                </tr>}
+        </tbody>
+    </table>
+</div>
+
+<script language="javascript">
+    $(document).ready(function () {
+        var leftovers = {};
+        $("#leftovers_table").DataTable({
+            "language": {
+                "url": "@Url.Content("~/content/dataTables.ru.lang.json")"
+            },
+            paging: false,
+            "drawCallback": function (settings) {
+
+            }
+        });
+
+        $("#current_request_table").DataTable({
+            "language": {
+                "url": "@Url.Content("~/content/dataTables.ru.lang.json")"
+            },
+            paging: false,
+            filter: false
+        });
+
+        $('a[id*="leftover_"]').click(function () {
+            var $span = $(this).next();
+            $span.show(true);
+        });
+
+        $('a[id*="leftoverconfirm_"]').click(function () {
+            var $inp = $(this).prev();
+            var $amount = $inp.val();
+            var $leftover_id = this.id.split('_')[1];
+            var $tr = $("tr[id='tr_" + $leftover_id + "']");
+            var $name = $tr.children("[id='name']").text();
+            var $price = $tr.children("[id='price']").text();
+            $amount = parseFloat($amount.replace(',', '.'));
+            $price = parseFloat($price.replace(',', '.'));
+            //validation
+            if (isNaN($amount)) {
+                alert("Введите корректное значение в поле количество");
+                return;
+            }
+            if ($amount == 0) {
+                alert("Введите ненулевое значение в поле количество");
+                return;
+            }
+            var leftover = {};
+            leftover["id"] = $leftover_id;
+            leftover["name"] = $name;
+            leftover["price"] = $price;
+            leftover["amount"] = $amount;
+            var $cost = $price * $amount;
+            leftover["cost"] = $cost;
+            leftovers[$leftover_id] = leftover;
+            $("#request_info").val(JSON.stringify(leftovers));
+            //$("#current_request_body:last-child").append("<tr><td>" + $name + "</td><td>" + $price + "</td><td>" + $amount + "</td><td>" + $cost + "</td></tr>");
+            $("#current_request_table").DataTable().row.add([$name, $price, $amount, $cost, '']).draw(false);
+        });
+
+    });
+</script>

@@ -321,7 +321,6 @@
     <Content Include="Content\scripts\DataTables\media\js\jquery.dataTables.js" />
     <Content Include="Content\scripts\DataTables\media\js\jquery.dataTables.min.js" />
     <Content Include="Content\scripts\DataTables\media\js\jquery.js" />
-    <Content Include="Content\scripts\highlight.min.js" />
     <Content Include="Content\scripts\jquery.js" />
     <Content Include="Content\scripts\jquery.min.js" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
