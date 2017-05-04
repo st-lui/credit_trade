@@ -2,16 +2,12 @@
     ViewBag.Title = "Покупатели";
     Layout = "layout.cshtml";
 }
-<style type="text/css">
-    .dataTable_div {
-        width: 75% !important;
-    }
-</style>
+
 <h2>@ViewBag.Title</h2>
 <p>
     <a id="add_buyer" href="@Url.Content("~/buyers/add")" class="btn btn-primary">Новый покупатель</a>
 </p>
-<div class="dataTable_div">
+<div class="dataTable_div col-md-7">
     <table id="buyers_table" class="row-border">
         <thead><tr><th>ФИО покупателя</th><th></th></tr></thead>
         @foreach (var buyer in Model.Buyers)

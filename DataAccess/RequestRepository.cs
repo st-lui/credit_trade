@@ -32,7 +32,7 @@ namespace DataAccess
 
 		public request Get(int id)
 		{
-			return db.requests.SingleOrDefault(x => x.id == id);
+			return db.requests.Include("buyer").Include("request_rows").Include("user.warehouse.postoffice.post").SingleOrDefault(x => x.id == id);
 		}
 
 		public void Change(request item)

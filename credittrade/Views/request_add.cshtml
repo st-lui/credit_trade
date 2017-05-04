@@ -12,27 +12,30 @@
 
 <form action="@Url.Content("~/requests/add")" method="post">
     <h3>Выберите покупателя</h3>
-    <select name="buyer" size="1">
-        @foreach (var buyer in Model.buyers)
-        {
-            <option value="@buyer.id">@buyer.fio</option>
-        }
-    </select>
-    <h3>Текущий заказ</h3>
-    @Html.AntiForgeryToken()
-    <div class="dataTable_div">
-        <table id="current_request_table" class="row-border">
-            <thead>
-                <tr>
-                    <td>Товар</td>
-                    <td>Цена</td>
-                    <td>Количество</td>
-                    <td>Стоимость</td>
-                    <td></td>
-                </tr>
-            </thead>
-            <tbody id="current_request_body"></tbody>
-        </table>
+    <div class="col-md-3 form-group">
+        <select class="form-control" name="buyer" size="1">
+            @foreach (var buyer in Model.buyers)
+            {
+                <option value="@buyer.id">@buyer.fio</option>}
+        </select>
+    </div>
+    <div>
+        <h3>Текущий заказ</h3>
+        @Html.AntiForgeryToken()
+        <div class="dataTable_div">
+            <table id="current_request_table" class="row-border">
+                <thead>
+                    <tr>
+                        <td>Товар</td>
+                        <td>Цена</td>
+                        <td>Количество</td>
+                        <td>Стоимость</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody id="current_request_body"></tbody>
+            </table>
+        </div>
     </div>
     <input hidden id="request_info" name="request_info" />
     <button type="submit" class="btn btn-primary">Создать заказ</button>
@@ -59,7 +62,7 @@
                     <td id="price">@leftover.good.price</td>
                     <td id="amount">@leftover.amount</td>
                     <td>@leftover.expenditure</td>
-                    <td><a id="leftover_@leftover.id" class="add_good btn-primary btn-sm" title="Добавить в заказ">+</a><span style="display: none" id="leftoveradd_@leftover.id"><input id="leftoveramount_@leftover.id" type="text" /><a class="btn-sm btn-primary" id="leftoverconfirm_@leftover.id">Подтвердить</a></span></td>
+                    <td><a id="leftover_@leftover.id" class="add_good btn btn-sm btn-primary" title="Добавить в заказ">+</a><span style="display: none" id="leftoveradd_@leftover.id"><input id="leftoveramount_@leftover.id" type="text" /><a class="btn btn-sm btn-primary" id="leftoverconfirm_@leftover.id">Подтвердить</a></span></td>
                 </tr>}
         </tbody>
     </table>

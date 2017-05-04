@@ -3,37 +3,53 @@
     Layout = "layout.cshtml";
 }
 
-<h1>Welcome! @Model.username</h1>
+<h1>Добро пожаловать! @Model.username</h1>
 <h2>@ViewBag.Title</h2>
-<p>
-This is a quickstart project template for creating a Nancy demo application which can be hosted on http://samples.nancyfx.org. If you wish to contribute a sample to the website, this template is the fastest way to do it.
-</p>
 
-<h2>Creating a Sample</h2>
-
-<p>It's pretty simple to create a sample for the site, but there's a few conventions you need to follow:</p>
-
-<ol>
-  <li>Think of an idea that you want to demo :-)</li>
-  <li>Create your project and Github repository with the Nancy.Demo.[name] naming convention.</li>
-  <li>Make sure you use NuGet for your dependencies, the site will parse your packages.conf.</li>
-  <li>Add a readme.md to the root of the repo and provide details of what the sample is, what it does, and how to get it running if there are any additional steps required.</li>
-  <li>Add a root "index view" with the readme details in a "hero" div (&lt;div class="hero-unit"&gt;&lt;/div&gt;).</li>
-  <li>For code snippets use &lt;pre&gt;&lt;code&gt;&lt;/code&gt;&lt;/pre&gt; and they will be syntax highligted using highlight.js.</li>
-  <li>Add a license.txt, preferably MIT, but this isn't a hard requirement.</li>
-  <li>Follow the general Bootstrapper styles and theming for consistency.</li>
-  <li>Make sure any external content, such as CSS, images, js etc have the appropriate licenses and make sure you respect any copyright or attribution clauses on any external dependencies.</li>
-</ol>
-
-<p>One you've done all that and pushed it up to Github, you just need to let us know, either:</p>
-
-<ul>
-  <li>Send us an <a href="mailto:nancy@nancyfx.org">email</a>.</li>
-  <li>Ping us on <a href="http://twitter.com/nancyfx">Twitter</a>.</li>
-</ul>
-
-<p>Once your account is added the site will automatically pickup any additional Demo projects you add.</p>
-
-<p>Have fun! :-)</p>
-
-<h3>- Team Nancy</h3>
+<div class="dataTable_div col-md-9">
+    <table id="requests_table" class="row-border">
+        <thead>
+            <tr>
+                <td>№ заказа</td>
+                <td>Покупатель</td>
+                <td>Дата покупки</td>
+                <td>Сумма</td>
+                <td>Оплачен</td>
+                <td>Дата оплаты</td>
+                <td></td>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var request in Model.requests)
+            {
+                <tr>
+                    <td>@request.id</td>
+                    <td>@request.buyer.fio</td>
+                    <td>@request.date.ToString("dd.MM.yyyy HH:mm:ss")</td>
+                    <td>@request.cost</td>
+                    <td>@(request.paid ? "Да" : "Нет")</td>
+                    @*<td>@request.paid</td>*@
+                    <td>@(request.pay_date!=null ? request.pay_date.ToString("dd.MM.yyyy HH:mm:ss") : "-")</td>
+                    @*<td>@request.pay_date</td>*@
+                    @if (request.paid)
+                    {
+                        <td></td> }
+                    else
+                    {
+                        <td><a class="btn btn-primary" href="@Url.Content("~/requests/makepay/" + request.id)">Внести оплату</a></td>
+                    }
+                    <td><a class="btn btn-primary" href="@Url.Content("~/requests/view/" + request.id)">Подробности</a></td>
+                </tr>}
+        </tbody>
+    </table>
+</div>
+<script language="javascript">
+    $("#requests_table").DataTable({
+        "language": {
+            "url": "@Url.Content("~/content/dataTables.ru.lang.json")"
+        },
+        paging: false,
+        columnDefs:[{orderable:false,targets:[6,7]}]
+    });
+</script>

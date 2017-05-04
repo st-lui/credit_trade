@@ -128,6 +128,8 @@ namespace DataAccess
 		{
 			request.paid = true;
 			request.pay_date = DateTime.Now;
+			if (!db.Entry(request).Collection(x=>x.request_rows).IsLoaded)
+				db.Entry(request).Collection(x => x.request_rows).Load();
 		}
 
 		public void AddRequestRow(request request, request_rows requestRow)
@@ -154,6 +156,11 @@ namespace DataAccess
 		public IEnumerable<buyer> GetBuyers(user currentUser)
 		{
 			return db.buyers.Where(x => x.warehouse_id == currentUser.warehouse_id).ToList();
+		}
+
+		public IEnumerable<request> GetRequests(user user)
+		{
+			return db.requests.Include("buyer").Include("request_rows").Where(x => x.user_id == user.id).ToList();
 		}
 	}
 }

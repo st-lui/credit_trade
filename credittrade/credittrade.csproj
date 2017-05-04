@@ -325,8 +325,8 @@
     <Content Include="Content\scripts\DataTables\media\js\jquery.js" />
     <Content Include="Content\scripts\jquery.js" />
     <Content Include="Content\scripts\jquery.min.js" />
+    <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
-    <Content Include="icon.png" />
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
@@ -350,6 +350,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <Content Include="Views\buyer_add.cshtml" />
+    <Content Include="Views\request_view.cshtml" />
     <None Include="Views\index.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

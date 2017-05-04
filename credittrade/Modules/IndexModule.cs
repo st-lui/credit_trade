@@ -17,8 +17,23 @@ namespace credittrade.Modules
 			dynamic model = new ExpandoObject();
 			Get["/"] = _ =>
 			{
-				model.username = Context.CurrentUser.UserName;
-				return View["index", model];
+				user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					model.username = currentUser.username;
+					model.requests= unitOfWork.Users.GetRequests(currentUser);
+					
+					return View["index", model];
+				}
+			};
+			Get["/requests/view/{request_id}"] = p =>
+			{
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					model.request = unitOfWork.Requests.Get(p.request_id);
+
+					return View["request_view", model];
+				}
 			};
 			Get["/buyers/list"] = p =>
 			{
@@ -76,10 +91,9 @@ namespace credittrade.Modules
 						request_rows rr = unitOfWork.RequestRows.CreateRequestRows(row.Value["amount"],leftover.good.name,leftover.good.edizm,leftover.good_id,leftover.good.price,leftover.good.barcode);
 						leftover.expenditure += rr.amount;
 						unitOfWork.Leftovers.Change(leftover);
-						cost += rr.amount.Value * rr.price.Value;
 						unitOfWork.Requests.AddRequestRow(request,rr);
 					}
-					request.cost = cost;
+					unitOfWork.Requests.CalculateCost(request);
 					unitOfWork.Requests.Add(request);
 					unitOfWork.SaveChanges();
 					return Response.AsRedirect("~/");
