@@ -74,6 +74,8 @@ namespace credittrade.Modules
 					{
 						leftover leftover = unitOfWork.Leftovers.GetWithGoods(int.Parse(row.Value["id"]));
 						request_rows rr = unitOfWork.RequestRows.CreateRequestRows(row.Value["amount"],leftover.good.name,leftover.good.edizm,leftover.good_id,leftover.good.price,leftover.good.barcode);
+						leftover.expenditure += rr.amount;
+						unitOfWork.Leftovers.Change(leftover);
 						cost += rr.amount.Value * rr.price.Value;
 						unitOfWork.Requests.AddRequestRow(request,rr);
 					}

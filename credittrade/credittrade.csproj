@@ -240,6 +240,8 @@
     <Content Include="Content\DataTables\media\images\sort_desc.png" />
     <Content Include="Content\DataTables\media\images\sort_desc_disabled.png" />
     <Content Include="Content\default.min.css" />
+    <Content Include="Content\img\edit.png" />
+    <Content Include="Content\img\gerb.png" />
     <Content Include="Content\img\glyphicons-halflings-white.png" />
     <Content Include="Content\img\glyphicons-halflings.png" />
     <Content Include="Content\nancy-vertical-bf-tb.png" />
@@ -329,7 +331,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
-    <Content Include="Content\bootstrap1.css" />
+    <None Include="Content\bootstrap.css.bak" />
     <Content Include="Content\scripts\DataTables\extensions\AutoFill\Readme.md" />
     <Content Include="Content\scripts\DataTables\extensions\Buttons\Readme.md" />
     <Content Include="Content\scripts\DataTables\extensions\ColReorder\Readme.md" />

@@ -23,7 +23,8 @@
           <Property Name="name" Type="varchar" MaxLength="512" Nullable="false" />
           <Property Name="edizm" Type="varchar" MaxLength="16" Nullable="false" />
           <Property Name="price" Type="numeric" Precision="7" Scale="2" Nullable="false" />
-          <Property Name="barcode" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="barcode" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="category" Type="varchar" MaxLength="150" />
         </EntityType>
         <EntityType Name="leftovers">
           <Key>
@@ -33,6 +34,7 @@
           <Property Name="warehouse_id" Type="int" Nullable="false" />
           <Property Name="good_id" Type="int" Nullable="false" />
           <Property Name="amount" Type="numeric" Precision="9" Scale="3" Nullable="false" />
+          <Property Name="expenditure" Type="numeric" Precision="9" Scale="3" />
         </EntityType>
         <EntityType Name="postoffices">
           <Key>
@@ -114,30 +116,6 @@
               <PropertyRef Name="id" />
             </Principal>
             <Dependent Role="buyers">
-              <PropertyRef Name="warehouse_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_leftovers_goods">
-          <End Role="goods" Type="Self.goods" Multiplicity="1" />
-          <End Role="leftovers" Type="Self.leftovers" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="goods">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="leftovers">
-              <PropertyRef Name="good_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_leftovers_warehouses">
-          <End Role="warehouses" Type="Self.warehouses" Multiplicity="1" />
-          <End Role="leftovers" Type="Self.leftovers" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="warehouses">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="leftovers">
               <PropertyRef Name="warehouse_id" />
             </Dependent>
           </ReferentialConstraint>
@@ -240,14 +218,6 @@
           <AssociationSet Name="FK_buyers_warehouses" Association="Self.FK_buyers_warehouses">
             <End Role="warehouses" EntitySet="warehouses" />
             <End Role="buyers" EntitySet="buyers" />
-          </AssociationSet>
-          <AssociationSet Name="FK_leftovers_goods" Association="Self.FK_leftovers_goods">
-            <End Role="goods" EntitySet="goods" />
-            <End Role="leftovers" EntitySet="leftovers" />
-          </AssociationSet>
-          <AssociationSet Name="FK_leftovers_warehouses" Association="Self.FK_leftovers_warehouses">
-            <End Role="warehouses" EntitySet="warehouses" />
-            <End Role="leftovers" EntitySet="leftovers" />
           </AssociationSet>
           <AssociationSet Name="FK_postoffices_posts" Association="Self.FK_postoffices_posts">
             <End Role="posts" EntitySet="posts" />
@@ -354,8 +324,9 @@
           <Property Name="name" Type="String" Nullable="false" MaxLength="512" FixedLength="false" Unicode="false" />
           <Property Name="edizm" Type="String" Nullable="false" MaxLength="16" FixedLength="false" Unicode="false" />
           <Property Name="price" Type="Decimal" Nullable="false" Precision="7" Scale="2" />
-          <Property Name="barcode" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="barcode" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="leftovers" Relationship="DbModel.FK_leftovers_goods" FromRole="good" ToRole="leftover" />
+          <Property Name="category" Type="String" MaxLength="150" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="leftover">
           <Key>
@@ -367,6 +338,7 @@
           <Property Name="amount" Type="Decimal" Nullable="false" Precision="9" Scale="3" />
           <NavigationProperty Name="good" Relationship="DbModel.FK_leftovers_goods" FromRole="leftover" ToRole="good" />
           <NavigationProperty Name="warehouse" Relationship="DbModel.FK_leftovers_warehouses" FromRole="leftover" ToRole="warehouse" />
+          <Property Name="expenditure" Type="Decimal" Precision="9" Scale="3" />
         </EntityType>
         <EntityType Name="postoffice">
           <Key>
@@ -593,6 +565,7 @@
           <EntitySetMapping Name="goods">
             <EntityTypeMapping TypeName="DbModel.good">
               <MappingFragment StoreEntitySet="goods">
+                <ScalarProperty Name="category" ColumnName="category" />
                 <ScalarProperty Name="barcode" ColumnName="barcode" />
                 <ScalarProperty Name="price" ColumnName="price" />
                 <ScalarProperty Name="edizm" ColumnName="edizm" />
@@ -606,6 +579,7 @@
           <EntitySetMapping Name="leftovers">
             <EntityTypeMapping TypeName="DbModel.leftover">
               <MappingFragment StoreEntitySet="leftovers">
+                <ScalarProperty Name="expenditure" ColumnName="expenditure" />
                 <ScalarProperty Name="amount" ColumnName="amount" />
                 <ScalarProperty Name="good_id" ColumnName="good_id" />
                 <ScalarProperty Name="warehouse_id" ColumnName="warehouse_id" />

@@ -18,6 +18,7 @@ namespace DbModel
         public int warehouse_id { get; set; }
         public int good_id { get; set; }
         public decimal amount { get; set; }
+        public Nullable<decimal> expenditure { get; set; }
     
         public virtual good good { get; set; }
         public virtual warehouse warehouse { get; set; }
