@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbModel", "DbModel\DbModel.csproj", "{F07F5A06-3453-40D4-94BF-4E84C4AF79CD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess", "DataAccess\DataAccess.csproj", "{859DAE86-E29E-455F-954B-201768C6CE7A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "credittrade", "credittrade\credittrade.csproj", "{E945E104-2687-4637-AE33-6EECBF157E8B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreditBase", "CreditBase\CreditBase.csproj", "{4C9FD412-4164-4275-B565-6C983DE98076}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{E945E104-2687-4637-AE33-6EECBF157E8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E945E104-2687-4637-AE33-6EECBF157E8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E945E104-2687-4637-AE33-6EECBF157E8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C9FD412-4164-4275-B565-6C983DE98076}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C9FD412-4164-4275-B565-6C983DE98076}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C9FD412-4164-4275-B565-6C983DE98076}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C9FD412-4164-4275-B565-6C983DE98076}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

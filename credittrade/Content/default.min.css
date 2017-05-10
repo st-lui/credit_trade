@@ -5,3 +5,16 @@ pre code{display:block;padding:.5em;background:#f0f0f0}pre code,pre .subst,pre .
 .navbar-brand img {
 	margin-top: -4px;
 }
+
+@font-face { 
+font-family: IDAutomationHC39M;  
+src: url(IDAutomationHC39M.woff);
+}
+.input-group[class*="col-"] {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+}
+
+#current_request_table_pay td {
+    height: 100px !important;
+}

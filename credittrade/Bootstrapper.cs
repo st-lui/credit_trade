@@ -7,6 +7,7 @@ using DataAccess;
 using DbModel;
 using Nancy;
 using Nancy.Bootstrapper;
+using Nancy.Conventions;
 using Nancy.Session;
 using Nancy.TinyIoc;
 
@@ -52,10 +53,18 @@ namespace credittrade
 				return string.Format("[User: UserName={1}, Ip={2}]", UserName, Ip);
 			}
 		}
+		protected override void ConfigureConventions(NancyConventions conventions)
+		{
+			base.ConfigureConventions(conventions);
 
+			conventions.StaticContentsConventions.Add(
+				StaticContentConventionBuilder.AddDirectory("fonts", @"fonts")
+			);
+		}
 		protected override void ApplicationStartup(TinyIoCContainer container, IPipelines pipelines)
 		{
 			base.ApplicationStartup(container, pipelines);
+			StaticConfiguration.DisableErrorTraces = false;
 			CookieBasedSessions.Enable(pipelines);
 			Nancy.Security.Csrf.Enable(pipelines);
 			pipelines.BeforeRequest += (ctx) =>
@@ -77,8 +86,16 @@ namespace credittrade
 					userIp = ctx.Request.UserHostAddress;
 
 				//Util.log.Info("Request from ip={0}\t PROXY={1}", userIp, proxy);
-				var dnsEntry = System.Net.Dns.GetHostEntry(userIp);
-				string hostName=dnsEntry.HostName;
+				string hostName;
+				try
+				{
+					var dnsEntry = System.Net.Dns.GetHostEntry(userIp);
+					hostName = dnsEntry.HostName;
+				}
+				catch 
+				{
+					hostName = "";
+				}
 				Regex regex = new Regex("r22-/d{6}-.*");
 				string idx = "658101";
 				if (regex.IsMatch(hostName))

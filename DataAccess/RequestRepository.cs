@@ -37,7 +37,7 @@ namespace DataAccess
 
 		public void Change(request item)
 		{
-			db.Entry(item).State=EntityState.Modified;
+			db.Entry(item).State = EntityState.Modified;
 		}
 
 		public request CreateRequest(DateTime date, string username, string comment, int user_id, int buyer_id)
@@ -49,13 +49,13 @@ namespace DataAccess
 				comment = comment,
 				user_id = user_id,
 				buyer_id = buyer_id,
-				paid=false,
+				paid = false,
 				pay_date = null,
 				cost = 0
 			};
 		}
 
-		public request CreateRequest(DateTime date, string username, string comment, int user_id, int buyer_id,IEnumerable<request_rows> requestRows)
+		public request CreateRequest(DateTime date, string username, string comment, int user_id, int buyer_id, IEnumerable<request_rows> requestRows)
 		{
 			var request = new request()
 			{
@@ -76,10 +76,22 @@ namespace DataAccess
 			return request;
 		}
 
-		public void MakePay(request request,DateTime date)
+		public void MakePay(request request, DateTime date)
 		{
 			request.paid = true;
 			request.pay_date = date;
+			warehouse warehouse = request.user.warehouse;
+			if (!db.Entry(warehouse).Collection(x => x.leftovers).IsLoaded)
+				db.Entry(warehouse).Collection(x => x.leftovers).Load();
+			foreach (var request_row in request.request_rows)
+			{
+				leftover foundLeftover = warehouse.leftovers.SingleOrDefault(x => x.good_id == request_row.goods_id.Value);
+				if (foundLeftover != null)
+				{
+					foundLeftover.expenditure -= request_row.amount;
+					db.Entry(foundLeftover).State=EntityState.Modified;
+				}
+			}
 		}
 
 		public void AddRequestRow(request request, request_rows requestRow)
@@ -93,7 +105,7 @@ namespace DataAccess
 			request.cost = 0;
 			foreach (var requestRow in request.request_rows)
 			{
-				request.cost += requestRow.amount*requestRow.price;
+				request.cost += requestRow.amount * requestRow.price;
 			}
 		}
 	}

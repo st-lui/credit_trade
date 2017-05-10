@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Web;
 using System.Web.Helpers;
 using DataAccess;
 using DbModel;
@@ -21,8 +22,8 @@ namespace credittrade.Modules
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
 					model.username = currentUser.username;
-					model.requests= unitOfWork.Users.GetRequests(currentUser);
-					
+					model.requests = unitOfWork.Users.GetRequests(currentUser);
+
 					return View["index", model];
 				}
 			};
@@ -35,6 +36,16 @@ namespace credittrade.Modules
 					return View["request_view", model];
 				}
 			};
+			Get["/requests/print/{request_id}"] = p =>
+			{
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					request request = unitOfWork.Requests.Get(p.request_id);
+					model.request = request;
+					return View["request_print",model];
+				}
+			};
+
 			Get["/buyers/list"] = p =>
 			{
 				user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
@@ -62,7 +73,7 @@ namespace credittrade.Modules
 					return Response.AsRedirect("~/buyers/list");
 				}
 			};
-			Get["requests/add"] = p =>
+			Get["/requests/add"] = p =>
 			{
 				user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
@@ -74,7 +85,7 @@ namespace credittrade.Modules
 				}
 			};
 
-			Post["requests/add"] = p =>
+			Post["/requests/add"] = p =>
 			{
 				this.ValidateCsrfToken();
 				user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
@@ -82,19 +93,42 @@ namespace credittrade.Modules
 				{
 					var request_info = Request.Form.request_info;
 					int buyer_id = Request.Form.buyer;
-					dynamic request_data= Json.Decode(request_info);
-					request request= unitOfWork.Requests.CreateRequest(DateTime.Now, currentUser.username, "", currentUser.id, buyer_id);
+					DateTime dt = Request.Form.datecreated;
+					dynamic request_data = Json.Decode(request_info);
+					request request = unitOfWork.Requests.CreateRequest(dt, currentUser.username, "", currentUser.id, buyer_id);
 					decimal cost = 0;
-					foreach (KeyValuePair<string,dynamic> row in request_data)
+					foreach (KeyValuePair<string, dynamic> row in request_data)
 					{
 						leftover leftover = unitOfWork.Leftovers.GetWithGoods(int.Parse(row.Value["id"]));
-						request_rows rr = unitOfWork.RequestRows.CreateRequestRows(row.Value["amount"],leftover.good.name,leftover.good.edizm,leftover.good_id,leftover.good.price,leftover.good.barcode);
+						request_rows rr = unitOfWork.RequestRows.CreateRequestRows(row.Value["amount"], leftover.good.name, leftover.good.edizm, leftover.good_id, leftover.good.price, leftover.good.barcode);
 						leftover.expenditure += rr.amount;
 						unitOfWork.Leftovers.Change(leftover);
-						unitOfWork.Requests.AddRequestRow(request,rr);
+						unitOfWork.Requests.AddRequestRow(request, rr);
 					}
 					unitOfWork.Requests.CalculateCost(request);
 					unitOfWork.Requests.Add(request);
+					unitOfWork.SaveChanges();
+					return Response.AsRedirect("~/");
+				}
+			};
+			Get["/requests/makepay/{request_id}"] = p =>
+			{
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					model.request = unitOfWork.Requests.Get(p.request_id);
+
+					return View["request_makepay", model];
+				}
+			};
+			Post["/requests/makepay/{request_id}"] = p =>
+			{
+				this.ValidateCsrfToken();
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					DateTime pay_date = Request.Form.pay_date;
+					var request = unitOfWork.Requests.Get(p.request_id);
+					unitOfWork.Requests.MakePay(request,pay_date);
+					unitOfWork.Requests.Change(request);
 					unitOfWork.SaveChanges();
 					return Response.AsRedirect("~/");
 				}

@@ -1,0 +1,103 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Накладная - Продажа товаров в кредит</title>
+    <style type="text/css">
+        .print {
+            width: 50%;
+        }
+
+        @@media print {
+            .print {
+                width: 100%;
+            }
+        }
+
+        .head {
+            text-align: center;
+        }
+
+
+        table {
+            border-collapse: collapse;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        th, td {
+            border-width: 1px;
+            border-style: solid;
+        }
+        tr td:first-child {
+            width: 25px;
+            text-align: center;
+        }
+        .footer {
+            margin-left: 8%;
+        }
+        .footer p {
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="print">
+        <div class="head">
+            <h3>@Model.request.user.warehouse.postoffice.idx @Model.request.user.warehouse.name @Model.request.user.warehouse.postoffice.post.name</h3>
+            <h3>Заказ №@(Model.request.id == 0 ? "" : Model.request.id.ToString()) от @Model.request.date.ToString("dd.MM.yyyy")</h3>
+            <h3>ФИО покупателя: @Model.request.buyer.fio</h3>
+        </div>
+        <div class="body">
+            <table>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th>Наменование</th>
+                    <th>Количество</th>
+                    <th>Цена</th>
+                    <th>Сумма</th>
+                </tr>
+                <tbody>
+
+                    @{  int positionNumber = 1;
+                        foreach (var requestRow in Model.request.request_rows)
+                        {
+                            <tr>
+                                <td>
+                                    @(positionNumber++)
+                                </td>
+                                <td>
+                                    @requestRow.name
+                                </td>
+                                <td>
+                                    @requestRow.amount
+                                </td>
+                                <td>
+                                    @((double)requestRow.price)
+                                </td>
+                                <td>
+                                    @((double)(requestRow.price * requestRow.amount))
+                                </td>
+                            </tr>}
+                    }
+
+                </tbody>
+
+            </table>
+        </div>
+        <div class="footer">
+            <p>
+                Начальник ОПС
+            <p>
+                Оттиск КПШ
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,20 +1,13 @@
 ﻿@{
-    ViewBag.Title = "Данные заказа";
+    ViewBag.Title = "Внесение оплаты";
     Layout = "layout.cshtml";
 }
 
-
-<form class="form-horizontal col-sm-8">
+<form class="form-horizontal col-sm-8" action="@Url.Content("~/requests/makepay/"+Model.request.id)" method="post">
+    @Html.AntiForgeryToken()
     <h3>Заказ № @Model.request.id от @Model.request.date.ToString("dd.MM.yyyy HH:mm")</h3>
     <h3>@Model.request.user.warehouse.postoffice.idx @Model.request.user.warehouse.name @Model.request.user.warehouse.postoffice.post.name</h3>
-    <div class="form-group">
-        <div class="col-sm-4 ">
-            <a class="btn btn-primary form-control" href="@Url.Content("~/requests/print/"+@Model.request.id)">Вывод печатной формы</a>
-        </div>
-        <div class="col-sm-3 ">
-            <a class="btn btn-primary form-control" href="@Url.Content("~/requests/makepay/"+@Model.request.id)">Внести оплату</a>
-        </div>
-    </div>
+    <input type="hidden" name="request_id"value ="@Model.request.id"/>
     <div class="form-group">
         <label class="control-label col-sm-3" for="fio">ФИО покупателя:</label>
         <div class="col-sm-6">
@@ -28,31 +21,32 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-sm-3" for="paid">Оплачен:</label>
-        <div class="col-sm-6">
-            <label class="form-control" id="paid">@(Model.request.paid ? "Да" : "Нет")</label>
+        <label class="control-label col-sm-3" for="pay_date">Ввести дату оплаты:</label>
+        <div class='input-group date col-md-6' id='datetimepicker2'>
+            <input type='text' class="form-control" id="pay_date" name="pay_datepri" />
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </span>
         </div>
     </div>
-    @if (Model.request.paid)
-    {
-        <div class="form-group">
-            <label class="control-label col-sm-3" for="pay_date">Дата оплаты:</label>
-            <div class="col-sm-6">
-                <label class="form-control" id="pay_date">@Model.request.pay_date.ToString("dd.MM.yyyy HH:mm:ss")</label>
-            </div>
+    
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary">Подтвердить оплату</button>
         </div>
-    }
+    </div>
+
     <div class="form-group">
         <h3 class="col-sm-offset-1">Состав заказа</h3>
         <div class="dataTable_div">
-            <table id="current_request_table" class="row-border">
+            <table id="current_request_table_pay" class="row-border">
                 <thead>
                     <tr>
                         <th>Товар</th>
                         <th>Цена</th>
                         <th>Количество</th>
                         <th>Стоимость</th>
-                        <th></th>
+                        <th>Штрих-код</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -63,25 +57,26 @@
                             <td>@rr.price</td>
                             <td>@rr.amount @rr.ed_izm</td>
                             <td>@(Math.Round(rr.price * rr.amount, 2))</td>
+                    <td style="font-size:16pt ; font-family: IDAutomationHC39M">(@rr.barcode)</td>
                         </tr>}
                 </tbody>
             </table>
         </div>
     </div>
-    <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-            <a class="btn btn-default" onclick="javascript: history.go(-1);">Назад</a>
-        </div>
-    </div>
+    
 </form>
 
 
 <script>
-    $("#current_request_table").DataTable({
+    $("#current_request_table_pay").DataTable({
         "language": {
             "url": "@Url.Content("~/content/dataTables.ru.lang.json")"
         },
         paging: false,
         filter: false
+    });
+    $('#datetimepicker2').datetimepicker({
+        locale: 'ru',
+        defaultDate: moment()
     });
 </script>
