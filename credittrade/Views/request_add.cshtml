@@ -77,7 +77,7 @@
                 <td id="edizm">@leftover.good.edizm</td>
                 <td id="price">@leftover.good.price</td>
                 <td id="amount">@leftover.amount</td>
-                <td>@leftover.expenditure</td>
+                <td id="expense">@leftover.expenditure</td>
                 <td><a id="leftover_@leftover.id" class="add_good btn btn-sm btn-primary" title="Добавить в заказ">+</a><span style="display: none" id="leftoveradd_@leftover.id"><input id="leftoveramount_@leftover.id" type="text"/><a class="btn btn-sm btn-primary" id="leftoverconfirm_@leftover.id">Подтвердить</a></span></td>
             </tr>}
         </tbody>
@@ -117,8 +117,12 @@
             var $tr = $("tr[id='tr_" + $leftover_id + "']");
             var $name = $tr.children("[id='name']").text();
             var $price = $tr.children("[id='price']").text();
+            var $leftover = $tr.children("[id='amount']").text();
+            var $expense = $tr.children("[id='expense']").text();
             $amount = parseFloat($amount.replace(',', '.'));
             $price = parseFloat($price.replace(',', '.'));
+            $leftover = parseFloat($leftover.replace(',', '.'));
+            $expense = parseFloat($expense.replace(',', '.'));
             //validation
             if (isNaN($amount)) {
                 alert("Введите корректное значение в поле количество");
@@ -126,6 +130,10 @@
             }
             if ($amount == 0) {
                 alert("Введите ненулевое значение в поле количество");
+                return;
+            }
+            if ($amount > $leftover - $expense) {
+                alert("Введенное количество превышает доступный остаток");
                 return;
             }
             var leftover = {};

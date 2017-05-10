@@ -11,9 +11,16 @@
         <div class="col-sm-4 ">
             <a class="btn btn-primary form-control" href="@Url.Content("~/requests/print/"+@Model.request.id)">Вывод печатной формы</a>
         </div>
-        <div class="col-sm-3 ">
-            <a class="btn btn-primary form-control" href="@Url.Content("~/requests/makepay/"+@Model.request.id)">Внести оплату</a>
-        </div>
+        @if (!Model.request.paid)
+        {
+            <div class="col-sm-3 ">
+                <a class="btn btn-primary form-control" href="@Url.Content("~/requests/makepay/" + @Model.request.id)">Внести оплату</a>
+            </div>
+        }
+        
+            <div class="col-sm-5">
+                <a class="btn btn-default" onclick="javascript: history.go(-1);">Назад</a>
+            </div>
     </div>
     <div class="form-group">
         <label class="control-label col-sm-3" for="fio">ФИО покупателя:</label>
@@ -66,11 +73,6 @@
                         </tr>}
                 </tbody>
             </table>
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
-            <a class="btn btn-default" onclick="javascript: history.go(-1);">Назад</a>
         </div>
     </div>
 </form>
