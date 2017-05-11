@@ -52,7 +52,7 @@ namespace DataAccess
 			{
 				db.Entry(warehouseLeftover).Reference<good>("good").Load();
 			}
-			return warehouse.leftovers.OrderBy(x=>x.good.parent_id).ToList();
+			return warehouse.leftovers.Where(x=>x.amount!=0 || x.expenditure!=0).OrderBy(x=>x.good.parent_id).ToList();
 		}
 	}
 }
