@@ -9,7 +9,7 @@
     <h3>@Model.request.user.warehouse.postoffice.idx @Model.request.user.warehouse.name @Model.request.user.warehouse.postoffice.post.name</h3>
     <div class="form-group">
         <div class="col-sm-4 ">
-            <a class="btn btn-primary form-control" href="@Url.Content("~/requests/print/"+@Model.request.id)">Вывод печатной формы</a>
+            <a class="btn btn-primary form-control" onclick='javascript:window.open("@Url.Content("~/requests/print/"+@Model.request.id)");'>Вывод печатной формы</a>
         </div>
         @if (!Model.request.paid)
         {

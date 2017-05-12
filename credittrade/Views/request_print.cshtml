@@ -1,4 +1,5 @@
-﻿@{
+﻿@using credittrade.Modules
+@{
     Layout = null;
 }
 
@@ -9,95 +10,242 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Накладная - Продажа товаров в кредит</title>
-    <style type="text/css">
-        .print {
-            width: 50%;
+    <script language="javascript" src="~/Content/scripts/jquery.min.js"></script>
+    <script language="javascript">
+        $(document).ready(function () {
+            var $first = $("#first").html();
+            $("#second").append($first);
+            print();
+        });
+        
+
+    </script>
+    <style>
+        body {
+            width: 95%;
         }
 
-        @@media print {
-            .print {
-                width: 100%;
-            }
+        td, th {
+            font-size: 6pt;
         }
-        .head {
+
+        .down {
+            vertical-align: bottom;
+        }
+
+        .up {
+            vertical-align: top;
+        }
+
+        .underscore {
+            border-bottom: 1px solid black;
+        }
+
+        .leftpadd {
+            padding-left: 5px;
+        }
+
+        .center {
             text-align: center;
         }
-        table {
+
+        #number_and_date_table {
+            margin-left: 60%;
+        }
+
+        table.bordered {
             border-collapse: collapse;
-            margin-left: auto;
-            margin-right: auto;
         }
 
-        th, td {
-            border-width: 1px;
-            border-style: solid;
+        .bordered td, th {
+            border: 1px solid black;
         }
-        tr td:first-child {
-            width: 25px;
-            text-align: center;
+
+        caption {
+            font-weight: bold;
+            font-size: 8pt;
         }
-        .footer {
-            margin-left: 8%;
+
+        .main_table {
+            width: 100%;
         }
-        .footer p {
-            margin-top: 40px;
+
+        .small_row td {
+            font-size: 6pt;
+            padding: 0px 0;
+            margin: 0;
+        }
+
+        .summary {
+            width: 100%;
+        }
+
+        .sign {
+            width: 100%;
+        }
+
+        .large_row {
+            height: 50px;
+        }
+
+        .fl_left {
+            float: left;
+            font-size: 6pt;
+            margin-left: 15%;
+            margin-top: 30px;
+        }
+
+        .fl_right {
+            float: right;
+            font-size: 6pt;
+            margin-right: 15%;
+            margin-top: 30px;
+        }
+
+        .clear { clear:both;}
+        #second {
+            padding-top: 50px;
         }
     </style>
-    <script language ="javascript">
-        print();
-    </script>
 </head>
 <body>
-    <div class="print">
-        <div class="head">
-            <h3>@Model.request.user.warehouse.postoffice.idx @Model.request.user.warehouse.name @Model.request.user.warehouse.postoffice.post.name</h3>
-            <h3>Заказ №@(Model.request.id == 0 ? "" : Model.request.id.ToString()) от @Model.request.date.ToString("dd.MM.yyyy")</h3>
-            <h3>ФИО покупателя: @Model.request.buyer.fio</h3>
-        </div>
-        <div class="body">
-            <table>
+    <div id="first">
+        <table>
+            <tr>
+                <td>&nbsp;</td>
+                <td class="down leftpadd">Продавец</td>
+                <td>&nbsp;</td>
+                <td class="underscore">'ФГУП "Почта России", 131000, г. Москва, Варшавское шоссе, 37, ИНН/КПП 7724261610/222402001, 'УФПС Алтайского края - филиал ФГУП "Почта России", р/с № 40502810714030001142, Банк получателя ФИЛИАЛ БАНКА ВТБ (ПАО) В Г. КРАСНОЯРСКЕ, БИК 040407777, К/С. № 30101810200000000777 &nbsp; Почтамт, ОПС @Model.request.user.warehouse.postoffice.idx @Model.request.user.warehouse.name @Model.request.user.warehouse.postoffice.post.name</td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td class="down leftpadd">Покупатель</td>
+                <td>&nbsp;</td>
+                <td class="underscore">@Model.request.buyer.fio</td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td class="up center"><sup>(организация, адрес, телефон, факс, банковские реквизиты, ФИО физ.лица)</sup></td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td class="down leftpadd">Основание</td>
+                <td>&nbsp;</td>
+                <td class="underscore">Номер договора о продаже в кредит</td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td class="up center"><sup>(договор, заказ-наряд)</sup></td>
+                <td>&nbsp;</td>
+            </tr>
+        </table>
+        <table id="number_and_date_table" class="center bordered">
+            <tr>
+                <td>Номер документа</td>
+                <td>Дата составления</td>
+            </tr>
+            <tr>
+                <td>@Model.request.id</td>
+                <td>@Model.request.date.ToString("d")</td>
+            </tr>
+        </table>
+        <table class="main_table bordered center">
+            <col width="3%" />
+            <col width="75%">
+            <col width="3%">
+            <col width="5%">
+            <col width="7%">
+            <col width="7%">
+            <caption>
+                ТОВАРНАЯ НАКЛАДНАЯ
+            </caption>
+            <tr>
+                <th>№ п/п</th>
+                <th>Товар</th>
+                <th>Единица измерения</th>
+                <th>Количество</th>
+                <th>Цена, руб. коп.</th>
+                <th>Сумма с учетом НДС, руб. коп.</th>
+            </tr>
+            <tr class="small_row">
+                <td>1</td>
+                <td>2</td>
+                <td>3</td>
+                <td>4</td>
+                <td>5</td>
+                <td>6</td>
+            </tr>
+            @{ int i = 0;
+                decimal totalamount = 0;
+            }
+            @foreach (var requestRow in @Model.request.request_rows)
+            {
+                totalamount += requestRow.amount;
                 <tr>
-                    <th>&nbsp;</th>
-                    <th>Наменование</th>
-                    <th>Количество</th>
-                    <th>Цена</th>
-                    <th>Сумма</th>
-                </tr>
-                <tbody>
-
-                    @{  int positionNumber = 1;
-                        foreach (var requestRow in Model.request.request_rows)
-                        {
-                            <tr>
-                                <td>
-                                    @(positionNumber++)
-                                </td>
-                                <td>
-                                    @requestRow.name
-                                </td>
-                                <td>
-                                    @requestRow.amount
-                                </td>
-                                <td>
-                                    @((double)requestRow.price)
-                                </td>
-                                <td>
-                                    @((double)(requestRow.price * requestRow.amount))
-                                </td>
-                            </tr>}
-                    }
-
-                </tbody>
-
-            </table>
+                    <td>@(++i)</td>
+                    <td>@requestRow.name</td>
+                    <td>@requestRow.ed_izm</td>
+                    <td>@requestRow.amount</td>
+                    <td>@requestRow.price</td>
+                    <td>@((requestRow.amount * requestRow.price).ToString("f2"))</td>
+                </tr>}
+            <tr>
+                <td colspan="2">
+                    Всего по накладной
+                </td>
+                <th>X</th>
+                <th>@(totalamount.ToString("f3"))</th>
+                <th>X</th>
+                <th>@Model.request.cost</th>
+        </table>
+        <table class="summary">
+            <col width="10%">
+            <tr><td>Всего отпущено на сумму</td><td class="underscore">@RuDateAndMoneyConverter.CurrencyToTxt((double)Model.request.cost, true)</td></tr>
+            <tr><td>&nbsp;</td><td class="up"><sup>(прописью)</sup></td></tr>
+        </table>
+        <table class="sign center">
+            <col width="10%">
+            <tr class="large_row">
+                <td class="down">Отпуск товара произвел</td>
+                <td class="underscore">&nbsp;</td>
+                <td>&nbsp;</td>
+                <td class="underscore">&nbsp;</td>
+                <td class="underscore">&nbsp;</td>
+                <td>&nbsp;</td>
+                <td class="down">Товар получил</td>
+                <td class="underscore">&nbsp;</td>
+                <td class="underscore">&nbsp;</td>
+            </tr>
+            <tr class="up">
+                <td>&nbsp;</td>
+                <td><sup>(должность)</sup></td>
+                <td>&nbsp;</td>
+                <td><sup>(подпись)</sup></td>
+                <td><sup>(расшифровка подписи)</sup></td>
+                <td>&nbsp;</td>
+                <td></td>
+                <td><sup>(подпись)</sup></td>
+                <td><sup>(расшифровка подписи)</sup></td>
+            </tr>
+        </table>
+        <div class="fl_left">
+            М.П.	"____"_____________________ г.
         </div>
-        <div class="footer">
-            <p>
-                Начальник ОПС
-            <p>
-                Оттиск КПШ
-            </p>
+        <div class="fl_right">
+            М.П.	"____"_____________________ г.
         </div>
+    </div>
+<div class="clear">
+    </div>
+<div id="second">
     </div>
 </body>
 </html>
