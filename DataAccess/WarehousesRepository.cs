@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.SqlClient;
 using System.Linq;
 using DbModel;
 
@@ -46,13 +47,16 @@ namespace DataAccess
 
 		public IEnumerable<leftover> GetLeftovers(warehouse warehouse)
 		{
-			if (!db.Entry(warehouse).Collection(x => x.leftovers).IsLoaded)
-				db.Entry(warehouse).Collection(x => x.leftovers).Load();
-			foreach (var warehouseLeftover in warehouse.leftovers)
-			{
-				db.Entry(warehouseLeftover).Reference<good>("good").Load();
-			}
-			return warehouse.leftovers.Where(x=>x.amount!=0 || x.expenditure!=0).OrderBy(x=>x.good.parent_id).ToList();
+			var l = db.leftovers.Include(x => x.good).Where(x=>x.warehouse_id==warehouse.id && x.amount>0);
+			return l.ToList();
+			//			var leftovers = db.leftovers.SqlQuery(@"select l.[id],l.[warehouse_id],l.[good_id],l.[amount],l.[expenditure]
+			//,g.[id],g.[nom_id],g.[parent_id],g.[name],g.[edizm],g.[price],g.[barcode],g.[category]
+			//FROM leftovers l,goods g
+			//where l.warehouse_id=@warehouse_id and l.good_id=g.id", new SqlParameter("@warehouse_id", warehouse.id));
+			//			foreach (var leftover in leftovers)
+			//			{
+			//				yield return leftover;
+			//			}
 		}
 	}
 }

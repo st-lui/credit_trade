@@ -7,7 +7,7 @@
     @Html.AntiForgeryToken()
     <h3>Заказ № @Model.request.id от @Model.request.date.ToString("dd.MM.yyyy HH:mm")</h3>
     <h3>@Model.request.user.warehouse.postoffice.idx @Model.request.user.warehouse.name @Model.request.user.warehouse.postoffice.post.name</h3>
-    <input type="hidden" name="request_id"value ="@Model.request.id"/>
+    <input type="hidden" name="request_id" value="@Model.request.id" />
     <div class="form-group">
         <label class="control-label col-sm-3" for="fio">ФИО покупателя:</label>
         <div class="col-sm-6">
@@ -23,13 +23,13 @@
     <div class="form-group">
         <label class="control-label col-sm-3" for="pay_date">Ввести дату оплаты:</label>
         <div class='input-group date col-md-6' id='datetimepicker2'>
-            <input type='text' class="form-control" id="pay_date" name="pay_datepri" />
+            <input type='text' class="form-control" id="pay_date" name="pay_date" />
             <span class="input-group-addon">
                 <span class="glyphicon glyphicon-calendar"></span>
             </span>
         </div>
     </div>
-    
+
     <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">
             <button type="submit" class="btn btn-primary">Подтвердить оплату</button>
@@ -57,13 +57,20 @@
                             <td>@rr.price</td>
                             <td>@rr.amount @rr.ed_izm</td>
                             <td>@(Math.Round(rr.price * rr.amount, 2))</td>
-                    <td style="font-size:16pt ; font-family: IDAutomationHC39M">(@rr.barcode)</td>
+                            @if (rr.barcode == "")
+                            {
+                                <td>-</td>
+}
+                            else
+                            {
+                                <td style="font-size: 16pt; font-family: IDAutomationHC39M">(@rr.barcode)</td>
+}
                         </tr>}
                 </tbody>
             </table>
         </div>
     </div>
-    
+
 </form>
 
 

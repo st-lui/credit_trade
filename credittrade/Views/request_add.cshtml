@@ -146,7 +146,7 @@
             leftovers[$leftover_id] = leftover;
             $("#request_info").val(JSON.stringify(leftovers));
             //$("#current_request_body:last-child").append("<tr><td>" + $name + "</td><td>" + $price + "</td><td>" + $amount + "</td><td>" + $cost + "</td></tr>");
-            $("#current_request_table").DataTable().row.add([$name, $price, $amount, $cost, '']).draw(false);
+            $("#current_request_table").DataTable().row.add([$name, $price.toFixed(2).replace('.', ','), $amount.toFixed(3).replace('.', ','), $cost.toFixed(2).replace('.', ','), '']).draw(false);
         });
 
         $('#datetimepicker2').datetimepicker({
