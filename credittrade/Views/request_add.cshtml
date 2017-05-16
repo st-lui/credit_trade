@@ -10,17 +10,17 @@
 </style>
 <h2>@ViewBag.Title</h2>
 <div class="row">
-<form action="@Url.Content("~/requests/add")" method="post" class="form-horizontal col-md-8">
-    <div class="form-group">
-        <h3>Выберите покупателя</h3>
-        <div class="col-md-6">
-            <select class="form-control" name="buyer" size="1">
-                @foreach (var buyer in Model.buyers)
-                {
-                    <option value="@buyer.id">@buyer.fio</option>}
-            </select>
+    <form id="create-form" action="@Url.Content("~/requests/add")" method="post" class="form-horizontal col-md-8">
+        <div class="form-group">
+            <h3>Выберите покупателя</h3>
+            <div class="col-md-6">
+                <select class="form-control" name="buyer" size="1">
+                    @foreach (var buyer in Model.buyers)
+                    {
+                        <option value="@buyer.id">@buyer.fio</option>}
+                </select>
             </div>
-    </div>
+        </div>
 
         <div class="form-group">
             <h3>Введите дату</h3>
@@ -30,63 +30,63 @@
                     <span class="glyphicon glyphicon-calendar"></span>
                 </span>
             </div>
-    </div>
-    <script type="text/javascript">
-
-    </script>
-    <div>
-        <h3>Текущий заказ</h3>
-        @Html.AntiForgeryToken()
-        <div class="dataTable_div">
-            <table id="current_request_table" class="row-border">
-                <thead>
-                    <tr>
-                        <th>Товар</th>
-                        <th>Цена</th>
-                        <th>Количество</th>
-                        <th>Стоимость</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="current_request_body"></tbody>
-            </table>
         </div>
-    </div>
-    <input hidden id="request_info" name="request_info" />
-    <button type="submit" class="btn btn-primary">Создать заказ</button>
-</form>
+        <script type="text/javascript">
+
+        </script>
+        <div>
+            <h3>Текущий заказ</h3>
+            @Html.AntiForgeryToken()
+            <div class="dataTable_div">
+                <table id="current_request_table" class="row-border">
+                    <thead>
+                        <tr>
+                            <th>Товар</th>
+                            <th>Цена</th>
+                            <th>Количество</th>
+                            <th>Стоимость</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="current_request_body"></tbody>
+                </table>
+            </div>
+        </div>
+        <input hidden id="request_info" name="request_info" />
+        <a id="submit" href='#' class="btn btn-primary">Создать заказ</a>
+    </form>
 </div>
 <div class="dataTable_div row">
     <h3>Выбор товара</h3>
     <table id="leftovers_table" class="row-border">
         <thead>
-        <tr>
-            <th>Товар</th>
-            <th>Единица</th>
-            <th>Цена</th>
-            <th>Остаток</th>
-            <th>Расход по торговле в кредит</th>
-            <th></th>
-        </tr>
+            <tr>
+                <th>Товар</th>
+                <th>Единица</th>
+                <th>Цена</th>
+                <th>Остаток</th>
+                <th>Расход по торговле в кредит</th>
+                <th></th>
+            </tr>
         </thead>
         <tbody>
-        @foreach (var leftover in Model.leftovers)
-        {
-            <tr id="tr_@leftover.id">
-                <td id="name">@leftover.good.name</td>
-                <td id="edizm">@leftover.good.edizm</td>
-                <td id="price">@leftover.good.price</td>
-                <td id="amount">@leftover.amount</td>
-                <td id="expense">@leftover.expenditure</td>
-                <td><a id="leftover_@leftover.id" class="add_good btn btn-sm btn-primary" title="Добавить в заказ">+</a><span style="display: none" id="leftoveradd_@leftover.id"><input id="leftoveramount_@leftover.id" type="text"/><a class="btn btn-sm btn-primary" id="leftoverconfirm_@leftover.id">Подтвердить</a></span></td>
-            </tr>}
+            @foreach (var leftover in Model.leftovers)
+            {
+                <tr id="tr_@leftover.id">
+                    <td id="name">@leftover.good.name</td>
+                    <td id="edizm">@leftover.good.edizm</td>
+                    <td id="price">@leftover.good.price</td>
+                    <td id="amount">@leftover.amount</td>
+                    <td id="expense">@(-leftover.expenditure)</td>
+                    <td><a id="leftover_@leftover.id" class="add_good btn btn-sm btn-primary" title="Добавить в заказ">+</a><span style="display: none" id="leftoveradd_@leftover.id"><input id="leftoveramount_@leftover.id" type="text" /><a class="btn btn-sm btn-primary" id="leftoverconfirm_@leftover.id">Подтвердить</a></span></td>
+                </tr>}
         </tbody>
     </table>
 </div>
 
 <script language="javascript">
     $(document).ready(function () {
-        var leftovers = {};
+        var leftovers_to_post = {};
         $("#leftovers_table").DataTable({
             "language": {
                 "url": "@Url.Content("~/content/dataTables.ru.lang.json")"
@@ -122,9 +122,9 @@
             $amount = parseFloat($amount.replace(',', '.'));
             $price = parseFloat($price.replace(',', '.'));
             $leftover = parseFloat($leftover.replace(',', '.'));
-            $expense = parseFloat($expense.replace(',', '.'));
+            $expense = -parseFloat($expense.replace(',', '.'));
             //validation
-            if (isNaN($amount)) {
+            if (isNaN($amount) || $amount < 0) {
                 alert("Введите корректное значение в поле количество");
                 return;
             }
@@ -132,26 +132,62 @@
                 alert("Введите ненулевое значение в поле количество");
                 return;
             }
-            if ($amount > $leftover - $expense) {
+            var $current_amount = 0;
+            if (leftovers_to_post[$leftover_id] != undefined) {
+                $current_amount += leftovers_to_post[$leftover_id]["amount"];
+            }
+            if ($amount > $leftover - $expense - $current_amount) {
                 alert("Введенное количество превышает доступный остаток");
                 return;
             }
-            var leftover = {};
-            leftover["id"] = $leftover_id;
-            leftover["name"] = $name;
-            leftover["price"] = $price;
-            leftover["amount"] = $amount;
-            var $cost = $price * $amount;
-            leftover["cost"] = $cost;
-            leftovers[$leftover_id] = leftover;
-            $("#request_info").val(JSON.stringify(leftovers));
-            //$("#current_request_body:last-child").append("<tr><td>" + $name + "</td><td>" + $price + "</td><td>" + $amount + "</td><td>" + $cost + "</td></tr>");
-            $("#current_request_table").DataTable().row.add([$name, $price.toFixed(2).replace('.', ','), $amount.toFixed(3).replace('.', ','), $cost.toFixed(2).replace('.', ','), '']).draw(false);
+            if ($current_amount == 0) {
+                var leftover = {};
+                leftover["id"] = $leftover_id;
+                leftover["name"] = $name;
+                leftover["price"] = $price;
+                leftover["amount"] = $amount;
+                var $cost = $price * $amount;
+                leftover["cost"] = $cost;
+                leftovers_to_post[$leftover_id] = leftover;
+                $("#request_info").val(JSON.stringify(leftovers_to_post));
+                //$("#current_request_body:last-child").append("<tr><td>" + $name + "</td><td>" + $price + "</td><td>" + $amount + "</td><td>" + $cost + "</td></tr>");
+                var $delbutton = '<a class="delbutton btn" id="delbutton_' + $leftover_id+ '"><img src="@Url.Content("~/Content/img/button_delete.gif")"/></a>';
+                var $node = $("#current_request_table").DataTable().row
+                    .add([
+                        $name, $price.toFixed(2).replace('.', ','), $amount.toFixed(3).replace('.', ','), $cost.toFixed(2).replace('.', ','), $delbutton])
+                    .draw(false).node();
+                $node.id = "curr" + leftover["id"];
+            } else {
+                leftovers_to_post[$leftover_id]["amount"] += $amount;
+                var $cost = $price * $amount;
+                leftovers_to_post[$leftover_id]["cost"] += $cost;
+                $("#request_info").val(JSON.stringify(leftovers_to_post));
+                var $new_amount = leftovers_to_post[$leftover_id]["amount"].toFixed(3).replace('.', ',');
+                var $new_cost = leftovers_to_post[$leftover_id]["cost"].toFixed(2).replace('.', ',');
+                $("#current_request_table").DataTable().cell("[id='curr" + $leftover_id + "']", 2).data($new_amount);
+                $("#current_request_table").DataTable().cell("[id='curr" + $leftover_id + "']", 3).data($new_cost);
+            }
         });
-
+        $('#current_request_table').on('click', 'a.delbutton',
+            function(parameters) {
+                if (confirm("Удалить строку заказа?") === false)
+                    return;
+                var $leftover_id = this.id.split('_')[1];
+                $("#current_request_table").DataTable().row("[id='curr" + $leftover_id + "']").remove().draw(false);
+                delete leftovers_to_post[$leftover_id];
+                $("#request_info").val(JSON.stringify(leftovers_to_post));
+            });
         $('#datetimepicker2').datetimepicker({
             locale: 'ru',
-            defaultDate:moment()
+            defaultDate: moment()
+        });
+        $("#submit").click(function() {
+            if (Object.keys(leftovers_to_post).length > 0)
+                $("#create-form").submit();
+            else {
+                alert("Невозможно создать пустой заказ");
+                return;
+            }
         });
     });
 </script>

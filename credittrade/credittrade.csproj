@@ -276,6 +276,7 @@
     <Content Include="Content\DataTables\media\images\sort_desc.png" />
     <Content Include="Content\DataTables\media\images\sort_desc_disabled.png" />
     <Content Include="Content\default.min.css" />
+    <Content Include="Content\img\button_delete.gif" />
     <Content Include="Content\img\edit.png" />
     <Content Include="Content\img\favicon.ico" />
     <Content Include="Content\img\gerb.png" />
