@@ -47,7 +47,7 @@ namespace DataAccess
 
 		public IEnumerable<leftover> GetLeftovers(warehouse warehouse)
 		{
-			var l = db.leftovers.Include(x => x.good).Where(x=>x.warehouse_id==warehouse.id && x.amount>0);
+			var l = db.leftovers.Include(x => x.good).Where(x=>x.warehouse_id==warehouse.id && x.amount>x.expenditure.Value);
 			return l.ToList();
 			//			var leftovers = db.leftovers.SqlQuery(@"select l.[id],l.[warehouse_id],l.[good_id],l.[amount],l.[expenditure]
 			//,g.[id],g.[nom_id],g.[parent_id],g.[name],g.[edizm],g.[price],g.[barcode],g.[category]
