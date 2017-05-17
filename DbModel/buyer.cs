@@ -23,6 +23,9 @@ namespace DbModel
         public int id { get; set; }
         public string fio { get; set; }
         public Nullable<int> warehouse_id { get; set; }
+        public Nullable<System.DateTime> contract_date { get; set; }
+        public string contract_number { get; set; }
+        public Nullable<decimal> limit { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<request> requests { get; set; }

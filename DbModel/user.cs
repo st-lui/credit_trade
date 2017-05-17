@@ -26,6 +26,7 @@ namespace DbModel
         public string dpt { get; set; }
         public string signer { get; set; }
         public Nullable<int> warehouse_id { get; set; }
+        public Nullable<bool> admin { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<request> requests { get; set; }

@@ -57,7 +57,7 @@ namespace credittrade.Modules
 			//	}
 			//};
 			//Get["/buyers/add"] = p =>
-			//{
+			//{	
 			//	return View["buyer_add"];
 			//};
 			//Post["/buyers/add"] = p =>

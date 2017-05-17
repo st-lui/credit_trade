@@ -5,11 +5,11 @@
 
 <h2>@ViewBag.Title</h2>
 <p>
-    <a id="add_buyer" href="@Url.Content("~/buyers/add")" class="btn btn-primary">Новый покупатель</a>
+    <a id="add_buyer" href="@Url.Content("~/admin/buyers/add")" class="btn btn-primary">Новый покупатель</a>
 </p>
 <div class="dataTable_div col-md-7">
     <table id="buyers_table" class="row-border">
-        <thead><tr><th>ФИО покупателя</th><th></th></tr></thead>
+        <thead><tr><th>ФИО покупателя</th><th>Номер и дата договора</th><th>ОПС</th></tr></thead>
         @foreach (var buyer in Model.Buyers)
         {
             <tr>
@@ -17,7 +17,10 @@
                     @buyer.fio
                 </td>
                 <td>
-                    <a id="add_buyer" href="@Url.Content("~/requests/list/"+@buyer.id)" class="btn btn-primary">Показать заказы</a>
+                    №@buyer.contract_number от @(buyer.contract_date.ToString("d"))
+                </td>
+                <td>
+                    @buyer.warehouse.postoffice.idx @buyer.warehouse.name
                 </td>
             </tr>
         }

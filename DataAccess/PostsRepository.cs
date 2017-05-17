@@ -43,5 +43,18 @@ namespace DataAccess
 		{
 			return db.posts.SingleOrDefault(x => x.name == name);
 		}
+
+		public IEnumerable<buyer> GetBuyers(int postId)
+		{
+			var postofficeIds = db.postoffices.Where(po => po.post_id == postId).Select(x => x.id);
+			var warehouseIds = db.warehouses.Where(wh => postofficeIds.Contains(wh.postoffice_id)).Select(x=>x.id);
+			return db.buyers.Include("warehouse.postoffice").Where(buyer => warehouseIds.Contains(buyer.warehouse_id.Value)).ToList();
+		}
+
+		public IEnumerable<warehouse> GetWarehouses(int postId)
+		{
+			var postofficeIds = db.postoffices.Where(po => po.post_id == postId).Select(x => x.id);
+			return db.warehouses.Include("postoffice").Where(wh => postofficeIds.Contains(wh.postoffice_id)).ToList();
+		}
 	}
 }

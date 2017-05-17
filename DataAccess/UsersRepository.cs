@@ -42,7 +42,7 @@ namespace DataAccess
 
 		public user Get(string name)
 		{
-			return db.users.Include("warehouse").SingleOrDefault(x => x.username == name);
+			return db.users.Include("warehouse.postoffice.post").SingleOrDefault(x => x.username == name);
 		}
 
 		public user CreateUser(string fio, int warehouse_id, string username)
@@ -145,6 +145,17 @@ namespace DataAccess
 				fio =fio,
 				warehouse_id = currentUser.warehouse_id,
 				warehouse = currentUser.warehouse
+			};
+		}
+
+		public buyer CreateBuyer(user currentUser, string fio,int warehouse_id,string contract_number,DateTime contract_date)
+		{
+			return new buyer()
+			{
+				fio = fio,
+				contract_number = contract_number,
+				contract_date = contract_date,
+				warehouse_id = warehouse_id,
 			};
 		}
 

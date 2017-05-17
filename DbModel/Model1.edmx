@@ -12,6 +12,9 @@
           <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="fio" Type="varchar" MaxLength="150" Nullable="false" />
           <Property Name="warehouse_id" Type="int" />
+          <Property Name="contract_date" Type="datetime2" Precision="7" />
+          <Property Name="contract_number" Type="varchar" MaxLength="50" />
+          <Property Name="limit" Type="numeric" Precision="7" Scale="2" />
         </EntityType>
         <EntityType Name="goods">
           <Key>
@@ -99,6 +102,7 @@
           <Property Name="dpt" Type="varchar" MaxLength="256" />
           <Property Name="signer" Type="varchar" MaxLength="64" />
           <Property Name="warehouse_id" Type="int" />
+          <Property Name="admin" Type="bit" />
         </EntityType>
         <EntityType Name="warehouses">
           <Key>
@@ -313,6 +317,9 @@
           <NavigationProperty Name="requests" Relationship="DbModel.FK_requests_buyers" FromRole="buyer" ToRole="request" />
           <Property Name="warehouse_id" Type="Int32" />
           <NavigationProperty Name="warehouse" Relationship="DbModel.FK_buyers_warehouses" FromRole="buyer" ToRole="warehouse" />
+          <Property Name="contract_date" Type="DateTime" Precision="7" />
+          <Property Name="contract_number" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="limit" Type="Decimal" Precision="7" Scale="2" />
         </EntityType>
         <EntityType Name="good">
           <Key>
@@ -414,6 +421,7 @@
           <Property Name="warehouse_id" Type="Int32" />
           <NavigationProperty Name="requests" Relationship="DbModel.FK_requests_User" FromRole="user" ToRole="request" />
           <NavigationProperty Name="warehouse" Relationship="DbModel.FK_users_warehouses" FromRole="user" ToRole="warehouse" />
+          <Property Name="admin" Type="Boolean" />
         </EntityType>
         <EntityType Name="warehouse">
           <Key>
@@ -556,6 +564,9 @@
           <EntitySetMapping Name="buyers">
             <EntityTypeMapping TypeName="DbModel.buyer">
               <MappingFragment StoreEntitySet="buyers">
+                <ScalarProperty Name="limit" ColumnName="limit" />
+                <ScalarProperty Name="contract_number" ColumnName="contract_number" />
+                <ScalarProperty Name="contract_date" ColumnName="contract_date" />
                 <ScalarProperty Name="warehouse_id" ColumnName="warehouse_id" />
                 <ScalarProperty Name="fio" ColumnName="fio" />
                 <ScalarProperty Name="id" ColumnName="id" />
@@ -648,6 +659,7 @@
           <EntitySetMapping Name="users">
             <EntityTypeMapping TypeName="DbModel.user">
               <MappingFragment StoreEntitySet="users">
+                <ScalarProperty Name="admin" ColumnName="admin" />
                 <ScalarProperty Name="warehouse_id" ColumnName="warehouse_id" />
                 <ScalarProperty Name="signer" ColumnName="signer" />
                 <ScalarProperty Name="dpt" ColumnName="dpt" />
