@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
 using DataAccess;
@@ -10,6 +11,8 @@ using Nancy.Bootstrapper;
 using Nancy.Conventions;
 using Nancy.Session;
 using Nancy.TinyIoc;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace credittrade
 {
@@ -23,24 +26,25 @@ namespace credittrade
 		{
 			private string name;
 			private user user;
-			public User(string name,user u)
+			private IEnumerable<string> claims;
+
+			public User(string name, user u)
 			{
 				this.name = name;
 				user = u;
 			}
-			
+
 			public string UserName
 			{
 				get { return this.name; }
 			}
 			public string Ip { get; set; }
 			public int Index { get; set; }
+
 			public IEnumerable<string> Claims
 			{
-				get
-				{
-					return new string[] { "users" };
-				}
+				get { return claims; }
+				set { claims = value; }
 			}
 
 			public user DbUser
@@ -69,53 +73,127 @@ namespace credittrade
 			Nancy.Security.Csrf.Enable(pipelines);
 			pipelines.BeforeRequest += (ctx) =>
 			{
+				int userId = 0;
+				string authHeader = ctx.Request.Headers.Authorization;
+				var unitOfWork = new UnitOfWork();
 
-				var iis_ctx = System.Web.HttpContext.Current;
-				object ip = null;
-				if (iis_ctx != null)
-					ip = iis_ctx.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
-				string userIp = String.Empty;
-				bool proxy = false;
-				if (ip != null)
+				
+				if (!string.IsNullOrEmpty(authHeader))
 				{
+					var authHeaderVal = AuthenticationHeaderValue.Parse(authHeader);
 
-					userIp = ip.ToString();
-					proxy = true;
+					// RFC 2617 sec 1.2, "scheme" name is case-insensitive
+					if (authHeaderVal.Scheme.Equals("basic", StringComparison.OrdinalIgnoreCase) && authHeaderVal.Parameter != null)
+					{
+						var credentials = authHeaderVal.Parameter;
+						var encoding = Encoding.GetEncoding("iso-8859-1");
+						credentials = encoding.GetString(Convert.FromBase64String(credentials));
+
+						int separator = credentials.IndexOf(':');
+						string name = credentials.Substring(0, separator);
+						string password = credentials.Substring(separator + 1);
+						var usr = unitOfWork.Users.Get(name, password);
+						if (usr != null)
+						{
+							User user = new User(usr.username, usr);
+							if (usr.admin.HasValue && usr.admin.Value)
+								user.Claims = new[] { "Admin" };
+							ctx.CurrentUser = user;
+							userId = usr.id;
+							ctx.Items.Add("unitofwork", unitOfWork);
+							ctx.Request.Cookies.Add("userId", usr.id.ToString());
+						}
+					}
 				}
-				if (string.IsNullOrEmpty(userIp))
-					userIp = ctx.Request.UserHostAddress;
 
-				//Util.log.Info("Request from ip={0}\t PROXY={1}", userIp, proxy);
-				string hostName;
 				try
 				{
-					var dnsEntry = System.Net.Dns.GetHostEntry(userIp);
-					hostName = dnsEntry.HostName;
+					userId = int.Parse((string) ctx.Request.Cookies["userId"]);
 				}
-				catch 
+				catch
 				{
-					hostName = "";
 				}
-				Regex regex = new Regex("r22-/d{6}-.*");
-				string idx = "658101";
-				if (regex.IsMatch(hostName))
-					idx = hostName.Substring(4,6);
+				if (userId == 0)
+				{
 
-				UnitOfWork unitOfWork = new UnitOfWork();
-				var usr = unitOfWork.Users.Get(idx);
-				if (usr != null)
-				{
-					User user = new User(usr.username,usr);
-					ctx.CurrentUser = user;
-					ctx.Items.Add("unitofwork",unitOfWork);
+					var iis_ctx = System.Web.HttpContext.Current;
+					object ip = null;
+					if (iis_ctx != null)
+						ip = iis_ctx.Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+					string userIp = String.Empty;
+					bool proxy = false;
+					if (ip != null)
+					{
+
+						userIp = ip.ToString();
+						proxy = true;
+					}
+					if (string.IsNullOrEmpty(userIp))
+						userIp = ctx.Request.UserHostAddress;
+					SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+					builder.UserID = "checkeas";
+					builder.Password = "123456654321";
+					builder.DataSource = "r22aufsrv02\\ufps";
+					builder.InitialCatalog = "CheckEASMachine";
+					string idx = "656906";
+
+					using (SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString))
+					{
+						sqlConnection.Open();
+						SqlCommand command = new SqlCommand("select indx from checkip where ipAddress = '@userIp'",sqlConnection);
+						command.Parameters.AddWithValue("@userIp", userIp);
+						var reader = command.ExecuteReader();
+						if (reader.HasRows)
+						{
+							idx = reader.GetString(0);
+						}
+						sqlConnection.Close();
+					}
+					//Util.log.Info("Request from ip={0}\t PROXY={1}", userIp, proxy);
+					string hostName;
+					try
+					{
+						var dnsEntry = System.Net.Dns.GetHostEntry(userIp);
+						hostName = dnsEntry.HostName;
+					}
+					catch
+					{
+						hostName = "";
+					}
+					Regex regex = new Regex("r22-/d{6}-.*");
+					
+					if (regex.IsMatch(hostName))
+						idx = hostName.Substring(4, 6);
+
+					
+					var usr = unitOfWork.Users.Get(idx);
+					if (usr != null)
+					{
+						User user = new User(usr.username, usr);
+						if (usr.admin.HasValue && usr.admin.Value)
+							user.Claims = new[] { "Admin" };
+						ctx.CurrentUser = user;
+						ctx.Items.Add("unitofwork", unitOfWork);
+						ctx.Request.Cookies.Add("userId", usr.id.ToString());
+					}
+					else
+					{
+						ctx.CurrentUser = null;
+					}
 				}
 				else
 				{
-					ctx.CurrentUser = null;
+
 				}
 				return null;
 			};
-			pipelines.AfterRequest += (ctx) => {
+			pipelines.AfterRequest += (ctx) =>
+			{
+				if (ctx.Response.StatusCode == HttpStatusCode.Forbidden)
+				{
+					ctx.Response.StatusCode = HttpStatusCode.Unauthorized;
+					ctx.Response.Headers.Add("WWW-Authenticate", "Basic realm=RUSSIANPOST");
+				}
 				if (ctx.CurrentUser == null)
 				{
 					ctx.Response.StatusCode = HttpStatusCode.Unauthorized;

@@ -14,6 +14,7 @@ namespace credittrade.Modules
 	{
 		public AdminModule():base("/admin")
 		{
+			this.RequiresClaims("Admin");
 			dynamic model = new ExpandoObject();
 			Get["/"] = p =>
 			{

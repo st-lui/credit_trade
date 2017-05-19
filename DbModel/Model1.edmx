@@ -103,6 +103,7 @@
           <Property Name="signer" Type="varchar" MaxLength="64" />
           <Property Name="warehouse_id" Type="int" />
           <Property Name="admin" Type="bit" />
+          <Property Name="password" Type="varchar" MaxLength="30" />
         </EntityType>
         <EntityType Name="warehouses">
           <Key>
@@ -422,6 +423,7 @@
           <NavigationProperty Name="requests" Relationship="DbModel.FK_requests_User" FromRole="user" ToRole="request" />
           <NavigationProperty Name="warehouse" Relationship="DbModel.FK_users_warehouses" FromRole="user" ToRole="warehouse" />
           <Property Name="admin" Type="Boolean" />
+          <Property Name="password" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="warehouse">
           <Key>
@@ -659,6 +661,7 @@
           <EntitySetMapping Name="users">
             <EntityTypeMapping TypeName="DbModel.user">
               <MappingFragment StoreEntitySet="users">
+                <ScalarProperty Name="password" ColumnName="password" />
                 <ScalarProperty Name="admin" ColumnName="admin" />
                 <ScalarProperty Name="warehouse_id" ColumnName="warehouse_id" />
                 <ScalarProperty Name="signer" ColumnName="signer" />

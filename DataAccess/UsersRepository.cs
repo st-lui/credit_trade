@@ -45,6 +45,11 @@ namespace DataAccess
 			return db.users.Include("warehouse.postoffice.post").SingleOrDefault(x => x.username == name);
 		}
 
+		public user Get(string name,string password)
+		{
+			return db.users.Include("warehouse.postoffice.post").SingleOrDefault(x => x.username == name && x.password==password);
+		}
+
 		public user CreateUser(string fio, int warehouse_id, string username)
 		{
 			return new user()
@@ -173,5 +178,6 @@ namespace DataAccess
 		{
 			return db.requests.Include("buyer").Include("request_rows").Where(x => x.user_id == user.id).ToList();
 		}
+
 	}
 }
