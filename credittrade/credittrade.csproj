@@ -421,6 +421,9 @@
     <Content Include="Views\request_add.cshtml" />
     <Content Include="Views\request_makepay.cshtml" />
     <Content Include="Views\request_print.cshtml" />
+    <Content Include="Views\layout_admin.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

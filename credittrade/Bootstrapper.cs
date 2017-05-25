@@ -13,6 +13,7 @@ using Nancy.Session;
 using Nancy.TinyIoc;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 
 namespace credittrade
 {
@@ -77,7 +78,7 @@ namespace credittrade
 				string authHeader = ctx.Request.Headers.Authorization;
 				var unitOfWork = new UnitOfWork();
 
-				
+
 				if (!string.IsNullOrEmpty(authHeader))
 				{
 					var authHeaderVal = AuthenticationHeaderValue.Parse(authHeader);
@@ -108,7 +109,7 @@ namespace credittrade
 
 				try
 				{
-					userId = int.Parse((string) ctx.Request.Cookies["userId"]);
+					userId = int.Parse((string)ctx.Request.Cookies["userId"]);
 				}
 				catch
 				{
@@ -133,18 +134,20 @@ namespace credittrade
 					SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
 					builder.UserID = "checkeas";
 					builder.Password = "123456654321";
-					builder.DataSource = "r22aufsrv02\\ufps";
+					builder.DataSource = "r22aufsrv02.main.russianpost.ru\\ufps";
 					builder.InitialCatalog = "CheckEASMachine";
-					string idx = "656906";
+					string idx = "0";
 
 					using (SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString))
 					{
 						sqlConnection.Open();
-						SqlCommand command = new SqlCommand("select indx from checkip where ipAddress = '@userIp'",sqlConnection);
+						SqlCommand command = new SqlCommand("select indx from checkip where ipAddress = @userIp",sqlConnection);
 						command.Parameters.AddWithValue("@userIp", userIp);
 						var reader = command.ExecuteReader();
+						
 						if (reader.HasRows)
 						{
+							reader.Read();
 							idx = reader.GetString(0);
 						}
 						sqlConnection.Close();

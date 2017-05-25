@@ -23,7 +23,6 @@ namespace credittrade.Modules
 				{
 					model.username = currentUser.username;
 					model.requests = unitOfWork.Users.GetRequests(currentUser);
-
 					return View["index", model];
 				}
 			};

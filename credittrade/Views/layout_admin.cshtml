@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>@ViewBag.Title - Продажа товаров в кредит</title>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="~/content/bootstrap.css" rel="Stylesheet" />
+    <link href="~/content/default.min.css" rel="Stylesheet" />
+    <link href="~/content/DataTables/media/css/jquery.dataTables.min.css" rel="Stylesheet" />
+    <link rel="stylesheet" href="~/Content/bootstrap-datetimepicker.min.css" />
+    @*<link href="~/content/DataTables/media/css/DataTables.bootstrap.min.css" rel="Stylesheet" />*@
+    <link rel="icon" href="~/content/img/favicon.ico" />
+
+    <script src="~/Content/scripts/jquery.min.js"></script>
+    <script src="~/Content/scripts/moment/moment.min.js"></script>
+    <script src="~/content/scripts/bootstrap.js"></script>
+    <script src="~/Content/scripts/moment/ru.js"></script>
+    <script src="~/Content/scripts/bootstrap-datetimepicker.min.js"></script>
+    <script src="~/Content/scripts/DataTables/media/js/jquery.dataTables.min.js"></script>
+    @*<script src="~/Content/scripts/DataTables/media/js/dataTables.bootstrap.js"></script>*@
+
+    <script>
+        $(document).ready(function () {
+        });
+    </script>
+
+    <style type="text/css">
+        body {
+            padding-top: 60px;
+            padding-bottom: 40px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="~/admin"><img alt='Почта России' src='@Url.Content("~/Content/img/gerb.png")' class="img-responsive" /></a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="~/admin">Список покупателей</a></li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        @RenderBody()
+    </div>
+</body>
+</html>
