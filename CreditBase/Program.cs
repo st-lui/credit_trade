@@ -1,4 +1,5 @@
 ﻿using System;
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,23 @@ using PostReq.Model;
 using PostReq.Util;
 namespace CreditBase
 {
+	public class SimpleLogger
+	{
+		private static string logName = "log.txt";
+		private static SimpleLogger current;
+
+		public static SimpleLogger GetInstance()
+		{
+			return current ?? (current = new SimpleLogger());
+		}
+
+		public void Write(string message)
+		{
+			StreamWriter writer = new StreamWriter(logName,true);
+			writer.WriteLine(message);
+			writer.Close();
+		}
+	}
 	class Program
 	{
 		static void Main(string[] args)
@@ -22,16 +40,21 @@ namespace CreditBase
 			//Console.WriteLine(ToPostOffice());
 			//Console.WriteLine(ToWarehouses());
 			//using PostReq.Model;
-			LeftoversFrom1c();
-			NomLoader NL = NomLoader.Create();
-			NL.UpdateLocalNom();
-			Console.WriteLine(Goods());
-			//Console.ForegroundColor = ConsoleColor.Green;
-			//CheckWareHouse();
-			Leftovers();
-
-			Console.WriteLine("Для выхода нажмите клавишу...");
-			Console.ReadKey();
+			try
+			{
+				LeftoversFrom1c();
+				NomLoader NL = NomLoader.Create();
+				NL.UpdateLocalNom();
+				SimpleLogger.GetInstance().Write(Goods());
+				//Console.ForegroundColor = ConsoleColor.Green;
+				//CheckWareHouse();
+				Leftovers();
+				SimpleLogger.GetInstance().Write("Работа завершена");
+			}
+			catch (Exception e)
+			{
+				SimpleLogger.GetInstance().Write(e.ToString());
+			}
 		}
 
 
@@ -59,7 +82,7 @@ namespace CreditBase
 			"Рубцовский почтамт",
 			"Рубцовский участок курьерской доставки 658290",
 			"Славгородский почтамт",
-			"Смоленский почтамт",
+			"Смоленский почтамт"
 														   };
 
 
@@ -152,7 +175,7 @@ namespace CreditBase
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine("Ошибка: Невозможно прочитать файл на диске. Описание ошибки: " + ex.Message);
+				SimpleLogger.GetInstance().Write("Ошибка: Невозможно прочитать файл на диске. Описание ошибки: " + ex.Message);
 			}
 
 
@@ -228,12 +251,12 @@ namespace CreditBase
 
 		public static void LeftoversFrom1c()
 		{
-			Console.WriteLine($"{DateTime.Now.Date:G} Начато формирование остатков");
+			SimpleLogger.GetInstance().Write($"{DateTime.Now.Date:g} Начато формирование остатков");
 			Process process = new Process();
 			process.StartInfo= new ProcessStartInfo("postoffice.bat");
 			process.Start();
 			process.WaitForExit();
-			Console.WriteLine($"{DateTime.Now.Date:G} Завершено формирование остатков");
+			SimpleLogger.GetInstance().Write($"{DateTime.Now.Date:g} Завершено формирование остатков");
 		}
 
 		public static string Goods()
@@ -441,7 +464,7 @@ namespace CreditBase
 			foreach (var OneFileLeftovers in FilesLeftovers)
 			{
 
-				Console.WriteLine("Файл - " + OneFileLeftovers);
+				SimpleLogger.GetInstance().Write("Файл - " + OneFileLeftovers);
 
 
 				var ExcelOffices = new ExcelPackage(new FileInfo(OneFileLeftovers));
@@ -474,13 +497,13 @@ namespace CreditBase
 					else
 					{
 
-						Console.WriteLine("Не найден склад: " + WarehouseName);
+						SimpleLogger.GetInstance().Write("Не найден склад: " + WarehouseName);
 					}
 
 				}
 
-				Console.WriteLine("Количество строк: " + rowCnt);
-				Console.WriteLine("Количество столбцов: " + colCnt);
+				SimpleLogger.GetInstance().Write("Количество строк: " + rowCnt);
+				SimpleLogger.GetInstance().Write("Количество столбцов: " + colCnt);
 
 			}
 
@@ -600,7 +623,7 @@ namespace CreditBase
 			{
 				i++;
 				g = 0;
-				Console.WriteLine("Файл - " + OneFileLeftovers);
+				SimpleLogger.GetInstance().Write("Файл - " + OneFileLeftovers);
 
 				string preffix = WhatAPost(OneFileLeftovers);
 				var ExcelOffices = new ExcelPackage(new FileInfo(OneFileLeftovers));
@@ -686,11 +709,11 @@ namespace CreditBase
 						}
 					}
 					if (col % 10 == 0)
-						Console.WriteLine($"Обработано {col} столбцов из {colCnt}");
+						SimpleLogger.GetInstance().Write($"Обработано {col} столбцов из {colCnt}");
 				}
 
-				Console.WriteLine("Количество строк: " + rowCnt);
-				Console.WriteLine("Количество столбцов: " + colCnt);
+				SimpleLogger.GetInstance().Write("Количество строк: " + rowCnt);
+				SimpleLogger.GetInstance().Write("Количество столбцов: " + colCnt);
 			}
 			//}
 			//catch (Exception ex)
