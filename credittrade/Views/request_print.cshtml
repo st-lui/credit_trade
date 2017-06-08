@@ -40,6 +40,9 @@
             text-align: center;
         }
 
+        tfoot tr td:first-child {
+            text-align: right;
+        }
         .footer {
             margin-left: 8%;
         }
@@ -67,7 +70,6 @@
                     <th>Количество</th>
                     <th>Цена</th>
                     <th>Сумма</th>
-                    <th>Подпись покупателя</th>
                 </tr>
                 <tbody>
 
@@ -90,19 +92,24 @@
                                 <td>
                                     @(((double)(requestRow.price * requestRow.amount)).ToString("F2"))
                                 </td>
-                                <td>
-                                    &nbsp
-                                </td>
                             </tr>}
                     }
-
                 </tbody>
-
+                <tfoot>
+                    <tr>
+                        <td colspan="2"><b>Итого:</b></td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td><b>@Model.request.cost</b></td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
         <div class="footer">
             <p>
-                Начальник ОПС
+                Выдал  _________________________________
+            <p>
+                Принял _________________________________
             <p>
                 Оттиск КПШ
             </p>
