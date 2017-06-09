@@ -1,0 +1,60 @@
+﻿@{
+    ViewBag.Title = "Новый покупатель";
+    Layout = "layout_admin.cshtml";
+}
+
+
+<h2>@ViewBag.Title</h2>
+
+<div class="row1">
+
+    <form class="form-horizontal col-sm-8" action="@Url.Content("~/admin/buyers/add")" method="post">
+        @Html.AntiForgeryToken()
+        
+        
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="warehouse">Выберите ОПС</label>
+            <div class="col-md-6">
+                <select id="warehouse" class="form-control" name="warehouse" size="1">
+                    @foreach (var warehouse in Model.Warehouses)
+                    {
+                        <option value="@warehouse.id">@(warehouse.postoffice.idx??"null") @(warehouse.name??"null")</option>
+                        
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="fio">ФИО покупателя</label>
+            <div class="col-sm-6">
+                <input type="text" class="form-control" id="fio" name="fio" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="contract_number">Номер договора</label>
+            <div class="col-sm-6">
+                <input type="text" class="form-control" id="contract_number" name="contract_number" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="contract_date">Дата договора</label>
+            <div class='input-group date col-md-6' id='datetimepicker2'>
+                <input type='text' class="form-control" name="contract_date" id="contract_date"/>
+                <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Создать</button>
+        <a class="btn btn-default" onclick="javascript: history.go(-1);">Назад</a>
+    </form>
+    <script>
+        $(document).ready(function() {
+            $('#datetimepicker2').datetimepicker({
+                locale: 'ru',
+                defaultDate: moment()
+            });
+        });
+    </script>
+</div>

@@ -22,6 +22,9 @@
                 <td>
                     @buyer.warehouse.postoffice.idx @buyer.warehouse.name
                 </td>
+                <td>
+                    <a href="@Url.Content("~/admin/buyers/edit/"+buyer.id)" class="btn btn-primary">Изменить</a>
+                </td>
             </tr>
         }
     </table>

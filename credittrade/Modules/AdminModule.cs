@@ -52,6 +52,18 @@ namespace credittrade.Modules
 					return Response.AsRedirect("~/admin");
 				}
 			};
+			Get["/buyers/edit/{buyer_id}"]=p=>
+			{
+				using (UnitOfWork unitOfWork = (UnitOfWork) Context.Items["unitofwork"])
+				{
+					user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
+					model.Buyer = unitOfWork.Users.GetBuyers(currentUser).SingleOrDefault(x => x.id == p["buyer_id"]);
+					if(model.Buyer ==null)
+						return new NotFoundResponse();
+					return View["buyer_edit",model];
+				}
+				
+			};
 		}
 	}
 }
