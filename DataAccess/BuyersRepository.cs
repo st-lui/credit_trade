@@ -57,7 +57,5 @@ namespace DataAccess
 		{
 			return db.buyers.Where(x => x.warehouse_id == warehouse_id).ToList();
 		}
-
-
 	}
 }

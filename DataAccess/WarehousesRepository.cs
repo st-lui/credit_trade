@@ -58,5 +58,10 @@ namespace DataAccess
 			//				yield return leftover;
 			//			}
 		}
+
+		public IEnumerable<request> GetNotPaidRequests(int warehouse_id)
+		{
+			return db.requests.Where(x => x.buyer.warehouse_id == warehouse_id && x.paid==false).ToList();
+		}
 	}
 }

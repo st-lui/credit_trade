@@ -91,6 +91,27 @@ namespace credittrade.Modules
 					return Response.AsRedirect("~/admin");
 				}
 			};
+
+			Get["/reports"] = p =>
+			{
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
+					post post = currentUser.warehouse.postoffice.post;
+					model.Post = post.name;
+					var warehouses = unitOfWork.Posts.GetWarehouses(post.id);
+					Dictionary<string, string> debt = new Dictionary<string, string>();
+					foreach (var wh in warehouses)
+					{
+						var cost = unitOfWork.Warehouses.GetNotPaidRequests(wh.id).Sum(x => x.cost);
+						if (cost>0)
+							debt.Add($"{wh.postoffice.idx} {wh.name}",cost.Value.ToString(CultureInfo.GetCultureInfo("ru-RU")));
+					}
+					model.Debt = debt;
+					return View["report1", model];
+				}
+
+			};
 		}
 	}
 }
