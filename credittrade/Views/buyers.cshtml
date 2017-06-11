@@ -9,7 +9,7 @@
 </p>
 <div class="dataTable_div col-md-7">
     <table id="buyers_table" class="row-border">
-        <thead><tr><th>ФИО покупателя</th><th>Номер и дата договора</th><th>ОПС</th></tr></thead>
+        <thead><tr><th>ФИО покупателя</th><th>Номер и дата договора</th><th>ОПС</th><th>Лимит продажи</th></tr></thead>
         @foreach (var buyer in Model.Buyers)
         {
             <tr>
@@ -55,7 +55,7 @@
             "language": {
                 "url": "@Url.Content("~/content/dataTables.ru.lang.json")"
             },
-            paging: false
+            paging: true
         });
         //$("#buyer_new").modal({ show: false });
         //$("#add_buyer").click(function (parameters) {

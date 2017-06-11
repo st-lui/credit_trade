@@ -153,7 +153,7 @@ namespace DataAccess
 			};
 		}
 
-		public buyer CreateBuyer(user currentUser, string fio,int warehouse_id,string contract_number,DateTime contract_date)
+		public buyer CreateBuyer(user currentUser, string fio,int warehouse_id,string contract_number,DateTime contract_date,decimal limit)
 		{
 			return new buyer()
 			{
@@ -161,6 +161,7 @@ namespace DataAccess
 				contract_number = contract_number,
 				contract_date = contract_date,
 				warehouse_id = warehouse_id,
+				limit = limit
 			};
 		}
 
