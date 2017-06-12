@@ -97,18 +97,41 @@ namespace credittrade.Modules
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
 					user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
-					post post = currentUser.warehouse.postoffice.post;
-					model.Post = post.name;
-					var warehouses = unitOfWork.Posts.GetWarehouses(post.id);
-					Dictionary<string, string> debt = new Dictionary<string, string>();
-					foreach (var wh in warehouses)
+					if (currentUser.warehouse.postoffice.idx == "656700")
 					{
-						var cost = unitOfWork.Warehouses.GetNotPaidRequests(wh.id).Sum(x => x.cost);
-						if (cost>0)
-							debt.Add($"{wh.postoffice.idx} {wh.name}",cost.Value.ToString(CultureInfo.GetCultureInfo("ru-RU")));
+						var postList = unitOfWork.Posts.GetAll().Where(x => x.name.Contains("почтамт"));
+						Dictionary<string, string> debt = new Dictionary<string, string>();
+						foreach (post post in postList)
+						{
+							decimal debtValue = 0;
+							var warehouses = unitOfWork.Posts.GetWarehouses(post.id);
+
+							foreach (var wh in warehouses)
+							{
+								decimal cost = unitOfWork.Warehouses.GetNotPaidRequests(wh.id).Sum(x => x.cost).Value;
+								if (cost > 0)
+									debtValue += cost;
+							}
+							debt.Add(post.name, debtValue.ToString(CultureInfo.GetCultureInfo("ru-RU")));
+						}
+						model.Debt = debt;
+						return View["report_ufps", model];
 					}
-					model.Debt = debt;
-					return View["report1", model];
+					else
+					{
+						post post = currentUser.warehouse.postoffice.post;
+						model.Post = post.name;
+						var warehouses = unitOfWork.Posts.GetWarehouses(post.id);
+						Dictionary<string, string> debt = new Dictionary<string, string>();
+						foreach (var wh in warehouses)
+						{
+							var cost = unitOfWork.Warehouses.GetNotPaidRequests(wh.id).Sum(x => x.cost);
+							if (cost > 0)
+								debt.Add($"{wh.postoffice.idx} {wh.name}", cost.Value.ToString(CultureInfo.GetCultureInfo("ru-RU")));
+						}
+						model.Debt = debt;
+						return View["report1", model];
+					}
 				}
 
 			};
