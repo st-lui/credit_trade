@@ -9,7 +9,7 @@
 </p>
 <div class="dataTable_div col-md-7">
     <table id="buyers_table" class="row-border">
-        <thead><tr><th>ФИО покупателя</th><th>Номер и дата договора</th><th>ОПС</th><th>Лимит продажи</th></tr></thead>
+        <thead><tr><th>ФИО покупателя</th><th>Номер и дата договора</th><th>ОПС</th><th>Лимит продажи</th><th></th></tr></thead>
         @foreach (var buyer in Model.Buyers)
         {
             <tr>
@@ -21,6 +21,9 @@
                 </td>
                 <td>
                     @buyer.warehouse.postoffice.idx @buyer.warehouse.name
+                </td>
+                <td>
+                    @(buyer.limit!=null?buyer.limit.ToString().Replace(".",","):"0,00")
                 </td>
                 <td>
                     <a href="@Url.Content("~/admin/buyers/edit/"+buyer.id)" class="btn btn-primary">Изменить</a>
