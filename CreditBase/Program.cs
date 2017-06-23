@@ -43,8 +43,15 @@ namespace CreditBase
 			try
 			{
 				LeftoversFrom1c();
-				NomLoader NL = NomLoader.Create();
-				NL.UpdateLocalNom();
+				try
+				{
+					NomLoader NL = NomLoader.Create();
+					NL.UpdateLocalNom();
+				}
+				catch (Exception ee)
+				{
+					SimpleLogger.GetInstance().Write(ee.ToString());
+				}
 				SimpleLogger.GetInstance().Write(Goods());
 				//Console.ForegroundColor = ConsoleColor.Green;
 				//CheckWareHouse();

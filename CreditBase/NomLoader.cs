@@ -142,8 +142,6 @@ select count(_IDRRef)from tree; ", conn))
 			if (CheckNomUpdate())
 				using (SqlConnection conn = new SqlConnection(connectionString))
 				{
-					try
-					{
 						conn.Open();
 						//Выборка единиц измерения
 						Dictionary<SqlBinary, string> edIzmDictionary = new Dictionary<SqlBinary, string>();
@@ -156,7 +154,7 @@ select count(_IDRRef)from tree; ", conn))
 						}
 						//Выборка цен
 						Dictionary<SqlBinary, Tuple<DateTime, double>> priceDictionary = new Dictionary<SqlBinary, Tuple<DateTime, double>>();
-						using (SqlCommand comm =new SqlCommand($@"select _Fld11001RRef,_Fld11004,s._Period from {priceTableName} s,(select _Fld11001RRef nomid, max(_Period) period from {priceTableName} where _Fld11002RRef = 0xA4AEF4CE46FB566011E3DC100178205B group by _Fld11001RRef) p where s._Fld11001RRef = p.nomid and s._Period = p.period",conn))
+						using (SqlCommand comm =new SqlCommand($@"select _Fld11001RRef,_Fld11004,s._Period from {priceTableName} s,(select _Fld11001RRef nomid, max(_Period) period from {priceTableName} where _Fld11002RRef = 0xA4AEF4CE46FB566011E3DC100178205B group by _Fld11001RRef) p where s._Fld11001RRef = p.nomid and s._Period = p.period and s._Fld11002RRef = 0xA4AEF4CE46FB566011E3DC100178205B",conn))
 						{
 							var dataReader = comm.ExecuteReader();
 							while (dataReader.Read())
@@ -263,11 +261,6 @@ select _IDRRef,_ParentIDRRef,_Description,_Code,_Fld2258RRef from tree;", conn))
 						//Node.Clear(root);
 						Node.SaveToFile(root, filenameClean);
 						NomList = GetLocalNom(filenameClean);
-					}
-					catch (Exception e)
-					{
-						return;
-					}
 
 				}
 			else
