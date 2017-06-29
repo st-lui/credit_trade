@@ -132,16 +132,16 @@ namespace credittrade
 					if (string.IsNullOrEmpty(userIp))
 						userIp = ctx.Request.UserHostAddress;
 					SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
-					builder.UserID = "checkeas";
-					builder.Password = "123456654321";
-					builder.DataSource = "r22aufsrv02.main.russianpost.ru\\ufps";
-					builder.InitialCatalog = "CheckEASMachine";
+					builder.UserID = "sa";
+					builder.Password = "hf6k:tsb9v";
+					builder.DataSource = "R54-W12R2-XX.main.russianpost.ru\\ufps";
+					builder.InitialCatalog = "POSTITEMS";
 					string idx = "0";
 
 					using (SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString))
 					{
 						sqlConnection.Open();
-						SqlCommand command = new SqlCommand("select indx from checkip where ipAddress = @userIp",sqlConnection);
+						SqlCommand command = new SqlCommand("select idx from ipzone where ip = @userIp",sqlConnection);
 						command.Parameters.AddWithValue("@userIp", userIp);
 						var reader = command.ExecuteReader();
 						

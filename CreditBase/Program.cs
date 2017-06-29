@@ -27,7 +27,7 @@ namespace CreditBase
 
 		public void Write(string message)
 		{
-			StreamWriter writer = new StreamWriter(logName,true);
+			StreamWriter writer = new StreamWriter(logName, true);
 			writer.WriteLine($"{DateTime.Now:g} {message}");
 			writer.Close();
 		}
@@ -68,29 +68,17 @@ namespace CreditBase
 
 		public static string ToPost()
 		{
-			string connStr = @"Data Source=R22Aufvdocv01\SQL;
+			string connStr = @"Data Source=R54WEB02\SQL;
                             Initial Catalog=credit_trade;
                             Integrated Security=False;User ID=credit;Password=123456;";
 			List<string> PostsList = new List<string>() {
-			"Алейский почтамт",
-			"Барнаульский почтамт",
-			"Барнаульский участок курьерской доставки 656990",
-			"Белокурихинский участок курьерской доставки 659990",
-			"Бийский почтамт",
-			"Бийский участок курьерской доставки 659390",
-			"Благовещенский почтамт",
-			"Заринский почтамт",
-			"Каменский почтамт ",
-			"Кулундинский почтамт",
-			"Мамонтовский почтамт",
-			"Павловский почтамт",
-			"Первомайский почтамт",
-			"Поспелихинский почтамт",
-			"Рубцовский почтамт",
-			"Рубцовский участок курьерской доставки 658290",
-			"Славгородский почтамт",
-			"Смоленский почтамт"
-														   };
+			"ОСП Бичурский почтамт",
+			"ОСП Закаменский почтамт",
+			"ОСП Кабанский почтамт",
+			"ОСП Прибайкальский почтамт",
+			"ОСП Северобайкальский почтамт",
+			"ОСП Улан-Удэнский почтамт",
+			"ОСП Хоринский почтамт"};
 
 
 
@@ -146,7 +134,7 @@ namespace CreditBase
 				}
 
 
-				string connStr = @"Data Source=R22Aufvdocv01\SQL;
+				string connStr = @"Data Source=R54WEB02\SQL;
                             Initial Catalog=credit_trade;
                             Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -260,7 +248,7 @@ namespace CreditBase
 		{
 			SimpleLogger.GetInstance().Write($"Начато формирование остатков");
 			Process process = new Process();
-			process.StartInfo= new ProcessStartInfo("postoffice.bat");
+			process.StartInfo = new ProcessStartInfo("postoffice.bat");
 			process.Start();
 			process.WaitForExit();
 			SimpleLogger.GetInstance().Write($"Завершено формирование остатков");
