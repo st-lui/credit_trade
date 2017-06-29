@@ -28,7 +28,7 @@ namespace CreditBase
 		public void Write(string message)
 		{
 			StreamWriter writer = new StreamWriter(logName,true);
-			writer.WriteLine(message);
+			writer.WriteLine($"{DateTime.Now:g} {message}");
 			writer.Close();
 		}
 	}
@@ -258,12 +258,12 @@ namespace CreditBase
 
 		public static void LeftoversFrom1c()
 		{
-			SimpleLogger.GetInstance().Write($"{DateTime.Now.Date:g} Начато формирование остатков");
+			SimpleLogger.GetInstance().Write($"Начато формирование остатков");
 			Process process = new Process();
 			process.StartInfo= new ProcessStartInfo("postoffice.bat");
 			process.Start();
 			process.WaitForExit();
-			SimpleLogger.GetInstance().Write($"{DateTime.Now.Date:g} Завершено формирование остатков");
+			SimpleLogger.GetInstance().Write($"Завершено формирование остатков");
 		}
 
 		public static string Goods()
@@ -570,7 +570,7 @@ namespace CreditBase
 						WareHouse TempFromBase = new WareHouse()
 						{
 							id_w = drNewWarehouse.GetValue(0).ToString().Trim(),
-							name_w = preffix + "_" + drNewWarehouse.GetValue(1).ToString()
+							name_w = preffix + "_" + drNewWarehouse.GetValue(1).ToString().Trim()
 
 						};
 						//Console.WriteLine(TempFromBase.name_w);
@@ -649,7 +649,7 @@ namespace CreditBase
 
 				for (int col = 8; col <= colCnt - 1; col++)
 				{
-					WarehouseName = Null(listOffices.Cells[8, col].Value);
+					WarehouseName = Null(listOffices.Cells[8, col].Value).Trim();
 
 					WarehouseName = preffix + "_" + WarehouseName;
 					//Console.WriteLine(WarehouseName);
