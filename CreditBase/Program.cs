@@ -27,7 +27,7 @@ namespace CreditBase
 
 		public void Write(string message)
 		{
-			StreamWriter writer = new StreamWriter(logName,true);
+			StreamWriter writer = new StreamWriter(logName, true);
 			writer.WriteLine($"{DateTime.Now:g} {message}");
 			writer.Close();
 		}
@@ -42,7 +42,14 @@ namespace CreditBase
 			//using PostReq.Model;
 			try
 			{
-				LeftoversFrom1c();
+				try
+				{
+					LeftoversFrom1c();
+				}
+				catch (Exception ex)
+				{
+					SimpleLogger.GetInstance().Write(ex.ToString());
+				}
 				try
 				{
 					NomLoader NL = NomLoader.Create();
@@ -68,7 +75,7 @@ namespace CreditBase
 
 		public static string ToPost()
 		{
-			string connStr = @"Data Source=R22Aufvdocv01\SQL;
+			string connStr = @"Data Source=r54web02\SQL;
                             Initial Catalog=credit_trade;
                             Integrated Security=False;User ID=credit;Password=123456;";
 			List<string> PostsList = new List<string>() {
@@ -146,7 +153,7 @@ namespace CreditBase
 				}
 
 
-				string connStr = @"Data Source=R22Aufvdocv01\SQL;
+				string connStr = @"Data Source=r54web02\SQL;
                             Initial Catalog=credit_trade;
                             Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -215,7 +222,7 @@ namespace CreditBase
 
 		public static string ToWarehouses()
 		{
-			string connStr = @"Data Source=R22Aufvdocv01\SQL;
+			string connStr = @"Data Source=r54web02\SQL;
                             Initial Catalog=credit_trade;
                             Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -260,7 +267,7 @@ namespace CreditBase
 		{
 			SimpleLogger.GetInstance().Write($"Начато формирование остатков");
 			Process process = new Process();
-			process.StartInfo= new ProcessStartInfo("postoffice.bat");
+			process.StartInfo = new ProcessStartInfo("postoffice.bat");
 			process.Start();
 			process.WaitForExit();
 			SimpleLogger.GetInstance().Write($"Завершено формирование остатков");
@@ -283,7 +290,7 @@ namespace CreditBase
 				//Console.WriteLine(TempNom.ToString());
 			}
 
-			string connStr = @"Data Source=R22Aufvdocv01\SQL;
+			string connStr = @"Data Source=r54web02\SQL;
                             Initial Catalog=credit_trade;
                             Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -379,7 +386,7 @@ namespace CreditBase
 
 		public static string CheckWareHouse()
 		{
-			string connStr = @"Data Source=R22Aufvdocv01\SQL;
+			string connStr = @"Data Source=r54web02\SQL;
                             Initial Catalog=credit_trade;
                             Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -521,7 +528,7 @@ namespace CreditBase
 
 		public static string Leftovers()
 		{
-			string connStr = @"Data Source=R22Aufvdocv01\SQL;
+			string connStr = @"Data Source=r54web02\SQL;
                             Initial Catalog=credit_trade;
                             Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -574,7 +581,10 @@ namespace CreditBase
 
 						};
 						//Console.WriteLine(TempFromBase.name_w);
+						
 						DicWarehouse.Add(TempFromBase.name_w, TempFromBase);
+						
+						
 
 					}
 				}
@@ -599,7 +609,14 @@ namespace CreditBase
 
 						};
 						//Console.WriteLine(TempFromBase.name_g);
-						DicGood.Add(TempFromBase.name_g, TempFromBase);
+						try
+						{
+							DicGood.Add(TempFromBase.name_g, TempFromBase);
+						}
+						catch (Exception ex)
+						{
+							SimpleLogger.GetInstance().Write(TempFromBase.id_g + " " + TempFromBase.name_g);
+						}
 
 					}
 				}
