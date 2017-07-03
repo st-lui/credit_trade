@@ -134,7 +134,7 @@ namespace credittrade
 					SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
 					builder.UserID = "sa";
 					builder.Password = "hf6k:tsb9v";
-					builder.DataSource = "R54-W12R2-XX.main.russianpost.ru\\ufps";
+					builder.DataSource = "R54-W12R2-XX.main.russianpost.ru";
 					builder.InitialCatalog = "POSTITEMS";
 					string idx = "0";
 
@@ -148,7 +148,9 @@ namespace credittrade
 						if (reader.HasRows)
 						{
 							reader.Read();
-							idx = reader.GetString(0);
+							int idx1 = reader.GetInt32(0);
+
+							idx = idx1.ToString();
 						}
 						sqlConnection.Close();
 					}
