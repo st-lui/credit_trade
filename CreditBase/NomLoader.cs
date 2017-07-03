@@ -5,6 +5,7 @@ using System.Text;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.IO;
+using CreditBase;
 using PostReq.Model;
 
 namespace PostReq.Util
@@ -88,12 +89,13 @@ namespace PostReq.Util
 		public List<Nom> NomList { get; set; }
 		private NomLoader() { }
 
-		public static NomLoader Create()
+		public static NomLoader Create(string srv, string dbname,string usr, string pswd, string reg)
 		{
 			var nomLoader = new NomLoader();
-			nomLoader.connectionString = "data source=r22aufsql01;initial catalog=r22-asku-work;user=nom_reader;password=6LRZ{w.Y!LHXtY.";
-			nomLoader.filename = "appdata\\nom.txt";
-			nomLoader.filenameClean = "appdata\\nomClean.txt";
+			//nomLoader.connectionString = "data source=r22aufsql01;initial catalog=r22-asku-work;user=nom_reader;password=6LRZ{w.Y!LHXtY.";
+			nomLoader.connectionString = $"data source={srv};initial catalog={dbname};user={usr};password={pswd}";
+			nomLoader.filename = $"appdata\\nom_{reg}.txt";
+			nomLoader.filenameClean = $"appdata\\nomClean_{reg}.txt";
 			if (!File.Exists(nomLoader.filename))
 			{
 				using (File.Create(nomLoader.filename)) ;
@@ -132,6 +134,7 @@ select count(_IDRRef)from tree; ", conn))
 				}
 				catch (Exception e)
 				{
+					SimpleLogger.GetInstance().Write(e.Message);
 					return false;
 				}
 			}
