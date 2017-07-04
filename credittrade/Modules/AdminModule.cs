@@ -99,7 +99,27 @@ namespace credittrade.Modules
 					user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
 					if (currentUser.warehouse.postoffice.idx == "656700")
 					{
-						var postList = unitOfWork.Posts.GetAll().Where(x => x.name.Contains("почтамт"));
+						var postList = unitOfWork.Posts.GetAll().Where(x => x.name.Contains("почтамт")&& !x.name.Contains("ОСП"));
+						Dictionary<string, string> debt = new Dictionary<string, string>();
+						foreach (post post in postList)
+						{
+							decimal debtValue = 0;
+							var warehouses = unitOfWork.Posts.GetWarehouses(post.id);
+
+							foreach (var wh in warehouses)
+							{
+								decimal cost = unitOfWork.Warehouses.GetNotPaidRequests(wh.id).Sum(x => x.cost).Value;
+								if (cost > 0)
+									debtValue += cost;
+							}
+							debt.Add(post.name, debtValue.ToString(CultureInfo.GetCultureInfo("ru-RU")));
+						}
+						model.Debt = debt;
+						return View["report_ufps", model];
+					}
+					if (currentUser.warehouse.postoffice.idx == "670700")
+					{
+						var postList = unitOfWork.Posts.GetAll().Where(x=>!x.name.Contains("ОСП"));
 						Dictionary<string, string> debt = new Dictionary<string, string>();
 						foreach (post post in postList)
 						{
