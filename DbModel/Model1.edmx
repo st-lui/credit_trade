@@ -380,7 +380,7 @@
           <Property Name="request_id" Type="Int32" />
           <Property Name="price" Type="Decimal" Precision="10" Scale="2" />
           <NavigationProperty Name="request" Relationship="DbModel.FK_request_rows_Request" FromRole="request_rows" ToRole="request" />
-          <Property Name="barcode" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="barcode" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="request">
           <Key>

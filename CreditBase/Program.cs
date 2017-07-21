@@ -40,36 +40,36 @@ namespace CreditBase
 			//Console.WriteLine(ToPostOffice());
 			//Console.WriteLine(ToWarehouses());
 			//using PostReq.Model;
+			//try
+			//{
+			//	//LeftoversFrom1c();
+			//	try
+			//	{
+			//		//nomLoader.connectionString = "data source=r22aufsql01;initial catalog=r22-asku-work;user=nom_reader;password=6LRZ{w.Y!LHXtY.";
+			//		NomLoader NL = NomLoader.Create("r22aufsql01", "r22-asku-work", "nom_reader", "6LRZ{w.Y!LHXtY.","22");
+			//		NL.UpdateLocalNom();
+			//	}
+			//	catch (Exception ee)
+			//	{
+			//		SimpleLogger.GetInstance().Write(ee.ToString());
+			//	}
+			//	SimpleLogger.GetInstance().Write(Goods("22"));
+			//	//Console.ForegroundColor = ConsoleColor.Green;
+			//	//CheckWareHouse();
+			//	Leftovers();
+			//	SimpleLogger.GetInstance().Write("Работа завершена");
+			//}
+			//catch (Exception e)
+			//{
+			//	SimpleLogger.GetInstance().Write(e.ToString());
+			//}
 			try
 			{
 				//LeftoversFrom1c();
 				try
 				{
 					//nomLoader.connectionString = "data source=r22aufsql01;initial catalog=r22-asku-work;user=nom_reader;password=6LRZ{w.Y!LHXtY.";
-					NomLoader NL = NomLoader.Create("r22aufsql01", "r22-asku-work", "nom_reader", "6LRZ{w.Y!LHXtY.","22");
-					NL.UpdateLocalNom();
-				}
-				catch (Exception ee)
-				{
-					SimpleLogger.GetInstance().Write(ee.ToString());
-				}
-				SimpleLogger.GetInstance().Write(Goods("22"));
-				//Console.ForegroundColor = ConsoleColor.Green;
-				//CheckWareHouse();
-				Leftovers();
-				SimpleLogger.GetInstance().Write("Работа завершена");
-			}
-			catch (Exception e)
-			{
-				SimpleLogger.GetInstance().Write(e.ToString());
-			}
-			try
-			{
-				//LeftoversFrom1c();
-				try
-				{
-					//nomLoader.connectionString = "data source=r22aufsql01;initial catalog=r22-asku-work;user=nom_reader;password=6LRZ{w.Y!LHXtY.";
-					NomLoader NL = NomLoader.Create("10.69.1.210", "r03-asku-work", "r03-credit", "!!Qkdpze%!", "03");
+					NomLoader NL = NomLoader.Create("10.69.1.210", "r03-asku-work", "r03_credit", "111111!!!!!!0", "03");
 					NL.UpdateLocalNom();
 				}
 				catch (Exception ee)
@@ -79,7 +79,7 @@ namespace CreditBase
 				SimpleLogger.GetInstance().Write(Goods("03"));
 				//Console.ForegroundColor = ConsoleColor.Green;
 				//CheckWareHouse();
-				//Leftovers();
+				Leftovers("03");
 				SimpleLogger.GetInstance().Write("Работа завершена");
 			}
 			catch (Exception e)
@@ -93,8 +93,8 @@ namespace CreditBase
 		public static string ToPost()
 		{
 			string connStr = @"Data Source=R54WEB02\SQL;
-                            Initial Catalog=credit_trade;
-                            Integrated Security=False;User ID=credit;Password=123456;";
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
 			List<string> PostsList = new List<string>() {
 			"ОСП Бичурский почтамт",
 			"ОСП Закаменский почтамт",
@@ -115,9 +115,9 @@ namespace CreditBase
 
 
 				string query = string.Format(@"INSERT INTO [credit_trade].[dbo].[posts]
-           ([name])
-     VALUES
-           ('{0}')", PostsList[i]);
+		   ([name])
+	 VALUES
+		   ('{0}')", PostsList[i]);
 
 				SqlCommand sqlQueryInsert = new SqlCommand(query, conn);
 				sqlQueryInsert.ExecuteNonQuery();
@@ -159,8 +159,8 @@ namespace CreditBase
 
 
 				string connStr = @"Data Source=R54WEB02\SQL;
-                            Initial Catalog=credit_trade;
-                            Integrated Security=False;User ID=credit;Password=123456;";
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
 
 				SqlConnection conn = new SqlConnection(connStr);
 
@@ -171,11 +171,11 @@ namespace CreditBase
 				{
 
 					string query = string.Format(@"INSERT INTO [credit_trade].[dbo].[postoffices]
-           ([idx]
-           ,[name_ops]
-           ,[post_id])
-     VALUES
-           ('{0}','{1}','{2}')", Null(listOffices.Cells["C" + i].Value), Null(listOffices.Cells["B" + i].Value), WhatAPost(Null(listOffices.Cells["A" + i].Value), conn));
+		   ([idx]
+		   ,[name_ops]
+		   ,[post_id])
+	 VALUES
+		   ('{0}','{1}','{2}')", Null(listOffices.Cells["C" + i].Value), Null(listOffices.Cells["B" + i].Value), WhatAPost(Null(listOffices.Cells["A" + i].Value), conn));
 
 					SqlCommand sqlQueryInsert = new SqlCommand(query, conn);
 					sqlQueryInsert.ExecuteNonQuery();
@@ -207,8 +207,8 @@ namespace CreditBase
 
 			string NumberPost = "";
 			string SelectQuery = @"SELECT [privilegies]
-      ,[id]
-      ,[name]
+	  ,[id]
+	  ,[name]
   FROM [credit_trade].[dbo].[posts] WHERE name='" + namePost + "'";
 			SqlCommand sqlQuerySelect = new SqlCommand(SelectQuery, connect);
 
@@ -227,9 +227,9 @@ namespace CreditBase
 
 		public static string ToWarehouses()
 		{
-			string connStr = @"Data Source=.\SQL;
-                            Initial Catalog=credit_trade;
-                            Integrated Security=False;User ID=credit;Password=123456;";
+			string connStr = @"Data Source=r54web02\sql;
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
 
 			SqlConnection conn = new SqlConnection(connStr);
 			SqlConnection connIns = new SqlConnection(connStr);
@@ -238,10 +238,10 @@ namespace CreditBase
 
 
 			string SelectQuery = @"SELECT [id]
-      ,[idx]
-      ,[name_ops]
-      ,[post_id]
-        FROM[credit_trade].[dbo].[postoffices]";
+	  ,[idx]
+	  ,[name_ops]
+	  ,[post_id]
+		FROM[credit_trade].[dbo].[postoffices]";
 			SqlCommand sqlQuerySelect = new SqlCommand(SelectQuery, conn);
 
 			using (SqlDataReader drNew = sqlQuerySelect.ExecuteReader())
@@ -249,10 +249,10 @@ namespace CreditBase
 				while (drNew.Read())
 				{
 					string query = string.Format(@"INSERT INTO [credit_trade].[dbo].[warehouses]
-           ([name]
-           ,[postoffice_id])
-     VALUES
-           ('{0}','{1}')", drNew.GetValue(2).ToString(), drNew.GetValue(0).ToString());
+		   ([name]
+		   ,[postoffice_id])
+	 VALUES
+		   ('{0}','{1}')", drNew.GetValue(2).ToString(), drNew.GetValue(0).ToString());
 
 					SqlCommand sqlQueryInsert = new SqlCommand(query, connIns);
 					sqlQueryInsert.ExecuteNonQuery();
@@ -291,13 +291,13 @@ namespace CreditBase
 			for (int i = 0; i < AllLines.Length; i++)
 			{
 				Nom TempNom = Nom.Parse(AllLines[i]);
-				NomDictionary.Add(TempNom.Id, TempNom);
+				NomDictionary.Add(TempNom.Id+"_"+reg_code, TempNom);
 				//Console.WriteLine(TempNom.ToString());
 			}
 
-			string connStr = @"Data Source=.\SQL;
-                            Initial Catalog=credit_trade;
-                            Integrated Security=False;User ID=credit;Password=123456;";
+			string connStr = @"Data Source=r54web02\sql;
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
 
 			SqlConnection conn = new SqlConnection(connStr);
 			SqlConnection connInsUpd = new SqlConnection(connStr);
@@ -306,13 +306,13 @@ namespace CreditBase
 
 
 			string SelectQuery = $@"SELECT [id]
-      ,[nom_id]
-      ,[parent_id]
-      ,[name]
-      ,[edizm]
-      ,[price]
-      ,[barcode]
-  FROM [credit_trade].[dbo].[goods] where reg_code={reg_code}";
+	  ,[nom_id]
+	  ,[parent_id]
+	  ,[name]
+	  ,[edizm]
+	  ,[price]
+	  ,[barcode]
+  FROM [credit_trade].[dbo].[goods] where reg_code='{reg_code}'";
 			SqlCommand sqlQuerySelect = new SqlCommand(SelectQuery, conn);
 
 			using (SqlDataReader drNew = sqlQuerySelect.ExecuteReader())
@@ -323,7 +323,7 @@ namespace CreditBase
 					{
 						Nom TempFromBase = new Nom()
 						{
-							Id = drNew.GetValue(1).ToString().Trim(),
+							Id = drNew.GetValue(1).ToString().Trim()+"_"+reg_code,
 							ParentId = drNew.GetValue(2).ToString().Trim(),
 							Name = drNew.GetValue(3).ToString(),
 							EdIzm = drNew.GetValue(4).ToString(),
@@ -362,7 +362,7 @@ namespace CreditBase
 				{
 					string price = NomSearchNom.Price.ToString(CultureInfo.GetCultureInfo("en-US"));
 					string query = string.Format(@"INSERT INTO [credit_trade].[dbo].[goods] ([nom_id],[parent_id],[name],[edizm],[price],[barcode],reg_code)
-     VALUES ('{0}','{1}','{2}','{3}', {4} ,'{5}','{6}')",
+	 VALUES ('{0}','{1}','{2}','{3}', {4} ,'{5}','{6}')",
 		   NomSearchNom.Id,
 		   NomSearchNom.ParentId,
 		   NomSearchNom.Name.Replace("'", "''"),
@@ -391,9 +391,9 @@ namespace CreditBase
 
 		public static string CheckWareHouse()
 		{
-			string connStr = @"Data Source=.\SQL;
-                            Initial Catalog=credit_trade;
-                            Integrated Security=False;User ID=credit;Password=123456;";
+			string connStr = @"Data Source=r54web02\sql;
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
 
 			SqlConnection conn = new SqlConnection(connStr);
 			conn.Open();
@@ -416,8 +416,8 @@ namespace CreditBase
 			Dictionary<string, Good> DicGood = new Dictionary<string, Good>();
 
 			string SelectQueryWarehouse = @"SELECT [id]
-      ,[name]
-      ,[postoffice_id]
+	  ,[name]
+	  ,[postoffice_id]
   FROM [credit_trade].[dbo].[warehouses]";
 			SqlCommand sqlQuerySelectWarehouse = new SqlCommand(SelectQueryWarehouse, conn);
 
@@ -531,11 +531,11 @@ namespace CreditBase
 			return "Leftovers: Успешная загрузка";
 		}
 
-		public static string Leftovers()
+		public static string Leftovers(string reg_code)
 		{
-			string connStr = @"Data Source=.\SQL;
-                            Initial Catalog=credit_trade;
-                            Integrated Security=False;User ID=credit;Password=123456;";
+			string connStr = @"Data Source=r54web02\sql;
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
 
 			SqlConnection conn = new SqlConnection(connStr);
 			conn.Open();
@@ -595,7 +595,7 @@ namespace CreditBase
 			//connPref.Close();
 			conn.Open();
 
-			string SelectQueryGood = @"SELECT [id],[name] FROM [credit_trade].[dbo].[goods]";
+			string SelectQueryGood = $@"SELECT [id],[name] FROM [credit_trade].[dbo].[goods] where reg_code ='{reg_code}'";
 			SqlCommand sqlQuerySelectGood = new SqlCommand(SelectQueryGood, conn);
 
 			using (SqlDataReader drNewGood = sqlQuerySelectGood.ExecuteReader())
@@ -645,6 +645,8 @@ namespace CreditBase
 				SimpleLogger.GetInstance().Write("Файл - " + OneFileLeftovers);
 
 				string preffix = WhatAPost(OneFileLeftovers);
+				if (string.IsNullOrEmpty(preffix))
+					continue;
 				var ExcelOffices = new ExcelPackage(new FileInfo(OneFileLeftovers));
 				var listOffices = ExcelOffices.Workbook.Worksheets[1];
 
@@ -798,6 +800,13 @@ namespace CreditBase
 			if (nameFile.Contains("report_Славгородский почтамт")) pref = "40";
 			if (nameFile.Contains("report_Смоленский почтамт")) pref = "41";
 
+			if (nameFile.Contains("report_ОСП Бичурский почтамт")) pref = "42";
+			if (nameFile.Contains("report_ОСП Закаменский почтамт")) pref = "43";
+			if (nameFile.Contains("report_ОСП Кабанский почтамт")) pref = "44";
+			if (nameFile.Contains("report_ОСП Прибайкальский почтамт")) pref = "45";
+			if (nameFile.Contains("report_ОСП Северобайкальский почтамт")) pref = "46";
+			if (nameFile.Contains("report_ОСП Улан-Удэнский почтамт")) pref = "47";
+			if (nameFile.Contains("report_ОСП Хоринский почтамт")) pref = "48";
 
 			return pref;
 

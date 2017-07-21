@@ -82,10 +82,10 @@ namespace PostReq.Util
 		FileInfo fileInfo, fileInfoClean;
 		string nomTableName = "_Reference112";
 		string edIzmTableName = "_Reference80";
-		string priceTableName = "_InfoRg11000";
+		string priceTableName = "_InfoRg10964";
 		string partnerTableName = "_Reference122";
 		string partnerNomTableName = "_Reference113";
-		private string barcodeTableName = "_InfoRg11025";
+		private string barcodeTableName = "_InfoRg11178";
 		public List<Nom> NomList { get; set; }
 		private NomLoader() { }
 
@@ -157,7 +157,7 @@ select count(_IDRRef)from tree; ", conn))
 						}
 						//Выборка цен
 						Dictionary<SqlBinary, Tuple<DateTime, double>> priceDictionary = new Dictionary<SqlBinary, Tuple<DateTime, double>>();
-						using (SqlCommand comm =new SqlCommand($@"select _Fld11001RRef,_Fld11004,s._Period from {priceTableName} s,(select _Fld11001RRef nomid, max(_Period) period from {priceTableName} where _Fld11002RRef = 0xA4AEF4CE46FB566011E3DC100178205B group by _Fld11001RRef) p where s._Fld11001RRef = p.nomid and s._Period = p.period and s._Fld11002RRef = 0xA4AEF4CE46FB566011E3DC100178205B",conn))
+						using (SqlCommand comm =new SqlCommand($@"select _Fld10965RRef,_Fld10968,s._Period from {priceTableName} s,(select _Fld10965RRef nomid, max(_Period) period from {priceTableName} where _Fld10966RRef = 0x88A200226489576D11E37C023EEFC761 group by _Fld10965RRef) p where s._Fld10965RRef = p.nomid and s._Period = p.period and s._Fld10966RRef = 0x88A200226489576D11E37C023EEFC761",conn))
 						{
 							var dataReader = comm.ExecuteReader();
 							while (dataReader.Read())
@@ -172,7 +172,7 @@ select count(_IDRRef)from tree; ", conn))
 						}
 						//Выборка поставщиков
 						Dictionary<SqlBinary, string> partnerDictionary = new Dictionary<SqlBinary, string>();
-						using (SqlCommand command = new SqlCommand($"select nom._Fld2319RRef,partner._Description from {partnerNomTableName} nom,{partnerTableName} partner where nom._OwnerIDRRef=partner._IDRRef", conn))
+						using (SqlCommand command = new SqlCommand($"select nom._Fld2308RRef,partner._Description from {partnerNomTableName} nom,{partnerTableName} partner where nom._OwnerIDRRef=partner._IDRRef", conn))
 						{
 							var dataReader = command.ExecuteReader();
 							while (dataReader.Read())
@@ -185,7 +185,7 @@ select count(_IDRRef)from tree; ", conn))
 						}
 						//Выборка штрихкодов
 						Dictionary<SqlBinary, string> barcodeDictionary = new Dictionary<SqlBinary, string>();
-						using (SqlCommand command = new SqlCommand($"SELECT _Fld11028RRef,min(_Fld11026) FROM {barcodeTableName} group by _Fld11028RRef", conn))
+						using (SqlCommand command = new SqlCommand($"SELECT _Fld11181RRef,min(_Fld11179) FROM {barcodeTableName} group by _Fld11181RRef", conn))
 						{
 							var dataReader = command.ExecuteReader();
 							while (dataReader.Read())
@@ -199,12 +199,12 @@ select count(_IDRRef)from tree; ", conn))
 						// Выборка номенклатуры
 						List<Nom> list = new List<Nom>();
 						using (SqlCommand comm =new SqlCommand(
-									$@"with tree (_IDRRef,_ParentIDRRef,_Description,_Code,_Fld2258RRef,_level) as 
-(select _IDRRef,_ParentIDRRef,_Description,_Code,_Fld2258RRef,0 from [{nomTableName}] where _code='00000000001'
-union all select [{nomTableName}]._IDRRef,[{nomTableName}]._ParentIDRRef,[{nomTableName}]._Description,[{nomTableName}]._Code,[{nomTableName}]._Fld2258RRef,tree._level+1 from [{nomTableName}],tree
+									$@"with tree (_IDRRef,_ParentIDRRef,_Description,_Code,_Fld2247RRef,_level) as 
+(select _IDRRef,_ParentIDRRef,_Description,_Code,_Fld2247RRef,0 from [{nomTableName}] where _code='00000000001'
+union all select [{nomTableName}]._IDRRef,[{nomTableName}]._ParentIDRRef,[{nomTableName}]._Description,[{nomTableName}]._Code,[{nomTableName}]._Fld2247RRef,tree._level+1 from [{nomTableName}],tree
 where tree._IDRRef=[{nomTableName}]._ParentIDRRef and [{nomTableName}]._Code<>'С1-00001709' and [{nomTableName}]._Code<>'С1-00001897'
 and [{nomTableName}]._Code<>'00000000018' and [{nomTableName}]._Code<>'00000000002' and [{nomTableName}]._Code<>'00000000049' and [{nomTableName}]._Code<>'00000000052' and [{nomTableName}]._Code<>'00000000084' and [{nomTableName}]._Code<>'00000000732')
-select _IDRRef,_ParentIDRRef,_Description,_Code,_Fld2258RRef from tree;", conn))
+select _IDRRef,_ParentIDRRef,_Description,_Code,_Fld2247RRef from tree;", conn))
 						{
 							SqlDataReader dataReader = comm.ExecuteReader();
 							StreamWriter writer = new StreamWriter(new FileStream(filename, FileMode.Create), Encoding.GetEncoding(1251));
