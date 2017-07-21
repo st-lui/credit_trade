@@ -1,0 +1,53 @@
+﻿@{
+    ViewBag.Title = "Отчет по должникам";
+    Layout = "layout_admin.cshtml";
+}
+
+<h2>@ViewBag.Title</h2>
+<p>
+    @Model.Post
+</p>
+
+<div class="dataTable_div col-md-7">
+    <table id="buyers_table" class="row-border">
+        <thead><tr><th>Название ОПС</th><th>Суммарный долг</th></tr></thead>
+        @foreach (var debt in Model.Debt)
+        {
+            <tr>
+                <td>
+                    @debt.Key
+                </td>
+                <td>
+                    @debt.Value
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+<script language="javascript">
+    $(document).ready(function () {
+        $("#buyers_table").DataTable({
+            "language": {
+                "url": "@Url.Content("~/content/dataTables.ru.lang.json")"
+            },
+            paging: true
+        });
+        //$("#buyer_new").modal({ show: false });
+        //$("#add_buyer").click(function (parameters) {
+        //    $("#buyer_new").modal('show');
+        //});
+        //$('#accept-button').click(function () {
+        //    $.post("planController.php",
+        //        {
+        //            action: "correction_create",
+        //            values_id: $("#values_id").val(),
+        //            new_value: $("#corr_value").val(),
+        //            kind_name: $("#kind_name").val(),
+        //            month: $("#month").val(),
+        //            year: $("#year").val()
+        //        }).done(function (data) {
+        //            location.reload();
+        //        }).error;
+        //});
+    });
+</script>
