@@ -76,8 +76,8 @@ namespace CreditBase
 		public static string ToPost()
 		{
 			string connStr = @"Data Source=r54web02\SQL;
-                            Initial Catalog=credit_trade;
-                            Integrated Security=False;User ID=credit;Password=123456;";
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
 			List<string> PostsList = new List<string>() {
 			"Алейский почтамт",
 			"Барнаульский почтамт",
@@ -110,9 +110,9 @@ namespace CreditBase
 
 
 				string query = string.Format(@"INSERT INTO [credit_trade].[dbo].[posts]
-           ([name])
-     VALUES
-           ('{0}')", PostsList[i]);
+		   ([name])
+	 VALUES
+		   ('{0}')", PostsList[i]);
 
 				SqlCommand sqlQueryInsert = new SqlCommand(query, conn);
 				sqlQueryInsert.ExecuteNonQuery();
@@ -154,8 +154,8 @@ namespace CreditBase
 
 
 				string connStr = @"Data Source=r54web02\SQL;
-                            Initial Catalog=credit_trade;
-                            Integrated Security=False;User ID=credit;Password=123456;";
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
 
 				SqlConnection conn = new SqlConnection(connStr);
 
@@ -166,11 +166,11 @@ namespace CreditBase
 				{
 
 					string query = string.Format(@"INSERT INTO [credit_trade].[dbo].[postoffices]
-           ([idx]
-           ,[name_ops]
-           ,[post_id])
-     VALUES
-           ('{0}','{1}','{2}')", Null(listOffices.Cells["C" + i].Value), Null(listOffices.Cells["B" + i].Value), WhatAPost(Null(listOffices.Cells["A" + i].Value), conn));
+		   ([idx]
+		   ,[name_ops]
+		   ,[post_id])
+	 VALUES
+		   ('{0}','{1}','{2}')", Null(listOffices.Cells["C" + i].Value), Null(listOffices.Cells["B" + i].Value), WhatAPost(Null(listOffices.Cells["A" + i].Value), conn));
 
 					SqlCommand sqlQueryInsert = new SqlCommand(query, conn);
 					sqlQueryInsert.ExecuteNonQuery();
@@ -202,8 +202,8 @@ namespace CreditBase
 
 			string NumberPost = "";
 			string SelectQuery = @"SELECT [privilegies]
-      ,[id]
-      ,[name]
+	  ,[id]
+	  ,[name]
   FROM [credit_trade].[dbo].[posts] WHERE name='" + namePost + "'";
 			SqlCommand sqlQuerySelect = new SqlCommand(SelectQuery, connect);
 
@@ -223,8 +223,8 @@ namespace CreditBase
 		public static string ToWarehouses()
 		{
 			string connStr = @"Data Source=r54web02\SQL;
-                            Initial Catalog=credit_trade;
-                            Integrated Security=False;User ID=credit;Password=123456;";
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
 
 			SqlConnection conn = new SqlConnection(connStr);
 			SqlConnection connIns = new SqlConnection(connStr);
@@ -233,10 +233,10 @@ namespace CreditBase
 
 
 			string SelectQuery = @"SELECT [id]
-      ,[idx]
-      ,[name_ops]
-      ,[post_id]
-        FROM[credit_trade].[dbo].[postoffices]";
+	  ,[idx]
+	  ,[name_ops]
+	  ,[post_id]
+		FROM[credit_trade].[dbo].[postoffices]";
 			SqlCommand sqlQuerySelect = new SqlCommand(SelectQuery, conn);
 
 			using (SqlDataReader drNew = sqlQuerySelect.ExecuteReader())
@@ -244,10 +244,10 @@ namespace CreditBase
 				while (drNew.Read())
 				{
 					string query = string.Format(@"INSERT INTO [credit_trade].[dbo].[warehouses]
-           ([name]
-           ,[postoffice_id])
-     VALUES
-           ('{0}','{1}')", drNew.GetValue(2).ToString(), drNew.GetValue(0).ToString());
+		   ([name]
+		   ,[postoffice_id])
+	 VALUES
+		   ('{0}','{1}')", drNew.GetValue(2).ToString(), drNew.GetValue(0).ToString());
 
 					SqlCommand sqlQueryInsert = new SqlCommand(query, connIns);
 					sqlQueryInsert.ExecuteNonQuery();
@@ -286,13 +286,13 @@ namespace CreditBase
 			for (int i = 0; i < AllLines.Length; i++)
 			{
 				Nom TempNom = Nom.Parse(AllLines[i]);
-				NomDictionary.Add(TempNom.Id, TempNom);
+				NomDictionary.Add(TempNom.Id+"_22", TempNom);
 				//Console.WriteLine(TempNom.ToString());
 			}
 
 			string connStr = @"Data Source=r54web02\SQL;
-                            Initial Catalog=credit_trade;
-                            Integrated Security=False;User ID=credit;Password=123456;";
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
 
 			SqlConnection conn = new SqlConnection(connStr);
 			SqlConnection connInsUpd = new SqlConnection(connStr);
@@ -301,13 +301,13 @@ namespace CreditBase
 
 
 			string SelectQuery = @"SELECT [id]
-      ,[nom_id]
-      ,[parent_id]
-      ,[name]
-      ,[edizm]
-      ,[price]
-      ,[barcode]
-  FROM [credit_trade].[dbo].[goods]";
+	  ,[nom_id]
+	  ,[parent_id]
+	  ,[name]
+	  ,[edizm]
+	  ,[price]
+	  ,[barcode]
+  FROM [credit_trade].[dbo].[goods] where reg_code='22'";
 			SqlCommand sqlQuerySelect = new SqlCommand(SelectQuery, conn);
 
 			using (SqlDataReader drNew = sqlQuerySelect.ExecuteReader())
@@ -318,7 +318,7 @@ namespace CreditBase
 					{
 						Nom TempFromBase = new Nom()
 						{
-							Id = drNew.GetValue(1).ToString().Trim(),
+							Id = drNew.GetValue(1).ToString().Trim()+"_22",
 							ParentId = drNew.GetValue(2).ToString().Trim(),
 							Name = drNew.GetValue(3).ToString(),
 							EdIzm = drNew.GetValue(4).ToString(),
@@ -356,8 +356,8 @@ namespace CreditBase
 				else
 				{
 					string price = NomSearchNom.Price.ToString(CultureInfo.GetCultureInfo("en-US"));
-					string query = string.Format(@"INSERT INTO [credit_trade].[dbo].[goods] ([nom_id],[parent_id],[name],[edizm],[price],[barcode])
-     VALUES ('{0}','{1}','{2}','{3}', {4} ,'{5}')",
+					string query = string.Format(@"INSERT INTO [credit_trade].[dbo].[goods] ([nom_id],[parent_id],[name],[edizm],[price],[barcode],reg_code)
+	 VALUES ('{0}','{1}','{2}','{3}', {4} ,'{5}','22')",
 		   NomSearchNom.Id,
 		   NomSearchNom.ParentId,
 		   NomSearchNom.Name.Replace("'", "''"),
@@ -387,8 +387,8 @@ namespace CreditBase
 		public static string CheckWareHouse()
 		{
 			string connStr = @"Data Source=r54web02\SQL;
-                            Initial Catalog=credit_trade;
-                            Integrated Security=False;User ID=credit;Password=123456;";
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
 
 			SqlConnection conn = new SqlConnection(connStr);
 			conn.Open();
@@ -411,8 +411,8 @@ namespace CreditBase
 			Dictionary<string, Good> DicGood = new Dictionary<string, Good>();
 
 			string SelectQueryWarehouse = @"SELECT [id]
-      ,[name]
-      ,[postoffice_id]
+	  ,[name]
+	  ,[postoffice_id]
   FROM [credit_trade].[dbo].[warehouses]";
 			SqlCommand sqlQuerySelectWarehouse = new SqlCommand(SelectQueryWarehouse, conn);
 
@@ -529,8 +529,8 @@ namespace CreditBase
 		public static string Leftovers()
 		{
 			string connStr = @"Data Source=r54web02\SQL;
-                            Initial Catalog=credit_trade;
-                            Integrated Security=False;User ID=credit;Password=123456;";
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
 
 			SqlConnection conn = new SqlConnection(connStr);
 			conn.Open();
@@ -593,7 +593,7 @@ namespace CreditBase
 			//connPref.Close();
 			conn.Open();
 
-			string SelectQueryGood = @"SELECT [id],[name] FROM [credit_trade].[dbo].[goods]";
+			string SelectQueryGood = @"SELECT [id],[name] FROM [credit_trade].[dbo].[goods] where reg_code='22'";
 			SqlCommand sqlQuerySelectGood = new SqlCommand(SelectQueryGood, conn);
 
 			using (SqlDataReader drNewGood = sqlQuerySelectGood.ExecuteReader())
