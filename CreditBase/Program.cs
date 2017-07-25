@@ -605,7 +605,7 @@ namespace CreditBase
 						Good TempFromBase = new Good()
 						{
 							id_g = drNewGood.GetValue(0).ToString().Trim(),
-							name_g = drNewGood.GetValue(1).ToString()
+							name_g = drNewGood.GetValue(1).ToString().Replace((char)160, ' ')
 
 						};
 						//Console.WriteLine(TempFromBase.name_g);
