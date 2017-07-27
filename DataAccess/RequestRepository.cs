@@ -108,5 +108,11 @@ namespace DataAccess
 				request.cost += requestRow.amount * requestRow.price;
 			}
 		}
+
+		public IList<request> GetRequestsByDate(List<int> buyers, DateTime start, DateTime finish)
+		{
+			finish = finish.AddDays(1);
+			return db.requests.Include("user.warehouse.postoffice.post").Where(x => x.date >= start && x.date < finish && buyers.Contains(x.buyer_id.Value)).ToList();
+		}
 	}
 }
