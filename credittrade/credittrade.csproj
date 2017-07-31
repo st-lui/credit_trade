@@ -416,6 +416,7 @@
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Modules\AdminModule.cs" />
     <Compile Include="Modules\IndexModule.cs" />
+    <Compile Include="Modules\InOutReportModel.cs" />
     <Compile Include="Modules\RuDataAndMoneyConverter.cs" />
     <Compile Include="Modules\Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

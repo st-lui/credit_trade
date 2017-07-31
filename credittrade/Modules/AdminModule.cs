@@ -122,7 +122,7 @@ namespace credittrade.Modules
 					}
 					if (currentUser.warehouse.postoffice.idx == "670700")
 					{
-						var postList = unitOfWork.Posts.GetAll().Where(x => !x.name.Contains("ОСП"));
+						var postList = unitOfWork.Posts.GetAll().Where(x => x.name.Contains("ОСП"));
 						Dictionary<string, string> debt = new Dictionary<string, string>();
 						foreach (post post in postList)
 						{
@@ -193,7 +193,13 @@ namespace credittrade.Modules
 						}
 						var buyerIds = buyersPost.Select(x => x.id).ToList();
 						IList<request> reqs = unitOfWork.Requests.GetRequestsByDate(buyerIds, start, finish);
-						ms = Utils.GenReportUfps(reqs, Request.Form["date_start"], Request.Form["date_finish"]);
+						IList<request> reqsPenalty = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, start, finish);
+						InOutReportModel reportModel = new InOutReportModel();
+						reportModel.Start = Request.Form["date_start"];
+						reportModel.Finish = Request.Form["date_finish"];
+						reportModel.Requests = reqs;
+						reportModel.RequestsPenalty = reqsPenalty;
+						ms = Utils.GenReportUfps(reportModel);
 						//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 						//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
@@ -208,7 +214,13 @@ namespace credittrade.Modules
 						}
 						var buyerIds = buyersPost.Select(x => x.id).ToList();
 						IList<request> reqs = unitOfWork.Requests.GetRequestsByDate(buyerIds, start, finish);
-						ms = Utils.GenReportUfps(reqs, Request.Form["date_start"], Request.Form["date_finish"]);
+						IList<request> reqsPenalty = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, start, finish);
+						InOutReportModel reportModel = new InOutReportModel();
+						reportModel.Start = Request.Form["date_start"];
+						reportModel.Finish = Request.Form["date_finish"];
+						reportModel.Requests = reqs;
+						reportModel.RequestsPenalty = reqsPenalty;
+						ms = Utils.GenReportUfps(reportModel);
 						//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 						//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 					}
@@ -217,12 +229,18 @@ namespace credittrade.Modules
 						IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(postId);
 						var buyerIds = buyers.Select(x => x.id).ToList();
 						IList<request> reqs = unitOfWork.Requests.GetRequestsByDate(buyerIds, start, finish);
-						ms = Utils.GenReport(reqs, Request.Form["date_start"], Request.Form["date_finish"]);
+						IList<request> reqsPenalty = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, start, finish);
+						InOutReportModel reportModel = new InOutReportModel();
+						reportModel.Start = Request.Form["date_start"];
+						reportModel.Finish= Request.Form["date_finish"];
+						reportModel.Requests = reqs;
+						reportModel.RequestsPenalty = reqsPenalty;
+						ms = Utils.GenReport(reportModel);
 						//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 						//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 					}
 					return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-				}
+				}						
 			};
 		}
 	}
