@@ -18,6 +18,12 @@ namespace CreditBase
 		public SqlLoader03()
 		{
 			reg = "03";
+			priceTableName = "_InfoRg10964";
+			warehouseTableName = "_Reference163";
+			srv = "10.69.1.210";
+			dbname = "r03-asku-work";
+			usr = "r03_credit";
+			pswd = "111111!!!!!!0";
 		}
 
 		public override void LoadNom()
@@ -26,6 +32,57 @@ namespace CreditBase
 			NL.UpdateLocalNom();
 		}
 
+		public override void LoadPricesDictionary()
+		{
+			WarehousePriceKindDictionary= new Dictionary<string, string>();
+			PriceKindNomPrice = new Dictionary<string, Dictionary<string, decimal>>();
+			string defaultPriceKind = "88A200226489576D11E37C023EEFC761";
+			using (SqlConnection conn = new SqlConnection($"data source={srv};initial catalog={dbname};user={usr};password={pswd}"))
+			{
+				conn.Open();
+				SqlCommand command=new SqlCommand($"select _Description,_Fld3221RRef from {warehouseTableName} where _marked=0x00",conn);
+				SqlDataReader whReader= command.ExecuteReader();
+				while (whReader.Read())
+				{
+					string warehouseName = whReader.GetString(0);
+					string priceId = "0";
+					if (!whReader.IsDBNull(1))
+						priceId = Utils.SqlBinaryToString(whReader.GetSqlBinary(1));
+					else
+						priceId = defaultPriceKind;
+					if (priceId == "00000000000000000000000000000000")
+						priceId = defaultPriceKind;
+					if (!WarehousePriceKindDictionary.ContainsKey(warehouseName))
+						WarehousePriceKindDictionary.Add(warehouseName,priceId);
+				}
+				whReader.Close();
+				
+				command = new SqlCommand($"select _Fld10965RRef nomid,_Fld10968 price,_Fld10966RRef pricekind from {priceTableName} order by _Period",conn);
+				var priceReader = command.ExecuteReader();
+				while (priceReader.Read())
+				{
+					string nomId = Utils.SqlBinaryToString(priceReader.GetSqlBinary(0));
+					decimal price = priceReader.GetDecimal(1);
+					string kindId = Utils.SqlBinaryToString(priceReader.GetSqlBinary(2));
+					Dictionary<string, decimal> nomprice;
+					if (PriceKindNomPrice.ContainsKey(kindId))
+					{
+						nomprice = PriceKindNomPrice[kindId];
+					}
+					else
+					{
+						nomprice=new Dictionary<string, decimal>();
+						PriceKindNomPrice.Add(kindId,nomprice);
+					}
+					if (nomprice.ContainsKey(nomId))
+						nomprice[nomId] = price;
+					else
+						nomprice.Add(nomId, price);
+				}
+
+			}
+		
+	}
 
 		public class Node
 		{
@@ -369,5 +426,21 @@ select _IDRRef,_ParentIDRRef,_Description,_Code,_Fld2247RRef from tree;", conn))
 				}
 			}
 		}
+		public override string WhatAPost(string nameFile)
+		{
+			string pref = "";
+
+			if (nameFile.Contains("report_ОСП Бичурский почтамт")) pref = "42";
+			if (nameFile.Contains("report_ОСП Закаменский почтамт")) pref = "43";
+			if (nameFile.Contains("report_ОСП Кабанский почтамт")) pref = "44";
+			if (nameFile.Contains("report_ОСП Прибайкальский почтамт")) pref = "45";
+			if (nameFile.Contains("report_ОСП Северобайкальский почтамт")) pref = "46";
+			if (nameFile.Contains("report_ОСП Улан-Удэнский почтамт")) pref = "47";
+			if (nameFile.Contains("report_ОСП Хоринский почтамт")) pref = "48";
+
+			return pref;
+
+		}
+
 	}
 }

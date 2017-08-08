@@ -17,6 +17,10 @@ namespace CreditBase
 		public SqlLoader42()
 		{
 			reg = "42";
+			srv = "R421C8ASKBDB00.main.russianpost.ru";
+			dbname = "r42-asku-work";
+			priceTableName= "_InfoRg11044";
+			warehouseTableName = "_Reference165";
 		}
 
 		public override void LoadNom()
@@ -25,6 +29,57 @@ namespace CreditBase
 			NL.UpdateLocalNom();
 		}
 
+		public override void LoadPricesDictionary()
+		{
+			WarehousePriceKindDictionary = new Dictionary<string, string>();
+			PriceKindNomPrice = new Dictionary<string, Dictionary<string, decimal>>();
+			string defaultPriceKind = "82322C59E545699111E358BB32E464FC";
+			using (SqlConnection conn = new SqlConnection($"data source={srv};initial catalog={dbname};Integrated Security=true"))
+			{
+				conn.Open();
+				SqlCommand command = new SqlCommand($"select _Description,_Fld3256RRef from {warehouseTableName} where _marked=0x00", conn);
+				SqlDataReader whReader = command.ExecuteReader();
+				
+				while (whReader.Read())
+				{
+					string warehouseName = whReader.GetString(0);
+					string priceId = "0";
+					if (!whReader.IsDBNull(1))
+						priceId = Utils.SqlBinaryToString(whReader.GetSqlBinary(1));
+					else
+						priceId = defaultPriceKind;
+					if (priceId == "00000000000000000000000000000000")
+						priceId = defaultPriceKind;
+					if (!WarehousePriceKindDictionary.ContainsKey(warehouseName))
+						WarehousePriceKindDictionary.Add(warehouseName, priceId);
+				}
+				whReader.Close();
+
+				command = new SqlCommand($"select _Fld11045RRef nomid,_Fld11048 price,_Fld11046RRef pricekind from {priceTableName} order by _Period", conn);
+				var priceReader = command.ExecuteReader();
+				while (priceReader.Read())
+				{
+					string nomId = Utils.SqlBinaryToString(priceReader.GetSqlBinary(0));
+					decimal price = priceReader.GetDecimal(1);
+					string kindId = Utils.SqlBinaryToString(priceReader.GetSqlBinary(2));
+					Dictionary<string, decimal> nomprice;
+					if (PriceKindNomPrice.ContainsKey(kindId))
+					{
+						nomprice = PriceKindNomPrice[kindId];
+					}
+					else
+					{
+						nomprice = new Dictionary<string, decimal>();
+						PriceKindNomPrice.Add(kindId, nomprice);
+					}
+					if (nomprice.ContainsKey(nomId))
+						nomprice[nomId] = price;
+					else
+						nomprice.Add(nomId, price);
+				}
+
+			}
+		}
 
 		public class Node
 		{
@@ -368,6 +423,30 @@ select _IDRRef,_ParentIDRRef,_Description,_Code,_Fld2281RRef from tree;", conn))
 				}
 			}
 		}
+		public override string WhatAPost(string nameFile)
+		{
+			string pref = "";
+
+			if (nameFile.Contains("report_Анжеро-Судженский почтамт.xlsx")) pref = "50";
+			if (nameFile.Contains("report_Беловский почтамт.xlsx")) pref = "51";
+			if (nameFile.Contains("report_Кемеровский почтамт.xlsx")) pref = "52";
+			if (nameFile.Contains("report_Ленинск-Кузнецкий почтамт.xlsx")) pref = "53";
+			if (nameFile.Contains("report_Мариинский почтамт.xlsx")) pref = "54";
+			if (nameFile.Contains("report_Междуреченский почтамт.xlsx")) pref = "55";
+			if (nameFile.Contains("report_Новокузнецкий почтамт.xlsx")) pref = "56";
+			if (nameFile.Contains("report_Прокопьевский почтамт.xlsx")) pref = "57";
+			if (nameFile.Contains("report_Таштагольский почтамт.xlsx")) pref = "58";
+			if (nameFile.Contains("report_Тисульский почтамт.xlsx")) pref = "59";
+			if (nameFile.Contains("report_Топкинский почтамт.xlsx")) pref = "60";
+			if (nameFile.Contains("report_Тяжинский почтамт.xlsx")) pref = "61";
+			if (nameFile.Contains("report_Юргинский почтамт.xlsx")) pref = "62";
+			if (nameFile.Contains("report_Яшкинский почтамт.xlsx")) pref = "63";
+
+			return pref;
+
+		}
+
+		
 	}
 
 }

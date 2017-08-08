@@ -41,7 +41,7 @@ namespace CreditBase
 			//Console.WriteLine(ToWarehouses());
 			List<SqlLoaderCreator> creators = new List<SqlLoaderCreator>()
 			{
-				//new SqlLoaderCreator03(),
+				new SqlLoaderCreator03(),
 				new SqlLoaderCreator42()
 			};
 			foreach (var sqlLoaderCreator in creators)
@@ -50,6 +50,7 @@ namespace CreditBase
 				try
 				{
 					//LeftoversFrom1c();
+					
 					try
 					{
 						//nomLoader.connectionString = "data source=r22aufsql01;initial catalog=r22-asku-work;user=nom_reader;password=6LRZ{w.Y!LHXtY.";
@@ -64,7 +65,8 @@ namespace CreditBase
 					SimpleLogger.GetInstance().Write(Goods(sqlLoader.reg));
 					//Console.ForegroundColor = ConsoleColor.Green;
 					//CheckWareHouse();
-					Leftovers(sqlLoader.reg);
+					sqlLoader.LoadPricesDictionary();
+					Leftovers(sqlLoader.reg,sqlLoader.WhatAPost);
 					SimpleLogger.GetInstance().Write("Работа завершена");
 				}
 				catch (Exception e)
@@ -198,149 +200,7 @@ namespace CreditBase
 		}
 
 
-		public static string CheckWareHouse()
-		{
-			string connStr = @"Data Source=r54web02\sql;
-							Initial Catalog=credit_trade;
-							Integrated Security=False;User ID=credit;Password=123456;";
-
-			SqlConnection conn = new SqlConnection(connStr);
-			conn.Open();
-
-			SqlConnection connPref = new SqlConnection(connStr);
-
-
-			//try
-			//{
-
-			string PathLeftovers = @"\\10.56.0.154\1c";
-
-			string[] FilesLeftovers = Directory.GetFiles(PathLeftovers);
-			// for (int i = 0; i < FilesLeftovers.Length; i++)
-			// {
-			int i = 0;
-			int g = 0;
-
-			Dictionary<string, WareHouse> DicWarehouse = new Dictionary<string, WareHouse>();
-			Dictionary<string, Good> DicGood = new Dictionary<string, Good>();
-
-			string SelectQueryWarehouse = @"SELECT [id]
-	  ,[name]
-	  ,[postoffice_id]
-  FROM [credit_trade].[dbo].[warehouses]";
-			SqlCommand sqlQuerySelectWarehouse = new SqlCommand(SelectQueryWarehouse, conn);
-
-			using (SqlDataReader drNewWarehouse = sqlQuerySelectWarehouse.ExecuteReader(CommandBehavior.CloseConnection))
-			{
-				if (drNewWarehouse.HasRows)
-				{
-					while (drNewWarehouse.Read())
-					{
-
-						string SelectPOST = @"SELECT [post_id] FROM [credit_trade].[dbo].[postoffices] WHERE id=" + Convert.ToInt32(drNewWarehouse.GetValue(2).ToString().Trim()) + "";
-						SqlCommand sqlSelectPOST = new SqlCommand(SelectPOST, connPref);
-						string preffix = "";
-						connPref.Open();
-						using (SqlDataReader drPOST = sqlSelectPOST.ExecuteReader(CommandBehavior.CloseConnection))
-						{
-							while (drPOST.Read())
-							{
-								preffix = drPOST.GetValue(0).ToString();
-							}
-
-						}
-						WareHouse TempFromBase = new WareHouse()
-						{
-							id_w = drNewWarehouse.GetValue(0).ToString().Trim(),
-							name_w = preffix + "_" + drNewWarehouse.GetValue(1).ToString()
-
-						};
-						//Console.WriteLine(TempFromBase.name_w);
-						DicWarehouse.Add(TempFromBase.name_w, TempFromBase);
-
-					}
-				}
-			}
-
-			conn.Open();
-
-			string SelectQueryGood = @"SELECT [id],[name] FROM [credit_trade].[dbo].[goods]";
-			SqlCommand sqlQuerySelectGood = new SqlCommand(SelectQueryGood, conn);
-
-			using (SqlDataReader drNewGood = sqlQuerySelectGood.ExecuteReader(CommandBehavior.CloseConnection))
-			{
-				if (drNewGood.HasRows)
-				{
-					while (drNewGood.Read())
-					{
-						Good TempFromBase = new Good()
-						{
-							id_g = drNewGood.GetValue(0).ToString().Trim(),
-							name_g = drNewGood.GetValue(1).ToString()
-
-						};
-						//Console.WriteLine(TempFromBase.name_g);
-						DicGood.Add(TempFromBase.name_g, TempFromBase);
-
-					}
-				}
-			}
-			connPref.Close();
-			conn.Close();
-
-
-			foreach (var OneFileLeftovers in FilesLeftovers)
-			{
-
-				SimpleLogger.GetInstance().Write("Файл - " + OneFileLeftovers);
-
-
-				var ExcelOffices = new ExcelPackage(new FileInfo(OneFileLeftovers));
-				var listOffices = ExcelOffices.Workbook.Worksheets[1];
-
-
-				var rowCnt = listOffices.Dimension.End.Row;
-				var colCnt = listOffices.Dimension.End.Column;
-
-				int warehouse_id = 0;
-
-				string WarehouseName = "";
-
-
-				for (int col = 8; col <= colCnt - 1; col++)
-				{
-					WarehouseName = Null(listOffices.Cells[8, col].Value);
-
-					string preffix = WhatAPost(OneFileLeftovers);
-					WarehouseName = preffix + "_" + WarehouseName;
-
-					if (DicWarehouse.ContainsKey(WarehouseName))
-					{
-						WareHouse wareHouse;
-
-						DicWarehouse.TryGetValue(WarehouseName, out wareHouse);
-						warehouse_id = Convert.ToInt32(wareHouse.id_w);
-
-					}
-					else
-					{
-
-						SimpleLogger.GetInstance().Write("Не найден склад: " + WarehouseName);
-					}
-
-				}
-
-				SimpleLogger.GetInstance().Write("Количество строк: " + rowCnt);
-				SimpleLogger.GetInstance().Write("Количество столбцов: " + colCnt);
-
-			}
-
-
-
-			return "Leftovers: Успешная загрузка";
-		}
-
-		public static string Leftovers(string reg_code)
+		public static string Leftovers(string reg_code,Func<string,string> whatAPost)
 		{
 			string connStr = @"Data Source=r54web02\sql;
 							Initial Catalog=credit_trade;
@@ -453,7 +313,7 @@ namespace CreditBase
 				g = 0;
 				SimpleLogger.GetInstance().Write("Файл - " + OneFileLeftovers);
 
-				string preffix = WhatAPost(OneFileLeftovers);
+				string preffix = whatAPost(OneFileLeftovers);
 				if (string.IsNullOrEmpty(preffix))
 					continue;
 				var ExcelOffices = new ExcelPackage(new FileInfo(OneFileLeftovers));
@@ -469,8 +329,17 @@ namespace CreditBase
 
 				string WarehouseName = "";
 				string GoodName = "";
-
-				for (int col = 8; col <= colCnt - 1; col++)
+				int startCol = 1;
+				for (int col = 1; col <= colCnt - 1; col++)
+				{
+					string colVal = Null(listOffices.Cells[8, col].Value);
+					if (colVal == "Номенклатура, Ед. изм.")
+					{
+						startCol = col;
+						break;
+					}
+				}
+				for (int col = startCol+5; col <= colCnt - 1; col++)
 				{
 					WarehouseName = Null(listOffices.Cells[8, col].Value).Trim();
 
@@ -483,7 +352,7 @@ namespace CreditBase
 						//g++;
 						//Console.WriteLine("Строка в файле - " + g);
 
-						GoodName = Null(listOffices.Cells[row, 3].Value);
+						GoodName = Null(listOffices.Cells[row, startCol].Value);
 						GoodName = GoodName.Substring(0, GoodName.LastIndexOf(','));
 						GoodName = GoodName.Replace("\n", "");
 						if (Null(listOffices.Cells[row, col].Value) != "")
@@ -587,54 +456,55 @@ namespace CreditBase
 		}
 
 
-		public static string WhatAPost(string nameFile)
-		{
-			string pref = "";
-			if (nameFile.Contains("report_Алейский почтамт")) pref = "24";
-			if (nameFile.Contains("report_Барнаульский почтамт")) pref = "25";
-			if (nameFile.Contains("report_Барнаульский УКД")) pref = "26";
-			if (nameFile.Contains("report_Белокурихинский УКД")) pref = "27";
-			if (nameFile.Contains("report_Бийский почтамт")) pref = "28";
-			if (nameFile.Contains("report_Бийский УКД")) pref = "29";
-			if (nameFile.Contains("report_Благовещенский почтамт")) pref = "30";
-			if (nameFile.Contains("report_Заринский почтамт")) pref = "31";
-			if (nameFile.Contains("report_Каменский почтамт")) pref = "32";
-			if (nameFile.Contains("report_Кулундинский почтамт")) pref = "33";
-			if (nameFile.Contains("report_Мамонтовский почтамт")) pref = "34";
-			if (nameFile.Contains("report_Павловский почтамт")) pref = "35";
-			if (nameFile.Contains("report_Первомайский почтамт")) pref = "36";
-			if (nameFile.Contains("report_Поспелихинский почтамт")) pref = "37";
-			if (nameFile.Contains("report_Рубовский УКД")) pref = "39";
-			if (nameFile.Contains("report_Рубцовский почтамт")) pref = "38";
-			if (nameFile.Contains("report_Славгородский почтамт")) pref = "40";
-			if (nameFile.Contains("report_Смоленский почтамт")) pref = "41";
+		//public static string WhatAPost(string nameFile)
+		//{
+		//	string pref = "";
+		//	if (nameFile.Contains("report_Алейский почтамт")) pref = "24";
+		//	if (nameFile.Contains("report_Барнаульский почтамт")) pref = "25";
+		//	if (nameFile.Contains("report_Барнаульский УКД")) pref = "26";
+		//	if (nameFile.Contains("report_Белокурихинский УКД")) pref = "27";
+		//	if (nameFile.Contains("report_Бийский почтамт")) pref = "28";
+		//	if (nameFile.Contains("report_Бийский УКД")) pref = "29";
+		//	if (nameFile.Contains("report_Благовещенский почтамт")) pref = "30";
+		//	if (nameFile.Contains("report_Заринский почтамт")) pref = "31";
+		//	if (nameFile.Contains("report_Каменский почтамт")) pref = "32";
+		//	if (nameFile.Contains("report_Кулундинский почтамт")) pref = "33";
+		//	if (nameFile.Contains("report_Мамонтовский почтамт")) pref = "34";
+		//	if (nameFile.Contains("report_Павловский почтамт")) pref = "35";
+		//	if (nameFile.Contains("report_Первомайский почтамт")) pref = "36";
+		//	if (nameFile.Contains("report_Поспелихинский почтамт")) pref = "37";
+		//	if (nameFile.Contains("report_Рубовский УКД")) pref = "39";
+		//	if (nameFile.Contains("report_Рубцовский почтамт")) pref = "38";
+		//	if (nameFile.Contains("report_Славгородский почтамт")) pref = "40";
+		//	if (nameFile.Contains("report_Смоленский почтамт")) pref = "41";
 
-			if (nameFile.Contains("report_ОСП Бичурский почтамт")) pref = "42";
-			if (nameFile.Contains("report_ОСП Закаменский почтамт")) pref = "43";
-			if (nameFile.Contains("report_ОСП Кабанский почтамт")) pref = "44";
-			if (nameFile.Contains("report_ОСП Прибайкальский почтамт")) pref = "45";
-			if (nameFile.Contains("report_ОСП Северобайкальский почтамт")) pref = "46";
-			if (nameFile.Contains("report_ОСП Улан-Удэнский почтамт")) pref = "47";
-			if (nameFile.Contains("report_ОСП Хоринский почтамт")) pref = "48";
+		//	if (nameFile.Contains("report_ОСП Бичурский почтамт")) pref = "42";
+		//	if (nameFile.Contains("report_ОСП Закаменский почтамт")) pref = "43";
+		//	if (nameFile.Contains("report_ОСП Кабанский почтамт")) pref = "44";
+		//	if (nameFile.Contains("report_ОСП Прибайкальский почтамт")) pref = "45";
+		//	if (nameFile.Contains("report_ОСП Северобайкальский почтамт")) pref = "46";
+		//	if (nameFile.Contains("report_ОСП Улан-Удэнский почтамт")) pref = "47";
+		//	if (nameFile.Contains("report_ОСП Хоринский почтамт")) pref = "48";
 
-			if (nameFile.Contains("report_Анжеро-Судженский почтамт.xlsx")) pref = "50";
-			if (nameFile.Contains("report_Беловский почтамт.xlsx")) pref = "51";
-			if (nameFile.Contains("report_Кемеровский почтамт.xlsx")) pref = "52";
-			if (nameFile.Contains("report_Ленинск-Кузнецкий почтамт.xlsx")) pref = "53";
-			if (nameFile.Contains("report_Мариинский почтамт.xlsx")) pref = "54";
-			if (nameFile.Contains("report_Междуреченский почтамт.xlsx")) pref = "55";
-			if (nameFile.Contains("report_Новокузнецкий почтамт.xlsx")) pref = "56";
-			if (nameFile.Contains("report_Прокопьевский почтамт.xlsx")) pref = "57";
-			if (nameFile.Contains("report_Таштагольский почтамт.xlsx")) pref = "58";
-			if (nameFile.Contains("report_Тисульский почтамт.xlsx")) pref = "59";
-			if (nameFile.Contains("report_Топкинский почтамт.xlsx")) pref = "60";
-			if (nameFile.Contains("report_Тяжинский почтамт.xlsx")) pref = "61";
-			if (nameFile.Contains("report_Юргинский почтамт.xlsx")) pref = "62";
-			if (nameFile.Contains("report_Яшкинский почтамт.xlsx")) pref = "63";
+		//	if (nameFile.Contains("report_Анжеро-Судженский почтамт.xlsx")) pref = "50";
+		//	if (nameFile.Contains("report_Беловский почтамт.xlsx")) pref = "51";
+		//	if (nameFile.Contains("report_Кемеровский почтамт.xlsx")) pref = "52";
+		//	if (nameFile.Contains("report_Ленинск-Кузнецкий почтамт.xlsx")) pref = "53";
+		//	if (nameFile.Contains("report_Мариинский почтамт.xlsx")) pref = "54";
+		//	if (nameFile.Contains("report_Междуреченский почтамт.xlsx")) pref = "55";
+		//	if (nameFile.Contains("report_Новокузнецкий почтамт.xlsx")) pref = "56";
+		//	if (nameFile.Contains("report_Прокопьевский почтамт.xlsx")) pref = "57";
+		//	if (nameFile.Contains("report_Таштагольский почтамт.xlsx")) pref = "58";
+		//	if (nameFile.Contains("report_Тисульский почтамт.xlsx")) pref = "59";
+		//	if (nameFile.Contains("report_Топкинский почтамт.xlsx")) pref = "60";
+		//	if (nameFile.Contains("report_Тяжинский почтамт.xlsx")) pref = "61";
+		//	if (nameFile.Contains("report_Юргинский почтамт.xlsx")) pref = "62";
+		//	if (nameFile.Contains("report_Яшкинский почтамт.xlsx")) pref = "63";
 
-			return pref;
+		//	return pref;
 
-		}
+		//}
+
 		public static string ToPost()
 		{
 			string connStr = @"Data Source=R54WEB02\SQL;
