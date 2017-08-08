@@ -24,30 +24,30 @@ namespace PostReq.Model
 		{
 			string stringRep = "";
 			stringRep += Id;
-			stringRep += "$";
+			stringRep += (char)1;
 			stringRep += ParentId;
-			stringRep += "$";
+			stringRep += (char)1;
 			stringRep += Name;
-			stringRep += "$";
+			stringRep += (char)1;
 			stringRep += Code;
-			stringRep += "$";
+			stringRep += (char)1;
 			if (EdIzm == null)
 				stringRep += "null";
 			else
 				stringRep += EdIzm;
-			stringRep += "$"; ;
+			stringRep += (char)1; ;
 			stringRep += Price.ToString("F2", CultureInfo.InvariantCulture);
-			stringRep += "$";
+			stringRep += (char)1;
 			if (Period.HasValue)
 				stringRep += Period.Value.ToString("yyyy.MM.dd");
 			else
 				stringRep += "null";
-			stringRep += "$";
+			stringRep += (char)1;
 			if (Partner != null)
 				stringRep += Partner;
 			else
 				stringRep += "null";
-			stringRep += "$";
+			stringRep += (char)1;
 			if (Partner != null)
 				stringRep += Barcode;
 			else
@@ -59,7 +59,7 @@ namespace PostReq.Model
 		public static Nom Parse(string s)
 		{
 			var nom = new Nom();
-			var split = s.Split('$');
+			var split = s.Split((char)1);
 			nom.Id = split[0];
 			nom.ParentId = split[1];
 			nom.Name = split[2];

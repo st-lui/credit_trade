@@ -39,235 +39,44 @@ namespace CreditBase
 			//Console.WriteLine(ToPost());
 			//Console.WriteLine(ToPostOffice());
 			//Console.WriteLine(ToWarehouses());
-			//using PostReq.Model;
-			//try
-			//{
-			//	//LeftoversFrom1c();
-			//	try
-			//	{
-			//		//nomLoader.connectionString = "data source=r22aufsql01;initial catalog=r22-asku-work;user=nom_reader;password=6LRZ{w.Y!LHXtY.";
-			//		NomLoader NL = NomLoader.Create("r22aufsql01", "r22-asku-work", "nom_reader", "6LRZ{w.Y!LHXtY.","22");
-			//		NL.UpdateLocalNom();
-			//	}
-			//	catch (Exception ee)
-			//	{
-			//		SimpleLogger.GetInstance().Write(ee.ToString());
-			//	}
-			//	SimpleLogger.GetInstance().Write(Goods("22"));
-			//	//Console.ForegroundColor = ConsoleColor.Green;
-			//	//CheckWareHouse();
-			//	Leftovers();
-			//	SimpleLogger.GetInstance().Write("Работа завершена");
-			//}
-			//catch (Exception e)
-			//{
-			//	SimpleLogger.GetInstance().Write(e.ToString());
-			//}
-			try
+			List<SqlLoaderCreator> creators = new List<SqlLoaderCreator>()
 			{
-				//LeftoversFrom1c();
+				//new SqlLoaderCreator03(),
+				new SqlLoaderCreator42()
+			};
+			foreach (var sqlLoaderCreator in creators)
+			{
+				SqlLoader sqlLoader = sqlLoaderCreator.FactoryMethod();
 				try
 				{
-					//nomLoader.connectionString = "data source=r22aufsql01;initial catalog=r22-asku-work;user=nom_reader;password=6LRZ{w.Y!LHXtY.";
-					NomLoader NL = NomLoader.Create("10.69.1.210", "r03-asku-work", "r03_credit", "111111!!!!!!0", "03");
-					NL.UpdateLocalNom();
+					//LeftoversFrom1c();
+					try
+					{
+						//nomLoader.connectionString = "data source=r22aufsql01;initial catalog=r22-asku-work;user=nom_reader;password=6LRZ{w.Y!LHXtY.";
+						sqlLoader.LoadNom();
+
+
+					}
+					catch (Exception ee)
+					{
+						SimpleLogger.GetInstance().Write(ee.ToString());
+					}
+					SimpleLogger.GetInstance().Write(Goods(sqlLoader.reg));
+					//Console.ForegroundColor = ConsoleColor.Green;
+					//CheckWareHouse();
+					Leftovers(sqlLoader.reg);
+					SimpleLogger.GetInstance().Write("Работа завершена");
 				}
-				catch (Exception ee)
+				catch (Exception e)
 				{
-					SimpleLogger.GetInstance().Write(ee.ToString());
-				}
-				SimpleLogger.GetInstance().Write(Goods("03"));
-				//Console.ForegroundColor = ConsoleColor.Green;
-				//CheckWareHouse();
-				Leftovers("03");
-				SimpleLogger.GetInstance().Write("Работа завершена");
-			}
-			catch (Exception e)
-			{
-				SimpleLogger.GetInstance().Write(e.ToString());
-			}
-		}
-
-
-
-		public static string ToPost()
-		{
-			string connStr = @"Data Source=R54WEB02\SQL;
-							Initial Catalog=credit_trade;
-							Integrated Security=False;User ID=credit;Password=123456;";
-			List<string> PostsList = new List<string>() {
-			"ОСП Бичурский почтамт",
-			"ОСП Закаменский почтамт",
-			"ОСП Кабанский почтамт",
-			"ОСП Прибайкальский почтамт",
-			"ОСП Северобайкальский почтамт",
-			"ОСП Улан-Удэнский почтамт",
-			"ОСП Хоринский почтамт"};
-
-
-
-			SqlConnection conn = new SqlConnection(connStr);
-
-			conn.Open();
-
-			for (int i = 0; i < PostsList.Count; i++)
-			{
-
-
-				string query = string.Format(@"INSERT INTO [credit_trade].[dbo].[posts]
-		   ([name])
-	 VALUES
-		   ('{0}')", PostsList[i]);
-
-				SqlCommand sqlQueryInsert = new SqlCommand(query, conn);
-				sqlQueryInsert.ExecuteNonQuery();
-
-			}
-			conn.Close();
-			conn.Dispose();
-
-			return "Post: Успешная загрузка";
-
-		}
-
-		public static string Null(object x)
-		{
-			return x == null ? "" : x.ToString();
-		}
-
-		public static string ToPostOffice()
-		{
-			try
-			{
-
-				string FileOffices = @"PostOffice.xlsx";
-
-
-				var ExcelOffices = new ExcelPackage(new FileInfo(FileOffices));
-				var listOffices = ExcelOffices.Workbook.Worksheets[1];
-
-				bool flag = true;
-				int countOffices = 0;
-				int Offices = 2;
-
-				while (flag)
-				{
-					if (Null(listOffices.Cells["A" + Offices].Value).Equals(""))
-						flag = false;
-					else { Offices++; countOffices++; }
-				}
-
-
-				string connStr = @"Data Source=R54WEB02\SQL;
-							Initial Catalog=credit_trade;
-							Integrated Security=False;User ID=credit;Password=123456;";
-
-				SqlConnection conn = new SqlConnection(connStr);
-
-				conn.Open();
-
-
-				for (int i = 2; i < Offices; i++)
-				{
-
-					string query = string.Format(@"INSERT INTO [credit_trade].[dbo].[postoffices]
-		   ([idx]
-		   ,[name_ops]
-		   ,[post_id])
-	 VALUES
-		   ('{0}','{1}','{2}')", Null(listOffices.Cells["C" + i].Value), Null(listOffices.Cells["B" + i].Value), WhatAPost(Null(listOffices.Cells["A" + i].Value), conn));
-
-					SqlCommand sqlQueryInsert = new SqlCommand(query, conn);
-					sqlQueryInsert.ExecuteNonQuery();
-
-
-
-
-				}
-				conn.Close();
-				conn.Dispose();
-
-
-
-
-
-			}
-			catch (Exception ex)
-			{
-				SimpleLogger.GetInstance().Write("Ошибка: Невозможно прочитать файл на диске. Описание ошибки: " + ex.Message);
-			}
-
-
-			return "PostOffice: Успешная загрузка.";
-		}
-
-		public static string WhatAPost(string namePost, SqlConnection connect)
-		{
-
-
-			string NumberPost = "";
-			string SelectQuery = @"SELECT [privilegies]
-	  ,[id]
-	  ,[name]
-  FROM [credit_trade].[dbo].[posts] WHERE name='" + namePost + "'";
-			SqlCommand sqlQuerySelect = new SqlCommand(SelectQuery, connect);
-
-			using (SqlDataReader drNew = sqlQuerySelect.ExecuteReader())
-			{
-				while (drNew.Read())
-				{
-					NumberPost = drNew.GetValue(1).ToString().Trim();
-
+					SimpleLogger.GetInstance().Write(e.ToString());
 				}
 			}
-
-
-			return NumberPost;
 		}
 
-		public static string ToWarehouses()
-		{
-			string connStr = @"Data Source=r54web02\sql;
-							Initial Catalog=credit_trade;
-							Integrated Security=False;User ID=credit;Password=123456;";
-
-			SqlConnection conn = new SqlConnection(connStr);
-			SqlConnection connIns = new SqlConnection(connStr);
-			conn.Open();
-			connIns.Open();
 
 
-			string SelectQuery = @"SELECT [id]
-	  ,[idx]
-	  ,[name_ops]
-	  ,[post_id]
-		FROM[credit_trade].[dbo].[postoffices]";
-			SqlCommand sqlQuerySelect = new SqlCommand(SelectQuery, conn);
-
-			using (SqlDataReader drNew = sqlQuerySelect.ExecuteReader())
-			{
-				while (drNew.Read())
-				{
-					string query = string.Format(@"INSERT INTO [credit_trade].[dbo].[warehouses]
-		   ([name]
-		   ,[postoffice_id])
-	 VALUES
-		   ('{0}','{1}')", drNew.GetValue(2).ToString(), drNew.GetValue(0).ToString());
-
-					SqlCommand sqlQueryInsert = new SqlCommand(query, connIns);
-					sqlQueryInsert.ExecuteNonQuery();
-
-				}
-			}
-
-
-
-
-			conn.Close();
-			conn.Dispose();
-			return "Warehouses: Успешная загрузка";
-		}
-
+	
 		public static void LeftoversFrom1c()
 		{
 			SimpleLogger.GetInstance().Write($"Начато формирование остатков");
@@ -291,7 +100,7 @@ namespace CreditBase
 			for (int i = 0; i < AllLines.Length; i++)
 			{
 				Nom TempNom = Nom.Parse(AllLines[i]);
-				NomDictionary.Add(TempNom.Id+"_"+reg_code, TempNom);
+				NomDictionary.Add(TempNom.Id + "_" + reg_code, TempNom);
 				//Console.WriteLine(TempNom.ToString());
 			}
 
@@ -323,7 +132,7 @@ namespace CreditBase
 					{
 						Nom TempFromBase = new Nom()
 						{
-							Id = drNew.GetValue(1).ToString().Trim()+"_"+reg_code,
+							Id = drNew.GetValue(1).ToString().Trim() + "_" + reg_code,
 							ParentId = drNew.GetValue(2).ToString().Trim(),
 							Name = drNew.GetValue(3).ToString(),
 							EdIzm = drNew.GetValue(4).ToString(),
@@ -368,7 +177,7 @@ namespace CreditBase
 		   NomSearchNom.Name.Replace("'", "''"),
 		   NomSearchNom.EdIzm,
 		   price,
-		   NomSearchNom.Barcode,reg_code);
+		   NomSearchNom.Barcode, reg_code);
 
 					SqlCommand sqlQueryInsert = new SqlCommand(query, connInsUpd);
 					sqlQueryInsert.ExecuteNonQuery();
@@ -607,7 +416,7 @@ namespace CreditBase
 						Good TempFromBase = new Good()
 						{
 							id_g = drNewGood.GetValue(0).ToString().Trim(),
-							name_g = drNewGood.GetValue(1).ToString().Replace((char)160,' ')
+							name_g = drNewGood.GetValue(1).ToString().Replace((char)160, ' ')
 
 						};
 						//Console.WriteLine(TempFromBase.name_g);
@@ -808,9 +617,202 @@ namespace CreditBase
 			if (nameFile.Contains("report_ОСП Улан-Удэнский почтамт")) pref = "47";
 			if (nameFile.Contains("report_ОСП Хоринский почтамт")) pref = "48";
 
+			if (nameFile.Contains("report_Анжеро-Судженский почтамт.xlsx")) pref = "50";
+			if (nameFile.Contains("report_Беловский почтамт.xlsx")) pref = "51";
+			if (nameFile.Contains("report_Кемеровский почтамт.xlsx")) pref = "52";
+			if (nameFile.Contains("report_Ленинск-Кузнецкий почтамт.xlsx")) pref = "53";
+			if (nameFile.Contains("report_Мариинский почтамт.xlsx")) pref = "54";
+			if (nameFile.Contains("report_Междуреченский почтамт.xlsx")) pref = "55";
+			if (nameFile.Contains("report_Новокузнецкий почтамт.xlsx")) pref = "56";
+			if (nameFile.Contains("report_Прокопьевский почтамт.xlsx")) pref = "57";
+			if (nameFile.Contains("report_Таштагольский почтамт.xlsx")) pref = "58";
+			if (nameFile.Contains("report_Тисульский почтамт.xlsx")) pref = "59";
+			if (nameFile.Contains("report_Топкинский почтамт.xlsx")) pref = "60";
+			if (nameFile.Contains("report_Тяжинский почтамт.xlsx")) pref = "61";
+			if (nameFile.Contains("report_Юргинский почтамт.xlsx")) pref = "62";
+			if (nameFile.Contains("report_Яшкинский почтамт.xlsx")) pref = "63";
+
 			return pref;
 
 		}
+		public static string ToPost()
+		{
+			string connStr = @"Data Source=R54WEB02\SQL;
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
+			List<string> PostsList = new List<string>() {
+"Анжеро-Судженский почтамт",
+"Беловский почтамт",
+"Кемеровский почтамт",
+"Ленинск-Кузнецкий почтамт",
+"Мариинский почтамт",
+"Междуреченский почтамт",
+"Новокузнецкий почтамт",
+"Прокопьевский почтамт",
+"Таштагольский почтамт",
+"Тисульский почтамт",
+"Топкинский почтамт",
+"Тяжинский почтамт",
+"Юргинский почтамт",
+"Яшкинский почтамт"
+};
+
+
+
+			SqlConnection conn = new SqlConnection(connStr);
+
+			conn.Open();
+
+			for (int i = 0; i < PostsList.Count; i++)
+			{
+
+
+				string query = string.Format(@"INSERT INTO [credit_trade].[dbo].[posts]
+		   ([name])
+	 VALUES
+		   ('{0}')", PostsList[i]);
+
+				SqlCommand sqlQueryInsert = new SqlCommand(query, conn);
+				sqlQueryInsert.ExecuteNonQuery();
+
+			}
+			conn.Close();
+			conn.Dispose();
+
+			return "Post: Успешная загрузка";
+
+		}
+
+		public static string Null(object x)
+		{
+			return x == null ? "" : x.ToString();
+		}
+
+		public static string ToPostOffice()
+		{
+			try
+			{
+
+				string FileOffices = @"PostOffice.xlsx";
+
+
+				var ExcelOffices = new ExcelPackage(new FileInfo(FileOffices));
+				var listOffices = ExcelOffices.Workbook.Worksheets[1];
+
+				bool flag = true;
+				int countOffices = 0;
+				int Offices = 2;
+
+				while (flag)
+				{
+					if (Null(listOffices.Cells["A" + Offices].Value).Equals(""))
+						flag = false;
+					else { Offices++; countOffices++; }
+				}
+
+
+				string connStr = @"Data Source=R54WEB02\SQL;
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
+
+				SqlConnection conn = new SqlConnection(connStr);
+
+				conn.Open();
+
+
+				for (int i = 2; i < Offices; i++)
+				{
+
+					string query = string.Format($@"INSERT INTO [credit_trade].[dbo].[postoffices]([idx],[name_ops],[post_id]) VALUES
+		   ('{Null(listOffices.Cells["C" + i].Value)}','{Null(listOffices.Cells["B" + i].Value)}','{WhatAPost(Null(listOffices.Cells["A" + i].Value), conn)}')");
+
+					SqlCommand sqlQueryInsert = new SqlCommand(query, conn);
+					sqlQueryInsert.ExecuteNonQuery();
+				}
+				conn.Close();
+				conn.Dispose();
+
+
+
+
+
+			}
+			catch (Exception ex)
+			{
+				SimpleLogger.GetInstance().Write("Ошибка: Невозможно прочитать файл на диске. Описание ошибки: " + ex.Message);
+			}
+
+
+			return "PostOffice: Успешная загрузка.";
+		}
+
+		public static string WhatAPost(string namePost, SqlConnection connect)
+		{
+
+
+			string NumberPost = "";
+			string SelectQuery = @"SELECT [privilegies]
+	  ,[id]
+	  ,[name]
+  FROM [credit_trade].[dbo].[posts] WHERE name='" + namePost + "'";
+			SqlCommand sqlQuerySelect = new SqlCommand(SelectQuery, connect);
+
+			using (SqlDataReader drNew = sqlQuerySelect.ExecuteReader())
+			{
+				while (drNew.Read())
+				{
+					NumberPost = drNew.GetValue(1).ToString().Trim();
+
+				}
+			}
+
+
+			return NumberPost;
+		}
+
+		public static string ToWarehouses()
+		{
+			string connStr = @"Data Source=r54web02\sql;
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
+
+			SqlConnection conn = new SqlConnection(connStr);
+			SqlConnection connIns = new SqlConnection(connStr);
+			conn.Open();
+			connIns.Open();
+
+
+			string SelectQuery = @"SELECT [id]
+	  ,[idx]
+	  ,[name_ops]
+	  ,[post_id]
+		FROM[credit_trade].[dbo].[postoffices] where post_id >=50";
+			SqlCommand sqlQuerySelect = new SqlCommand(SelectQuery, conn);
+
+			using (SqlDataReader drNew = sqlQuerySelect.ExecuteReader())
+			{
+				while (drNew.Read())
+				{
+					string query = string.Format(@"INSERT INTO [credit_trade].[dbo].[warehouses]
+		   ([name]
+		   ,[postoffice_id])
+	 VALUES
+		   ('{0}','{1}')", drNew.GetValue(2).ToString(), drNew.GetValue(0).ToString());
+
+					SqlCommand sqlQueryInsert = new SqlCommand(query, connIns);
+					sqlQueryInsert.ExecuteNonQuery();
+
+				}
+			}
+
+
+
+
+			conn.Close();
+			conn.Dispose();
+			return "Warehouses: Успешная загрузка";
+		}
+
 	}
 
 	public class WareHouse
