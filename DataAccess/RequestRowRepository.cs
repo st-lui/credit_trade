@@ -50,7 +50,7 @@ namespace DataAccess
 				price = price };
 		}
 
-		public request_rows CreateRequestRows(decimal amount, int goods_id,IEnumerable<good> goodsList )
+		public request_rows CreateRequestRows(decimal amount, int goods_id,IEnumerable<good> goodsList,decimal leftoverPrice)
 		{
 			var good = goodsList.First(x => x.id == goods_id);
 			request_rows requestRow= new request_rows()
@@ -60,7 +60,9 @@ namespace DataAccess
 				ed_izm = good.edizm,
 				goods_id = goods_id,
 				name = good.name,
-				price = good.price
+				
+price = leftoverPrice
+				//price = leftoverPrice == 0 ? good.price : leftoverPrice
 			};
 			return requestRow;
 		}

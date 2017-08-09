@@ -41,7 +41,7 @@ namespace credittrade.Modules
 				{
 					request request = unitOfWork.Requests.Get(p.request_id);
 					model.request = request;
-					return View["request_print",model];
+					return View["request_print", model];
 				}
 			};
 
@@ -99,7 +99,9 @@ namespace credittrade.Modules
 					foreach (KeyValuePair<string, dynamic> row in request_data)
 					{
 						leftover leftover = unitOfWork.Leftovers.GetWithGoods(int.Parse(row.Value["id"]));
-						request_rows rr = unitOfWork.RequestRows.CreateRequestRows(row.Value["amount"], leftover.good.name, leftover.good.edizm, leftover.good_id, leftover.good.price, leftover.good.barcode);
+						request_rows rr = unitOfWork.RequestRows.CreateRequestRows(row.Value["amount"], leftover.good.name, leftover.good.edizm, leftover.good_id,
+							//leftover.price == 0 ? leftover.good.price : leftover.price, leftover.good.barcode);
+							leftover.price, leftover.good.barcode);
 						leftover.expenditure += rr.amount;
 						unitOfWork.Leftovers.Change(leftover);
 						unitOfWork.Requests.AddRequestRow(request, rr);
@@ -126,7 +128,7 @@ namespace credittrade.Modules
 				{
 					DateTime pay_date = Request.Form.pay_date;
 					var request = unitOfWork.Requests.Get(p.request_id);
-					unitOfWork.Requests.MakePay(request,pay_date);
+					unitOfWork.Requests.MakePay(request, pay_date);
 					unitOfWork.Requests.Change(request);
 					unitOfWork.SaveChanges();
 					return Response.AsRedirect("~/");

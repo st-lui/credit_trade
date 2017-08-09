@@ -49,14 +49,6 @@ namespace DataAccess
 		{
 			var l = db.leftovers.Include(x => x.good).Where(x=>x.warehouse_id==warehouse.id && x.amount>x.expenditure.Value);
 			return l.ToList();
-			//			var leftovers = db.leftovers.SqlQuery(@"select l.[id],l.[warehouse_id],l.[good_id],l.[amount],l.[expenditure]
-			//,g.[id],g.[nom_id],g.[parent_id],g.[name],g.[edizm],g.[price],g.[barcode],g.[category]
-			//FROM leftovers l,goods g
-			//where l.warehouse_id=@warehouse_id and l.good_id=g.id", new SqlParameter("@warehouse_id", warehouse.id));
-			//			foreach (var leftover in leftovers)
-			//			{
-			//				yield return leftover;
-			//			}
 		}
 
 		public IEnumerable<request> GetNotPaidRequests(int warehouse_id)
