@@ -28,6 +28,7 @@ namespace DbModel
         public decimal price { get; set; }
         public string barcode { get; set; }
         public string category { get; set; }
+        public string reg_code { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<leftover> leftovers { get; set; }

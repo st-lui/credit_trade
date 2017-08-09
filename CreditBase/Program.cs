@@ -50,7 +50,7 @@ namespace CreditBase
 				try
 				{
 					//LeftoversFrom1c();
-					
+
 					try
 					{
 						//nomLoader.connectionString = "data source=r22aufsql01;initial catalog=r22-asku-work;user=nom_reader;password=6LRZ{w.Y!LHXtY.";
@@ -66,7 +66,7 @@ namespace CreditBase
 					//Console.ForegroundColor = ConsoleColor.Green;
 					//CheckWareHouse();
 					sqlLoader.LoadPricesDictionary();
-					Leftovers(sqlLoader.reg,sqlLoader.WhatAPost);
+					Leftovers(sqlLoader.reg, sqlLoader.WhatAPost, sqlLoader.WarehousePriceKindDictionary, sqlLoader.PriceKindNomPrice);
 					SimpleLogger.GetInstance().Write("Работа завершена");
 				}
 				catch (Exception e)
@@ -76,9 +76,6 @@ namespace CreditBase
 			}
 		}
 
-
-
-	
 		public static void LeftoversFrom1c()
 		{
 			SimpleLogger.GetInstance().Write($"Начато формирование остатков");
@@ -163,7 +160,8 @@ namespace CreditBase
 					if (NomSearchBase.Price != NomSearchNom.Price)
 					{
 						string price = NomSearchNom.Price.ToString(CultureInfo.GetCultureInfo("en-US"));
-						string query = string.Format(@"UPDATE [credit_trade].[dbo].[goods] SET [price] = '{0}' WHERE  nom_id='{1}'", price, NomSearchBase.Id);
+						string[] nomIdSplit = NomSearchBase.Id.Split('_');
+						string query = string.Format(@"UPDATE [credit_trade].[dbo].[goods] SET [price] = '{0}' WHERE  nom_id='{1}' and reg_code='{2}'", price, nomIdSplit[0],nomIdSplit[1]);
 
 						SqlCommand sqlQueryInsert = new SqlCommand(query, connInsUpd);
 						sqlQueryInsert.ExecuteNonQuery();
@@ -200,7 +198,7 @@ namespace CreditBase
 		}
 
 
-		public static string Leftovers(string reg_code,Func<string,string> whatAPost)
+		public static string Leftovers(string reg_code, Func<string, string> whatAPost, Dictionary<string, string> warehousePriceKindDictionary, Dictionary<string, Dictionary<string, decimal>> sqlLoaderPriceKindNomPrice)
 		{
 			string connStr = @"Data Source=r54web02\sql;
 							Initial Catalog=credit_trade;
@@ -264,7 +262,7 @@ namespace CreditBase
 			//connPref.Close();
 			conn.Open();
 
-			string SelectQueryGood = $@"SELECT [id],[name] FROM [credit_trade].[dbo].[goods] where reg_code ='{reg_code}'";
+			string SelectQueryGood = $@"SELECT [id],[name],nom_id FROM [credit_trade].[dbo].[goods] where reg_code ='{reg_code}'";
 			SqlCommand sqlQuerySelectGood = new SqlCommand(SelectQueryGood, conn);
 
 			using (SqlDataReader drNewGood = sqlQuerySelectGood.ExecuteReader())
@@ -276,7 +274,8 @@ namespace CreditBase
 						Good TempFromBase = new Good()
 						{
 							id_g = drNewGood.GetValue(0).ToString().Trim(),
-							name_g = drNewGood.GetValue(1).ToString().Replace((char)160, ' ')
+							name_g = drNewGood.GetValue(1).ToString().Replace((char)160, ' '),
+							id_nom = drNewGood.GetString(2)
 
 						};
 						//Console.WriteLine(TempFromBase.name_g);
@@ -290,7 +289,7 @@ namespace CreditBase
 			//conn.Close();
 
 			Dictionary<long, Leftover> leftovers = new Dictionary<long, Leftover>();
-			using (SqlCommand command = new SqlCommand("select id,good_id,warehouse_id,amount,expenditure from leftovers", conn))
+			using (SqlCommand command = new SqlCommand("select id,good_id,warehouse_id,amount,expenditure,price from leftovers", conn))
 			{
 				if (conn.State == ConnectionState.Closed)
 					conn.Open();
@@ -299,7 +298,7 @@ namespace CreditBase
 					while (dataReader.Read())
 					{
 						var leftover = new Leftover(dataReader.GetInt32(0), dataReader.GetInt32(1), dataReader.GetInt32(2),
-							dataReader.GetDecimal(3), dataReader.GetDecimal(4));
+							dataReader.GetDecimal(3), dataReader.GetDecimal(4), dataReader.GetDecimal(5));
 						long leftoverKey = (long)leftover.warehouse_id * 1000000 + leftover.good_id;
 						leftovers.Add(leftoverKey, leftover);
 					}
@@ -339,14 +338,29 @@ namespace CreditBase
 						break;
 					}
 				}
-				for (int col = startCol+5; col <= colCnt - 1; col++)
+				for (int col = startCol + 5; col <= colCnt - 1; col++)
 				{
 					WarehouseName = Null(listOffices.Cells[8, col].Value).Trim();
-
+					string wh_name = WarehouseName;
 					WarehouseName = preffix + "_" + WarehouseName;
 					//Console.WriteLine(WarehouseName);
 					//conn.Open();
+					if (DicWarehouse.ContainsKey(WarehouseName))
+					{
+						WareHouse wareHouse;
 
+						DicWarehouse.TryGetValue(WarehouseName, out wareHouse);
+						warehouse_id = Convert.ToInt32(wareHouse.id_w);
+						//Console.WriteLine(WarehouseName);
+						//Console.WriteLine(warehouse_id);
+					}
+					else
+					{
+						SimpleLogger.GetInstance().Write($"Не найден склад {WarehouseName}!");
+						continue;
+					}
+					string priceKind = warehousePriceKindDictionary[wh_name];
+					var priceDictionary = sqlLoaderPriceKindNomPrice[priceKind];
 					for (int row = 10; row <= rowCnt - 1; row++)
 					{
 						//g++;
@@ -359,36 +373,22 @@ namespace CreditBase
 							amount = Convert.ToDecimal(Null(listOffices.Cells[row, col].Value));
 						else
 							amount = 0;
-
-						if (DicWarehouse.ContainsKey(WarehouseName))
-						{
-							WareHouse wareHouse;
-
-							DicWarehouse.TryGetValue(WarehouseName, out wareHouse);
-							warehouse_id = Convert.ToInt32(wareHouse.id_w);
-							//Console.WriteLine(WarehouseName);
-							//Console.WriteLine(warehouse_id);
-						}
-						else
-						{
-							continue;
-							//Console.WriteLine("Не найден склад!");
-						}
-
+						Good good;
 						if (DicGood.ContainsKey(GoodName))
 						{
-							Good good;
-
-							DicGood.TryGetValue(GoodName, out good);
-							good_id = Convert.ToInt32(good.id_g);
-							if (good_id == 0) continue;
-							//Console.WriteLine(good_id);
+							good = DicGood[GoodName];
+							good_id = int.Parse(good.id_g);
 						}
 						else
 						{
-							//Console.WriteLine(GoodName); Console.WriteLine("Не найден товар!");
+							//SimpleLogger.GetInstance().Write($"Не найден товар {GoodName}!");
 							continue;
 						}
+
+						decimal price = 0;
+						if (priceDictionary.ContainsKey(good.id_nom))
+							price=priceDictionary[good.id_nom];
+
 						//conn.Open();
 						long leftoverKey = (long)warehouse_id * 1000000 + good_id;
 						if (leftovers.ContainsKey(leftoverKey))
@@ -398,11 +398,16 @@ namespace CreditBase
 								leftovers[leftoverKey].amount = amount;
 								leftovers[leftoverKey].sqlKey = 'u';
 							}
+							if (leftovers[leftoverKey].price != price)
+							{
+								leftovers[leftoverKey].price = price;
+								leftovers[leftoverKey].sqlKey = 'u';
+							}
 						}
 						else
 						if (amount != 0)
 						{
-							var leftover = new Leftover(0, good_id, warehouse_id, amount, 0);
+							var leftover = new Leftover(0, good_id, warehouse_id, amount, 0, price);
 							leftover.sqlKey = 'a';
 							leftovers.Add(leftoverKey, leftover);
 						}
@@ -432,7 +437,8 @@ namespace CreditBase
 						command.Connection = conn;
 						command.Transaction = transaction;
 						string amountStr = leftover.Value.amount.ToString(CultureInfo.GetCultureInfo("en-US"));
-						command.CommandText = $"update leftovers set amount={amountStr} where id={leftover.Value.id}";
+						string priceStr = leftover.Value.price.ToString(CultureInfo.GetCultureInfo("en-US"));
+						command.CommandText = $"update leftovers set amount={amountStr},price={priceStr} where id={leftover.Value.id}";
 						command.ExecuteNonQuery();
 					}
 				}
@@ -444,7 +450,8 @@ namespace CreditBase
 						command.Connection = conn;
 						command.Transaction = transaction;
 						string amountStr = leftover.Value.amount.ToString(CultureInfo.GetCultureInfo("en-US"));
-						command.CommandText = $"insert into leftovers (amount,expenditure,good_id,warehouse_id) values ({amountStr},0,{leftover.Value.good_id},{leftover.Value.warehouse_id})";
+						string priceStr = leftover.Value.price.ToString(CultureInfo.GetCultureInfo("en-US"));
+						command.CommandText = $"insert into leftovers (amount,expenditure,good_id,warehouse_id,price) values ({amountStr},0,{leftover.Value.good_id},{leftover.Value.warehouse_id},{priceStr})";
 						command.ExecuteNonQuery();
 					}
 				}
@@ -695,18 +702,19 @@ namespace CreditBase
 	{
 		public string id_g { set; get; }
 		public string name_g { set; get; }
-
+		public string id_nom { set; get; }
 	}
 
 	public class Leftover
 	{
-		public Leftover(int id, int goodId, int warehouseId, decimal amount, decimal expenditure)
+		public Leftover(int id, int goodId, int warehouseId, decimal amount, decimal expenditure, decimal price)
 		{
 			this.id = id;
 			warehouse_id = warehouseId;
 			good_id = goodId;
 			this.amount = amount;
 			this.expenditure = expenditure;
+			this.price = price;
 			sqlKey = '\0';
 		}
 
@@ -715,6 +723,7 @@ namespace CreditBase
 		public int good_id { get; set; }
 		public decimal amount { get; set; }
 		public decimal expenditure { get; set; }
+		public decimal price { get; set; }
 		public char sqlKey { get; set; }
 	}
 }

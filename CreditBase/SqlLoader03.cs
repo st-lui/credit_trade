@@ -44,7 +44,7 @@ namespace CreditBase
 				SqlDataReader whReader= command.ExecuteReader();
 				while (whReader.Read())
 				{
-					string warehouseName = whReader.GetString(0);
+					string warehouseName = whReader.GetString(0).Trim();
 					string priceId = "0";
 					if (!whReader.IsDBNull(1))
 						priceId = Utils.SqlBinaryToString(whReader.GetSqlBinary(1));
