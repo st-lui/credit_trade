@@ -347,7 +347,8 @@ namespace CreditBase
 					if (NomSearchBase.Price != NomSearchNom.Price)
 					{
 						string price = NomSearchNom.Price.ToString(CultureInfo.GetCultureInfo("en-US"));
-						string query = string.Format(@"UPDATE [credit_trade].[dbo].[goods] SET [price] = '{0}' WHERE  nom_id='{1}'", price, NomSearchBase.Id);
+						var split = NomSearchBase.Id.Split('_');
+						string query = string.Format(@"UPDATE [credit_trade].[dbo].[goods] SET [price] = '{0}' WHERE  nom_id='{1}' and reg_code='{2}'", price, split[0],split[1]);
 
 						SqlCommand sqlQueryInsert = new SqlCommand(query, connInsUpd);
 						sqlQueryInsert.ExecuteNonQuery();
