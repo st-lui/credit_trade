@@ -41,8 +41,8 @@ namespace CreditBase
 			//Console.WriteLine(ToWarehouses());
 			List<SqlLoaderCreator> creators = new List<SqlLoaderCreator>()
 			{
-				//new SqlLoaderCreator03(),
-				//new SqlLoaderCreator42()
+				new SqlLoaderCreator03(),
+				new SqlLoaderCreator42(),
 				new SqlLoaderCreator22()
 			};
 			foreach (var sqlLoaderCreator in creators)

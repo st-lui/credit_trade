@@ -16,13 +16,15 @@ namespace CreditBase
 			reg = "22";
 			srv = "r22aufsql01.main.russianpost.ru";
 			dbname = "r22-asku-work";
+			usr = "nom_reader";
+			pswd = "6LRZ{w.Y!LHXtY.";
 			priceTableName = "_InfoRg11000";
 			warehouseTableName = "_Reference163";
 		}
 
 		public override void LoadNom()
 		{
-			NomLoader NL = NomLoader.Create(srv, dbname, reg);
+			NomLoader NL = NomLoader.Create(srv, dbname,usr,pswd, reg);
 			NL.UpdateLocalNom();
 		}
 
@@ -58,7 +60,7 @@ namespace CreditBase
 			WarehousePriceKindDictionary = new Dictionary<string, string>();
 			PriceKindNomPrice = new Dictionary<string, Dictionary<string, decimal>>();
 			string defaultPriceKind = "A4AEF4CE46FB566011E3DC100178205B";
-			using (SqlConnection conn = new SqlConnection($"data source={srv};initial catalog={dbname};Integrated Security=true"))
+			using (SqlConnection conn = new SqlConnection($"data source={srv};initial catalog={dbname};user={usr};password={pswd}"))
 			{
 				conn.Open();
 				SqlCommand command = new SqlCommand($"select _Description,_Fld3233RRef from {warehouseTableName} where _marked=0x00", conn);
@@ -184,11 +186,11 @@ namespace CreditBase
 
 			public List<Nom> NomList { get; set; }
 
-			public static NomLoader Create(string srv, string dbname, string reg)
+			public static NomLoader Create(string srv, string dbname, string usr,string pswd,string reg)
 			{
 				var nomLoader = new NomLoader();
 				//nomLoader.connectionString = "data source=r22aufsql01;initial catalog=r22-asku-work;user=nom_reader;password=6LRZ{w.Y!LHXtY.";
-				nomLoader.connectionString = $"data source={srv};initial catalog={dbname};Integrated Security=true";
+				nomLoader.connectionString = $"data source={srv};initial catalog={dbname};user={usr};password={pswd}";
 				nomLoader.filename = $"appdata\\nom_{reg}.txt";
 				nomLoader.filenameClean = $"appdata\\nomClean_{reg}.txt";
 				if (!File.Exists(nomLoader.filename))
