@@ -53,6 +53,7 @@
     <Compile Include="SqlLoader03.cs" />
     <Compile Include="SqlLoader22.cs" />
     <Compile Include="SqlLoader42.cs" />
+    <Compile Include="SqlLoader75.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

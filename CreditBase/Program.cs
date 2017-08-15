@@ -41,6 +41,7 @@ namespace CreditBase
 			//Console.WriteLine(ToWarehouses());
 			List<SqlLoaderCreator> creators = new List<SqlLoaderCreator>()
 			{
+				new SqlLoaderCreator75(),
 				new SqlLoaderCreator03(),
 				new SqlLoaderCreator42(),
 				new SqlLoaderCreator22()
@@ -536,24 +537,20 @@ namespace CreditBase
 
 		public static string ToPost()
 		{
-			string connStr = @"Data Source=R54WEB02\SQL;
+			string connStr = @"Data Source=r54web02\SQL;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 			List<string> PostsList = new List<string>() {
-"Анжеро-Судженский почтамт",
-"Беловский почтамт",
-"Кемеровский почтамт",
-"Ленинск-Кузнецкий почтамт",
-"Мариинский почтамт",
-"Междуреченский почтамт",
-"Новокузнецкий почтамт",
-"Прокопьевский почтамт",
-"Таштагольский почтамт",
-"Тисульский почтамт",
-"Топкинский почтамт",
-"Тяжинский почтамт",
-"Юргинский почтамт",
-"Яшкинский почтамт"
+"ОСП Агинский почтамт",
+"ОСП Борзинский почтамт",
+"ОСП Краснокаменский почтамт",
+"ОСП Могочинский почтамт",
+"ОСП Нерчинский почтамт",
+"ОСП Петровск-Забайкальский почтамт",
+"ОСП Приаргунский почтамт",
+"ОСП Улетовский почтамт",
+"ОСП Читинский почтамт",
+"ОСП Шилкинский почтамт"
 };
 
 
@@ -610,7 +607,7 @@ namespace CreditBase
 				}
 
 
-				string connStr = @"Data Source=R54WEB02\SQL;
+				string connStr = @"Data Source=r54web02\SQL;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -622,11 +619,13 @@ namespace CreditBase
 				for (int i = 2; i < Offices; i++)
 				{
 
-					string query = string.Format($@"INSERT INTO [credit_trade].[dbo].[postoffices]([idx],[name_ops],[post_id]) VALUES
+					string query = string.Format($@"INSERT INTO [credit_trade].[dbo].[postoffices]([idx],[name_ops],[post_id]) output inserted.id VALUES
 		   ('{Null(listOffices.Cells["C" + i].Value)}','{Null(listOffices.Cells["B" + i].Value)}','{WhatAPost(Null(listOffices.Cells["A" + i].Value), conn)}')");
 
 					SqlCommand sqlQueryInsert = new SqlCommand(query, conn);
-					sqlQueryInsert.ExecuteNonQuery();
+					int postOfficeId = (int) sqlQueryInsert.ExecuteScalar();
+					SqlCommand sqlQueryInsertWarehouse=new SqlCommand($"insert into warehouses (postoffice_id,name) values ({postOfficeId},'{Null(listOffices.Cells["B" + i].Value)}')",conn);
+					sqlQueryInsertWarehouse.ExecuteNonQuery();
 				}
 				conn.Close();
 				conn.Dispose();
