@@ -25,6 +25,7 @@
         <AssociationConnector Association="DbModel.FK_requests_User" />
         <AssociationConnector Association="DbModel.FK_users_warehouses" />
         <AssociationConnector Association="DbModel.FK_buyers_warehouses" />
+        <AssociationConnector Association="DbModel.FK_posts_posts" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
