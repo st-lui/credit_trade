@@ -164,13 +164,89 @@ namespace credittrade.Modules
 			return ms;
 		}
 
+		public class ReportRow {
+			public int warehouseId,postId;
+			public string warehouseName;
+			public decimal debtBefore, debtBeforeOverdue, spent, paid, debtAfter, debtAfterOverdue;
+		}
+
 		public static MemoryStream GenReportUfps(InOutReportModel reportModel)
 		{
 			var req = reportModel.Requests;
+			var reqBefore = reportModel.RequestsBefore;
 			var start = reportModel.Start;
 			var finish = reportModel.Finish;
 			IList<request> penaltyRequests = reportModel.RequestsPenalty;
 			Dictionary<int, decimal> debts = GetDebtForRequests(penaltyRequests);
+			Dictionary<int, decimal> debtsBefore = GetDebtForRequests(reportModel.BeforeRequestsPenalty);
+
+			Dictionary<int, ReportRow> reportRows = new Dictionary<int, ReportRow>();
+			//обработка заявок текущего периода
+			foreach (request r in req)
+			{
+				warehouse wh = r.buyer.warehouse;
+				ReportRow reportRow;
+				if (reportRows.ContainsKey(wh.id))
+				{
+					reportRow = reportRows[wh.id];
+					reportRow.spent += r.cost.Value;
+					if (r.paid.Value)
+						reportRow.paid += r.cost.Value;
+				}
+				else
+				{
+					reportRow = new ReportRow();
+					reportRow.warehouseId = wh.id;
+					reportRow.postId = wh.postoffice.post.id;
+					reportRow.spent += r.cost.Value;
+					if (r.paid.Value && r.pay_date.Value>=reportModel.StartDate && r.pay_date.Value<=reportModel.FinishDate)
+						reportRow.paid += r.cost.Value;
+					reportRows.Add(wh.id, reportRow);
+				}
+			}
+			//обработка заявок на начало периода
+			foreach (request r in reqBefore)
+			{
+				warehouse wh = r.buyer.warehouse;
+				ReportRow reportRow;
+				if (reportRows.ContainsKey(wh.id))
+				{
+					reportRow = reportRows[wh.id];
+					// если заказ не оплачен, добавление в долг на начало периода
+					if (!r.paid.Value || r.paid.Value && r.pay_date.Value>reportModel.FinishDate)
+						reportRow.debtBefore += r.cost.Value;
+				}
+				else
+				{
+					reportRow = new ReportRow();
+					reportRow.warehouseId = wh.id;
+					reportRow.postId = wh.postoffice.post.id;
+					// если заказ не оплачен, добавление в долг на начало периода
+					if (!r.paid.Value || r.paid.Value && r.pay_date.Value>reportModel.StartDate)
+						reportRow.debtBefore += r.cost.Value;
+					reportRows.Add(wh.id, reportRow);
+				}
+			}
+			//обработка просроченных заказов на начало периода
+			foreach (request r in reqBefore)
+			{
+				warehouse wh = r.buyer.warehouse;
+				ReportRow reportRow;
+				if (reportRows.ContainsKey(wh.id))
+				{
+					reportRow = reportRows[wh.id];
+					reportRow.debtBeforeOverdue += r.cost.Value;
+				}
+				else
+				{
+					reportRow = new ReportRow();
+					reportRow.warehouseId = wh.id;
+					reportRow.postId = wh.postoffice.post.id;
+					reportRow.debtBeforeOverdue += r.cost.Value;
+					reportRows.Add(wh.id, reportRow);
+				}
+			}
+
 			var ms = new MemoryStream();
 			ExcelPackage excelPackage = new ExcelPackage();
 			excelPackage.Workbook.Worksheets.Add("Оборотная ведомость");
@@ -194,12 +270,12 @@ namespace credittrade.Modules
 
 				var groupedRequests = requestsByPost.GroupBy(x => x.buyer.warehouse_id);
 				int i = k+4;
-				decimal total = 0, paid = 0,penalty=0;
+				decimal total = 0,totalBefore=0, paid = 0,penalty=0,penaltyBefore=0;
 				foreach (IGrouping<int?, request> group in groupedRequests)
 				{
 					string warehouseName = group.ElementAt(0).buyer.warehouse.name;
 					int warehouseId = group.ElementAt(0).buyer.warehouse.id;
-					decimal totalDebt = 0, paidDebt = 0,pen=0;
+					decimal totalDebt = 0, paidDebt = 0,pen=0,penBefore=0;
 					foreach (var request in group)
 					{
 						totalDebt += request.cost.Value;
@@ -207,12 +283,15 @@ namespace credittrade.Modules
 							paidDebt += request.cost.Value;
 						if (debts.ContainsKey(warehouseId))
 							pen = debts[warehouseId];
+						if (debtsBefore.ContainsKey(warehouseId))
+							penBefore = debtsBefore[warehouseId];
 					}
 					paid += paidDebt;
 					total += totalDebt;
 					penalty+= pen;
+					penaltyBefore += penBefore;
 					sheet.Cells[i, 1].Value = warehouseName; sheet.Cells[i, 2].Value = totalDebt; sheet.Cells[i, 3].Value = paidDebt;
-					sheet.Cells[i, 4].Value = pen;
+					sheet.Cells[i, 4].Value = pen; sheet.Cells[i, 5].Value = penBefore;
 					sheet.Cells[i, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 					sheet.Cells[i, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 					sheet.Cells[i, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
@@ -220,7 +299,7 @@ namespace credittrade.Modules
 					i++;
 				}
 				sheet.Cells[i, 1].Value = "Итого"; sheet.Cells[i, 2].Value = total; sheet.Cells[i, 3].Value = paid;
-				sheet.Cells[i, 4].Value = penalty;
+				sheet.Cells[i, 4].Value = penalty; sheet.Cells[i, 5].Value = penaltyBefore;
 				sheet.Cells[i, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 				sheet.Cells[i, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 				sheet.Cells[i, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
