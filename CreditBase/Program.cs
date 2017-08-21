@@ -44,7 +44,7 @@ namespace CreditBase
 				new SqlLoaderCreator75(),
 				new SqlLoaderCreator03(),
 				new SqlLoaderCreator42(),
-				new SqlLoaderCreator22()
+				new SqlLoaderCreator22(),
 			};
 			foreach (var sqlLoaderCreator in creators)
 			{
@@ -159,11 +159,13 @@ namespace CreditBase
 
 					BaseDictionary.TryGetValue(itemNom.Key, out NomSearchBase);
 
-					if (NomSearchBase.Price != NomSearchNom.Price)
+					if (NomSearchBase.Price != NomSearchNom.Price || NomSearchBase.Name != NomSearchNom.Name)
 					{
 						string price = NomSearchNom.Price.ToString(CultureInfo.GetCultureInfo("en-US"));
 						string[] nomIdSplit = NomSearchBase.Id.Split('_');
-						string query = string.Format(@"UPDATE [credit_trade].[dbo].[goods] SET [price] = '{0}' WHERE  nom_id='{1}' and reg_code='{2}'", price, nomIdSplit[0], nomIdSplit[1]);
+						if (NomSearchBase.Name != NomSearchNom.Name)
+							SimpleLogger.GetInstance().Write($"Изменение имени номенклатуры:старое\t{NomSearchBase.Name}\tновое\t{NomSearchNom.Name}");
+						string query = $"UPDATE [credit_trade].[dbo].[goods] SET [price] = '{price}',name='{NomSearchNom.Name}' WHERE  nom_id='{nomIdSplit[0]}' and reg_code='{nomIdSplit[1]}'";
 
 						SqlCommand sqlQueryInsert = new SqlCommand(query, connInsUpd);
 						sqlQueryInsert.ExecuteNonQuery();
@@ -307,7 +309,6 @@ namespace CreditBase
 					dataReader.Close();
 				}
 			}
-
 			foreach (var OneFileLeftovers in FilesLeftovers)
 			{
 				i++;
