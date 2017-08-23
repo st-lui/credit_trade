@@ -100,29 +100,10 @@ namespace credittrade.Modules
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
 					user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
-					if (currentUser.warehouse.postoffice.idx == "656700")
+					if (currentUser.warehouse.postoffice.post.privilegies == 1)
 					{
-						var postList = unitOfWork.Posts.GetAll().Where(x => x.name.Contains("почтамт") && !x.name.Contains("ОСП"));
-						Dictionary<string, string> debt = new Dictionary<string, string>();
-						foreach (post post in postList)
-						{
-							decimal debtValue = 0;
-							var warehouses = unitOfWork.Posts.GetWarehouses(post.id);
-
-							foreach (var wh in warehouses)
-							{
-								decimal cost = unitOfWork.Warehouses.GetNotPaidRequests(wh.id).Sum(x => x.cost).Value;
-								if (cost > 0)
-									debtValue += cost;
-							}
-							debt.Add(post.name, debtValue.ToString(CultureInfo.GetCultureInfo("ru-RU")));
-						}
-						model.Debt = debt;
-						return View["report_ufps", model];
-					}
-					if (currentUser.warehouse.postoffice.idx == "670700")
-					{
-						var postList = unitOfWork.Posts.GetAll().Where(x => x.name.Contains("ОСП"));
+						int postid = currentUser.warehouse.postoffice.post.id;
+						var postList = unitOfWork.Posts.GetAll().Where(x => x.parent_id==postid);
 						Dictionary<string, string> debt = new Dictionary<string, string>();
 						foreach (post post in postList)
 						{
@@ -183,64 +164,29 @@ namespace credittrade.Modules
 					DateTime finish = DateTime.Parse(Request.Form["date_finish"]);
 					int postId = int.Parse(Request.Form["post"]);
 					MemoryStream ms = new MemoryStream();
-					if (postId == 1)
-					{
-						List<buyer> buyersPost = new List<buyer>();
-						for (int p = 24; p <= 41; p++)
-						{
-							IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(p);
-							buyersPost.AddRange(buyers);
-						}
-						var buyerIds = buyersPost.Select(x => x.id).ToList();
-						IList<request> reqs = unitOfWork.Requests.GetRequestsByDate(buyerIds, start, finish);
-						IList<request> reqsPenalty = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, start, finish);
-						InOutReportModel reportModel = new InOutReportModel();
-						reportModel.Start = Request.Form["date_start"];
-						reportModel.Finish = Request.Form["date_finish"];
-						reportModel.Requests = reqs;
-						reportModel.RequestsPenalty = reqsPenalty;
-						ms = Utils.GenReportUfps(reportModel);
-						//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-						//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					post post = unitOfWork.Posts.Get(postId);
 
-					}
-					else if (postId == 49)
+					List<buyer> buyersPost = new List<buyer>();
+					foreach (post p in post.children)
 					{
-						List<buyer> buyersPost = new List<buyer>();
-						for (int p = 42; p <= 48; p++)
-						{
-							IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(p);
-							buyersPost.AddRange(buyers);
-						}
-						var buyerIds = buyersPost.Select(x => x.id).ToList();
-						IList<request> reqs = unitOfWork.Requests.GetRequestsByDate(buyerIds, start, finish);
-						IList<request> reqsPenalty = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, start, finish);
-						InOutReportModel reportModel = new InOutReportModel();
-						reportModel.Start = Request.Form["date_start"];
-						reportModel.Finish = Request.Form["date_finish"];
-						reportModel.Requests = reqs;
-						reportModel.RequestsPenalty = reqsPenalty;
-						ms = Utils.GenReportUfps(reportModel);
-						//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-						//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+						IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(p.id);
+						buyersPost.AddRange(buyers);
 					}
-					else
-					{
-						IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(postId);
-						var buyerIds = buyers.Select(x => x.id).ToList();
-						IList<request> reqs = unitOfWork.Requests.GetRequestsByDate(buyerIds, start, finish);
-						IList<request> reqsPenalty = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, start, finish);
-						InOutReportModel reportModel = new InOutReportModel();
-						reportModel.Start = Request.Form["date_start"];
-						reportModel.Finish= Request.Form["date_finish"];
-						reportModel.Requests = reqs;
-						reportModel.RequestsPenalty = reqsPenalty;
-						ms = Utils.GenReport(reportModel);
-						//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-						//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-					}
+					var buyerIds = buyersPost.Select(x => x.id).ToList();
+					IList<request> reqs = unitOfWork.Requests.GetRequestsByDate(buyerIds, start, finish);
+					IList<request> reqsPenalty = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, start, finish);
+					InOutReportModel reportModel = new InOutReportModel();
+					reportModel.Start = Request.Form["date_start"];
+					reportModel.Finish = Request.Form["date_finish"];
+					reportModel.Requests = reqs;
+					reportModel.RequestsPenalty = reqsPenalty;
+					ms = Utils.GenReportUfps(reportModel);
+					//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+
 					return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-				}						
+				}
 			};
 		}
 	}

@@ -18,13 +18,18 @@ namespace DbModel
         public post()
         {
             this.postoffices = new HashSet<postoffice>();
+            this.children = new HashSet<post>();
         }
     
         public Nullable<int> privilegies { get; set; }
         public int id { get; set; }
         public string name { get; set; }
+        public Nullable<int> parent_id { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<postoffice> postoffices { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<post> children { get; set; }
+        public virtual post parent { get; set; }
     }
 }

@@ -36,7 +36,7 @@ namespace DataAccess
 
 		public post Get(int id)
 		{
-			return db.posts.SingleOrDefault(x => x.id == id);
+			return db.posts.Include("children").SingleOrDefault(x => x.id == id);
 		}
 
 		public post Get(string name)
