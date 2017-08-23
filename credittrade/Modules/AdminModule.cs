@@ -187,6 +187,8 @@ namespace credittrade.Modules
 					IList<request> reqs = unitOfWork.Requests.GetRequestsByDate(buyerIds, start, finish);
 					// заявки до периода
 					IList<request> reqsBefore = unitOfWork.Requests.GetRequestsByDate(buyerIds, SqlDateTime.MinValue.Value, start.AddDays(-1));
+					// заявки на конец периода
+					IList<request> reqsAfter = unitOfWork.Requests.GetRequestsByDate(buyerIds, SqlDateTime.MinValue.Value, finish);
 					// просроченные заявки на конец периода
 					IList<request> reqsPenalty = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, start, finish);
 					// просроченные заявки на начало периода
@@ -195,10 +197,13 @@ namespace credittrade.Modules
 					InOutReportModel reportModel = new InOutReportModel();
 					reportModel.Start = Request.Form["date_start"];
 					reportModel.Finish = Request.Form["date_finish"];
-					reportModel.Requests = reqs;
+					reportModel.StartDate = start;
+					reportModel.FinishDate = finish;
 					reportModel.RequestsBefore = reqsBefore;
-					reportModel.RequestsPenalty = reqsPenalty;
-					reportModel.BeforeRequestsPenalty = reqsPenaltyBefore;
+					reportModel.RequestsCurrent = reqs;
+					reportModel.RequestsAfter = reqsAfter;
+					reportModel.RequestsPenaltyAfter = reqsPenalty;
+					reportModel.RequestsPenaltyBefore = reqsPenaltyBefore;
 					ms = Utils.GenReportUfps(reportModel);
 					//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 					//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
