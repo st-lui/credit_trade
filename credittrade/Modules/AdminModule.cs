@@ -103,7 +103,7 @@ namespace credittrade.Modules
 					if (currentUser.warehouse.postoffice.post.privilegies == 1)
 					{
 						int postid = currentUser.warehouse.postoffice.post.id;
-						var postList = unitOfWork.Posts.GetAll().Where(x => x.parent_id==postid);
+						var postList = unitOfWork.Posts.GetAll().Where(x => x.parent_id == postid);
 						Dictionary<string, string> debt = new Dictionary<string, string>();
 						foreach (post post in postList)
 						{
@@ -138,6 +138,55 @@ namespace credittrade.Modules
 					}
 				}
 
+			};
+			Get["/report_mrc"] = param =>
+			{
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
+					List<MrcReportRow> reportRows = new List<MrcReportRow>();
+					var parents = unitOfWork.Posts.GetAll().Where(x=>x.privilegies==1).OrderBy(x=>x.name);
+					foreach (var ufps in parents)
+					{
+						MrcReportRow reportRow = new MrcReportRow();
+						reportRow.parent = ufps;
+						reportRow.name = ufps.name;
+						reportRow.children = new List<MrcReportRow>();
+						var postList = unitOfWork.Posts.GetAll().Where(x => x.parent_id == ufps.id);
+						decimal spent = 0, debt = 0, debtover = 0;
+						foreach (post post in postList)
+						{
+							MrcReportRow reportRow_child = new MrcReportRow();
+							reportRow_child.parent = post;
+							reportRow_child.name = post.name;
+							List<buyer> buyersPost = new List<buyer>();
+							IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(post.id);
+							buyersPost.AddRange(buyers);
+							var buyerIds = buyersPost.Select(x => x.id).ToList();
+							DateTime finish = DateTime.Today;
+							DateTime start = System.Data.SqlTypes.SqlDateTime.MinValue.Value;
+							IList<request> reqs = unitOfWork.Requests.GetRequestsByDate(buyerIds, start, finish);
+							foreach (request req in reqs)
+							{
+								reportRow_child.spent += req.cost.Value;
+								if (!req.paid.Value || req.pay_date > finish)
+								{
+									reportRow_child.debt += req.cost.Value;
+									if (req.date.Value.AddDays(30) < finish)
+										reportRow_child.debtOverdue += req.cost.Value;
+								}
+							}
+							reportRow.spent += reportRow_child.spent;
+							reportRow.debt += reportRow_child.debt;
+							reportRow.debtOverdue += reportRow_child.debtOverdue;
+							reportRow.children.Add(reportRow_child);
+						}
+						reportRows.Add(reportRow);
+					}
+					
+					model.reportRows=reportRows;
+					return View["report_mrc", model];
+				}
 			};
 			Get["/report_sells"] = param =>
 			{

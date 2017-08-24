@@ -1,0 +1,86 @@
+﻿@{
+    ViewBag.Title = "Отчет по должникам";
+    Layout = "layout_admin.cshtml";
+}
+@using credittrade.Modules
+<link rel="stylesheet" href="~/Content/css/jquery.treegrid.css" />
+<h2>@ViewBag.Title</h2>
+<link rel="stylesheet" href="~/Content/css/jquery.treegrid.css"/>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        text-align: left;
+        padding: 5px 10px;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    dt {
+        color: #444;
+        font-weight: 700;
+    }
+
+    th {
+        color: #444;
+    }
+
+    img {
+        max-width: 100%;
+    }
+</style>
+<div class="dataTable_div col-md-7">
+    <table id="buyers_table" class="row-border">
+        <thead><tr><th>Подразделение</th><th>Сумма продаж</th><th>Сумма долга</th><th>Просрочено</th></tr></thead>
+        @{int p = 1;}
+        @foreach (MrcReportRow reportRow in Model.reportRows)
+        {
+            int parent = p;
+            <tr class="treegrid-@p">
+                <td>
+                    @reportRow.name
+                </td>
+                <td>
+                    @reportRow.spent
+                </td>
+                <td>
+                    @reportRow.debt
+                </td>
+                <td>
+                    @reportRow.debtOverdue
+                </td>
+            </tr>
+            p++;
+            foreach (var item in reportRow.children)
+            {
+                <tr class="treegrid-@p treegrid-parent-@parent">
+                    <td>
+                        @item.name
+                    </td>
+                    <td>
+                        @item.spent
+                    </td>
+                    <td>
+                        @item.debt
+                    </td>
+                    <td>
+                        @item.debtOverdue
+                    </td>
+                </tr>
+                p++;
+            }
+        }
+    </table>
+</div>
+
+<script type="text/javascript" src="~/Content/scripts/jquery.treegrid.min.js"></script>
+
+<script language="javascript">
+    $(document).ready(function () {
+        $("#buyers_table").treegrid({ "initialState": "collapsed" });
+        
+    });
+</script>
+

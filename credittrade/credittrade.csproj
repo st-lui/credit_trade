@@ -27,6 +27,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -283,11 +284,16 @@
     <Content Include="Content\DataTables\media\images\sort_desc_disabled.png" />
     <Content Include="Content\default.min.css" />
     <Content Include="Content\img\button_delete.gif" />
+    <Content Include="Content\img\collapse.png" />
     <Content Include="Content\img\edit.png" />
+    <Content Include="Content\img\expand.png" />
     <Content Include="Content\img\favicon.ico" />
+    <Content Include="Content\img\file.png" />
+    <Content Include="Content\img\folder.png" />
     <Content Include="Content\img\gerb.png" />
     <Content Include="Content\img\glyphicons-halflings-white.png" />
     <Content Include="Content\img\glyphicons-halflings.png" />
+    <Content Include="Content\css\jquery.treegrid.css" />
     <Content Include="Content\nancy-vertical-bf-tb.png" />
     <Content Include="Content\scripts\bootstrap-datetimepicker.min.js" />
     <Content Include="Content\scripts\bootstrap.js" />
@@ -368,8 +374,13 @@
     <Content Include="Content\scripts\DataTables\media\js\jquery.dataTables.js" />
     <Content Include="Content\scripts\DataTables\media\js\jquery.dataTables.min.js" />
     <Content Include="Content\scripts\DataTables\media\js\jquery.js" />
+    <Content Include="Content\scripts\jquery.cookie.js" />
     <Content Include="Content\scripts\jquery.js" />
     <Content Include="Content\scripts\jquery.min.js" />
+    <Content Include="Content\scripts\jquery.treegrid.bootstrap2.js" />
+    <Content Include="Content\scripts\jquery.treegrid.bootstrap3.js" />
+    <Content Include="Content\scripts\jquery.treegrid.js" />
+    <Content Include="Content\scripts\jquery.treegrid.min.js" />
     <Content Include="Content\scripts\moment\moment.min.js" />
     <Content Include="Content\scripts\moment\ru.js" />
     <Content Include="favicon.ico" />
@@ -417,6 +428,7 @@
     <Compile Include="Modules\AdminModule.cs" />
     <Compile Include="Modules\IndexModule.cs" />
     <Compile Include="Modules\InOutReportModel.cs" />
+    <Compile Include="Modules\MrcReportRow.cs" />
     <Compile Include="Modules\RuDataAndMoneyConverter.cs" />
     <Compile Include="Modules\Utils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -441,6 +453,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Views\report_sells_ufps.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\report_mrc.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="Web.Debug.config">
