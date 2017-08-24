@@ -41,9 +41,9 @@ namespace CreditBase
 			//Console.WriteLine(ToWarehouses());
 			List<SqlLoaderCreator> creators = new List<SqlLoaderCreator>()
 			{
-				new SqlLoaderCreator75(),
-				new SqlLoaderCreator03(),
-				new SqlLoaderCreator42(),
+				//new SqlLoaderCreator75(),
+				//new SqlLoaderCreator03(),
+				//new SqlLoaderCreator42(),
 				new SqlLoaderCreator22(),
 			};
 			foreach (var sqlLoaderCreator in creators)
@@ -76,8 +76,111 @@ namespace CreditBase
 					SimpleLogger.GetInstance().Write(e.ToString());
 				}
 			}
+			RecalcPrices();
 		}
 
+		public static void RecalcPrices()
+		{
+			SimpleLogger.GetInstance().Write($"Начат пересчет цен");
+			string connStr = @"Data Source=.\SQL;
+							Initial Catalog=credit_trade;
+							Integrated Security=False;User ID=credit;Password=123456;";
+
+			SqlConnection conn = new SqlConnection(connStr);
+			conn.Open();
+			Dictionary<long, Leftover> leftovers = new Dictionary<long, Leftover>();
+			using (SqlCommand command = new SqlCommand($"select l.id,l.good_id,l.warehouse_id,l.amount,l.expenditure,l.price,g.name,p.id from leftovers l,goods g,warehouses w,postoffices po,posts p where l.good_id=g.id and l.warehouse_id=w.id and po.id=w.postoffice_id and po.post_id =p.id", conn))
+			{
+				if (conn.State == ConnectionState.Closed)
+					conn.Open();
+				using (SqlDataReader dataReader = command.ExecuteReader())
+				{
+					while (dataReader.Read())
+					{
+						var leftover = new Leftover(dataReader.GetInt32(0), dataReader.GetInt32(1), dataReader.GetInt32(2),
+							dataReader.GetDecimal(3), dataReader.GetDecimal(4), dataReader.GetDecimal(5), dataReader.GetString(6).Replace((char)160, ' '), dataReader.GetInt32(7).ToString());
+						long leftoverKey = (long)leftover.warehouse_id * 1000000 + leftover.good_id;
+						leftovers.Add(leftoverKey, leftover);
+					}
+					dataReader.Close();
+				}
+			}
+			List<Request> requests = new List<Request>();
+			List<RequestRow> requestRows = new List<RequestRow>();
+			using (SqlCommand reqCommand = new SqlCommand("select r.id,b.warehouse_id,cost from requests r,buyers b where b.id=r.buyer_id", conn))
+			{
+				using (SqlDataReader requestReader = reqCommand.ExecuteReader())
+				{
+					while (requestReader.Read())
+					{
+						int requestId = requestReader.GetInt32(0);
+						int warehouseId = requestReader.GetInt32(1);
+						decimal requestCost = requestReader.GetDecimal(2);
+						decimal requestCostChange = 0;
+						Request request = new Request();
+						request.id = requestId;
+						using (SqlConnection conn2 = new SqlConnection(connStr))
+						{
+							conn2.Open();
+							using (SqlCommand requestRowCommand = new SqlCommand($"select id, price,amount,goods_id from request_rows where request_id={requestId}", conn2))
+							{
+								using (SqlDataReader requestRowReader = requestRowCommand.ExecuteReader())
+								{
+									while (requestRowReader.Read())
+									{
+										int requestRowId = requestRowReader.GetInt32(0);
+										decimal requestRowPrice = requestRowReader.GetDecimal(1);
+										decimal amount = requestRowReader.GetDecimal(2);
+										int good_id = requestRowReader.GetInt32(3);
+										long leftoverId = (long)warehouseId * 1000000 + good_id;
+										//if (leftovers.ContainsKey(leftoverId))
+										{
+											var leftover = leftovers[leftoverId];
+											if (leftover.price != requestRowPrice)
+											{
+												RequestRow requestRow = new RequestRow();
+												requestRow.id = requestRowId;
+												requestRow.oldprice = requestRow.price;
+												requestRow.price = leftover.price;
+												requestRow.cost = requestRow.price * amount;
+												request.costChange += requestRow.cost - requestRowPrice * amount;
+												requestRows.Add(requestRow);
+											}
+										}
+									}
+								}
+							}
+							conn2.Close();
+						}
+						if (request.costChange != 0)
+							requests.Add(request);
+					}
+				}
+			}
+			conn.Close();
+			if (conn.State == ConnectionState.Closed)
+				conn.Open();
+
+			var transaction = conn.BeginTransaction();
+			foreach (var requestRow in requestRows)
+			{
+				SimpleLogger.GetInstance().Write($"Обновление цены request_row id:{requestRow.id} старая цена: {requestRow.oldprice}новая цена: {requestRow.price}");
+				//using (SqlCommand command = new SqlCommand())
+				//{
+				//	command.Connection = conn;
+				//	command.Transaction = transaction;
+				//	string priceStr = requestRow.price.ToString(CultureInfo.GetCultureInfo("en-US"));
+				//	command.CommandText = $"update request_rows set price={priceStr} where id={requestRow.id}";
+				//	command.ExecuteNonQuery();
+				//}
+
+			}
+			transaction.Commit();
+			conn.Close();
+			//todo обновление бд
+			SimpleLogger.GetInstance().Write($"Завершен пересчет цен");
+
+		}
 		public static void LeftoversFrom1c()
 		{
 			SimpleLogger.GetInstance().Write($"Начато формирование остатков");
@@ -105,7 +208,7 @@ namespace CreditBase
 				//Console.WriteLine(TempNom.ToString());
 			}
 
-			string connStr = @"Data Source=r54web02\sql;
+			string connStr = @"Data Source=.\SQL;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -204,7 +307,7 @@ namespace CreditBase
 
 		public static string Leftovers(string reg_code, Func<string, string> whatAPost, Dictionary<string, string> warehousePriceKindDictionary, Dictionary<string, Dictionary<string, decimal>> sqlLoaderPriceKindNomPrice)
 		{
-			string connStr = @"Data Source=r54web02\sql;
+			string connStr = @"Data Source=.\SQL;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -302,7 +405,7 @@ namespace CreditBase
 					while (dataReader.Read())
 					{
 						var leftover = new Leftover(dataReader.GetInt32(0), dataReader.GetInt32(1), dataReader.GetInt32(2),
-							dataReader.GetDecimal(3), dataReader.GetDecimal(4), dataReader.GetDecimal(5), dataReader.GetString(6).Replace((char)160,' '), dataReader.GetInt32(7).ToString());
+							dataReader.GetDecimal(3), dataReader.GetDecimal(4), dataReader.GetDecimal(5), dataReader.GetString(6).Replace((char)160, ' '), dataReader.GetInt32(7).ToString());
 						long leftoverKey = (long)leftover.warehouse_id * 1000000 + leftover.good_id;
 						leftovers.Add(leftoverKey, leftover);
 					}
@@ -538,7 +641,7 @@ namespace CreditBase
 
 		public static string ToPost()
 		{
-			string connStr = @"Data Source=r54web02\SQL;
+			string connStr = @"Data Source=.\SQL;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 			List<string> PostsList = new List<string>() {
@@ -608,7 +711,7 @@ namespace CreditBase
 				}
 
 
-				string connStr = @"Data Source=r54web02\SQL;
+				string connStr = @"Data Source=.\SQL;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -624,8 +727,8 @@ namespace CreditBase
 		   ('{Null(listOffices.Cells["C" + i].Value)}','{Null(listOffices.Cells["B" + i].Value)}','{WhatAPost(Null(listOffices.Cells["A" + i].Value), conn)}')");
 
 					SqlCommand sqlQueryInsert = new SqlCommand(query, conn);
-					int postOfficeId = (int) sqlQueryInsert.ExecuteScalar();
-					SqlCommand sqlQueryInsertWarehouse=new SqlCommand($"insert into warehouses (postoffice_id,name) values ({postOfficeId},'{Null(listOffices.Cells["B" + i].Value)}')",conn);
+					int postOfficeId = (int)sqlQueryInsert.ExecuteScalar();
+					SqlCommand sqlQueryInsertWarehouse = new SqlCommand($"insert into warehouses (postoffice_id,name) values ({postOfficeId},'{Null(listOffices.Cells["B" + i].Value)}')", conn);
 					sqlQueryInsertWarehouse.ExecuteNonQuery();
 				}
 				conn.Close();
@@ -671,7 +774,7 @@ namespace CreditBase
 
 		public static string ToWarehouses()
 		{
-			string connStr = @"Data Source=r54web02\sql;
+			string connStr = @"Data Source=.\SQL;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -727,6 +830,19 @@ namespace CreditBase
 		public string id_nom { set; get; }
 	}
 
+	public class Request
+	{
+		public int id { get; set; }
+		public decimal costChange { get; set; }
+	}
+
+	public class RequestRow
+	{
+		public int id { get; set; }
+		public decimal price { get; set; }
+		public decimal oldprice { get; set; }
+		public decimal cost { get; set; }
+	}
 	public class Leftover
 	{
 		public Leftover(int id, int goodId, int warehouseId, decimal amount, decimal expenditure, decimal price, string goodName, string warehouseName)
