@@ -268,7 +268,7 @@ namespace CreditBase
 						string[] nomIdSplit = NomSearchBase.Id.Split('_');
 						if (NomSearchBase.Name != NomSearchNom.Name)
 							SimpleLogger.GetInstance().Write($"Изменение имени номенклатуры:старое\t{NomSearchBase.Name}\tновое\t{NomSearchNom.Name}");
-						string query = $"UPDATE [credit_trade].[dbo].[goods] SET [price] = '{price}',name='{NomSearchNom.Name}' WHERE  nom_id='{nomIdSplit[0]}' and reg_code='{nomIdSplit[1]}'";
+						string query = $"UPDATE [credit_trade].[dbo].[goods] SET [price] = '{price}',name='{NomSearchNom.Name.Replace("'","''")}' WHERE  nom_id='{nomIdSplit[0]}' and reg_code='{nomIdSplit[1]}'";
 
 						SqlCommand sqlQueryInsert = new SqlCommand(query, connInsUpd);
 						sqlQueryInsert.ExecuteNonQuery();
