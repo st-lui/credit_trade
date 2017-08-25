@@ -145,7 +145,7 @@ namespace credittrade.Modules
 				{
 					user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
 					List<MrcReportRow> reportRows = new List<MrcReportRow>();
-					var parents = unitOfWork.Posts.GetAll().Where(x=>x.privilegies==1).OrderBy(x=>x.name);
+					var parents = unitOfWork.Posts.GetAll().Where(x => x.privilegies == 1).OrderBy(x => x.name);
 					foreach (var ufps in parents)
 					{
 						MrcReportRow reportRow = new MrcReportRow();
@@ -183,8 +183,8 @@ namespace credittrade.Modules
 						}
 						reportRows.Add(reportRow);
 					}
-					
-					model.reportRows=reportRows;
+
+					model.reportRows = reportRows;
 					return View["report_mrc", model];
 				}
 			};
@@ -216,9 +216,18 @@ namespace credittrade.Modules
 					post post = unitOfWork.Posts.Get(postId);
 
 					List<buyer> buyersPost = new List<buyer>();
-					foreach (post p in post.children)
+					if (post.privilegies == 1)
 					{
-						IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(p.id);
+						foreach (post p in post.children)
+						{
+							IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(p.id);
+							buyersPost.AddRange(buyers);
+						}
+					}
+					// иначе почтамт
+					else
+					{
+						IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(post.id);
 						buyersPost.AddRange(buyers);
 					}
 					var buyerIds = buyersPost.Select(x => x.id).ToList();
@@ -237,6 +246,66 @@ namespace credittrade.Modules
 					return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 				}
 			};
+
+
+			Get["/report_goods"] = param =>
+			{
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
+					post post = currentUser.warehouse.postoffice.post;
+					model.Post = post.name;
+					model.Post_id = post.id;
+					var today = DateTime.Today;
+					string StartDate = new DateTime(today.Year, today.Month, 1).ToString("d", CultureInfo.InvariantCulture);
+					string FinishDate = new DateTime(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month)).ToString("d", CultureInfo.InvariantCulture);
+					model.StartDate = StartDate;
+					model.FinishDate = FinishDate;
+
+				}
+				return View["report_goods", model];
+			};
+
+			Post["/report_goods"] = param =>
+			{
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					DateTime start = DateTime.Parse(Request.Form["date_start"]);
+					DateTime finish = DateTime.Parse(Request.Form["date_finish"]);
+					int postId = int.Parse(Request.Form["post"]);
+					MemoryStream ms = new MemoryStream();
+					post post = unitOfWork.Posts.Get(postId);
+
+					List<buyer> buyersPost = new List<buyer>();
+					if (post.privilegies == 1)
+					{
+						foreach (post p in post.children)
+						{
+							IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(p.id);
+							buyersPost.AddRange(buyers);
+						}
+					}
+					// иначе почтамт
+					else
+					{
+						IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(post.id);
+						buyersPost.AddRange(buyers);
+					}
+					var buyerIds = buyersPost.Select(x => x.id).ToList();
+					IList<request> reqs = unitOfWork.Requests.GetRequestsWithRowsByDate(buyerIds, start, finish);
+					InOutReportModel reportModel = new InOutReportModel();
+					reportModel.Start = Request.Form["date_start"];
+					reportModel.Finish = Request.Form["date_finish"];
+					reportModel.Requests = reqs;
+					ms = Utils.GenReportGoods(reportModel);
+					//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+
+					return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+				}
+			};
+
 		}
 	}
 }
