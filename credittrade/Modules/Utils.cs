@@ -183,8 +183,7 @@ namespace credittrade.Modules
 			var finish = reportModel.Finish;
 
 			DateTime finishDate = reportModel.FinishDate.AddDays(1);
-			IList<request> penaltyRequests = reportModel.RequestsPenaltyBefore;
-			Dictionary<int, decimal> debts = GetDebtForRequests(penaltyRequests);
+			Dictionary<int, decimal> debts = GetDebtForRequests(reportModel.RequestsPenaltyAfter);
 			Dictionary<int, decimal> debtsBefore = GetDebtForRequests(reportModel.RequestsPenaltyBefore);
 
 			Dictionary<int, ReportRow> reportRows = new Dictionary<int, ReportRow>();
@@ -273,24 +272,40 @@ namespace credittrade.Modules
 				}
 			}
 			//обработка просроченных заказов на начало периода
-			foreach (request r in reqBefore)
+			foreach (var debtBefore in debtsBefore)
 			{
-				warehouse wh = r.buyer.warehouse;
+				int wh = debtBefore.Key;
 				ReportRow reportRow;
-				if (reportRows.ContainsKey(wh.id))
+				if (reportRows.ContainsKey(wh))
 				{
-					reportRow = reportRows[wh.id];
-					reportRow.debtBeforeOverdue += r.cost.Value;
+					reportRow = reportRows[wh];
+					reportRow.debtBeforeOverdue += debtBefore.Value;
 				}
 				else
 				{
 					reportRow = new ReportRow();
-					reportRow.warehouseId = wh.id;
-					reportRow.warehouseName = wh.name;
-					reportRow.postId = wh.postoffice.post.id;
-					reportRow.postName = wh.postoffice.post.name;
-					reportRow.debtBeforeOverdue += r.cost.Value;
-					reportRows.Add(wh.id, reportRow);
+					reportRow.warehouseId = wh;
+					reportRow.debtBeforeOverdue += debtBefore.Value;
+					reportRows.Add(wh, reportRow);
+				}
+			}
+
+			//обработка просроченных заказов на конец периода
+			foreach (var debt in debts)
+			{
+				int wh = debt.Key;
+				ReportRow reportRow;
+				if (reportRows.ContainsKey(wh))
+				{
+					reportRow = reportRows[wh];
+					reportRow.debtAfterOverdue += debt.Value;
+				}
+				else
+				{
+					reportRow = new ReportRow();
+					reportRow.warehouseId = wh;
+					reportRow.debtAfterOverdue += debt.Value;
+					reportRows.Add(wh, reportRow);
 				}
 			}
 

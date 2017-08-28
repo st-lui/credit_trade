@@ -190,9 +190,9 @@ namespace credittrade.Modules
 					// заявки на конец периода
 					IList<request> reqsAfter = unitOfWork.Requests.GetRequestsByDate(buyerIds, SqlDateTime.MinValue.Value, finish);
 					// просроченные заявки на конец периода
-					IList<request> reqsPenalty = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, start, finish);
+					IList<request> reqsPenalty = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, SqlDateTime.MinValue.Value, finish);
 					// просроченные заявки на начало периода
-					IList<request> reqsPenaltyBefore = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, SqlDateTime.MinValue.Value, start.AddDays(-1));
+					IList<request> reqsPenaltyBefore = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, SqlDateTime.MinValue.Value, start.AddDays(-1)); 
 
 					InOutReportModel reportModel = new InOutReportModel();
 					reportModel.Start = Request.Form["date_start"];
