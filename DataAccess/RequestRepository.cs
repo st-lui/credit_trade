@@ -1,4 +1,4 @@
-using System;
+ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.SqlServer;
@@ -118,7 +118,7 @@ namespace DataAccess
 		public IList<request> GetPenaltyRequestsByDate(List<int> buyers, DateTime start, DateTime finish)
 		{
 			finish = finish.AddDays(1);
-			return db.requests.Include("user.warehouse.postoffice.post").Where(x => !x.paid.Value && SqlFunctions.DateAdd("day",30,x.date)<finish && buyers.Contains(x.buyer_id.Value)).ToList();
+			return db.requests.Include("user.warehouse.postoffice.post").Where(x => x.date.Value>=start && x.date<finish && (!x.paid.Value || x.paid.Value && x.pay_date.Value>=finish) && SqlFunctions.DateAdd("day",30,x.date)<finish && buyers.Contains(x.buyer_id.Value)).ToList();
 		}
 	}
 }

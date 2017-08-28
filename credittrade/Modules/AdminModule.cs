@@ -9,6 +9,7 @@ using Nancy;
 using Nancy.Security;
 using System.Globalization;
 using System.IO;
+using System.Data.SqlTypes;
 
 namespace credittrade.Modules
 {
@@ -214,21 +215,44 @@ namespace credittrade.Modules
 					int postId = int.Parse(Request.Form["post"]);
 					MemoryStream ms = new MemoryStream();
 					post post = unitOfWork.Posts.Get(postId);
-
 					List<buyer> buyersPost = new List<buyer>();
-					foreach (post p in post.children)
+					//если уфпс
+					if (post.privilegies == 1)
 					{
-						IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(p.id);
+						foreach (post p in post.children)
+						{
+							IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(p.id);
+							buyersPost.AddRange(buyers);
+						}
+					}
+					// иначе почтамт
+					else
+					{
+						IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(post.id);
 						buyersPost.AddRange(buyers);
 					}
 					var buyerIds = buyersPost.Select(x => x.id).ToList();
+					// заявки периода
 					IList<request> reqs = unitOfWork.Requests.GetRequestsByDate(buyerIds, start, finish);
-					IList<request> reqsPenalty = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, start, finish);
+					// заявки до периода
+					IList<request> reqsBefore = unitOfWork.Requests.GetRequestsByDate(buyerIds, SqlDateTime.MinValue.Value, start.AddDays(-1));
+					// заявки на конец периода
+					IList<request> reqsAfter = unitOfWork.Requests.GetRequestsByDate(buyerIds, SqlDateTime.MinValue.Value, finish);
+					// просроченные заявки на конец периода
+					IList<request> reqsPenalty = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, SqlDateTime.MinValue.Value, finish);
+					// просроченные заявки на начало периода
+					IList<request> reqsPenaltyBefore = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, SqlDateTime.MinValue.Value, start.AddDays(-1)); 
+
 					InOutReportModel reportModel = new InOutReportModel();
 					reportModel.Start = Request.Form["date_start"];
 					reportModel.Finish = Request.Form["date_finish"];
-					reportModel.Requests = reqs;
-					reportModel.RequestsPenalty = reqsPenalty;
+					reportModel.StartDate = start;
+					reportModel.FinishDate = finish;
+					reportModel.RequestsBefore = reqsBefore;
+					reportModel.RequestsCurrent = reqs;
+					reportModel.RequestsAfter = reqsAfter;
+					reportModel.RequestsPenaltyAfter = reqsPenalty;
+					reportModel.RequestsPenaltyBefore = reqsPenaltyBefore;
 					ms = Utils.GenReportUfps(reportModel);
 					//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 					//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");

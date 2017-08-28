@@ -14,6 +14,16 @@ namespace credittrade.Modules
 	public class Utils
 	{
 		/// <summary>
+		/// Класс, содержащий данные строки отчета
+		/// </summary>
+		public class ReportRow
+		{
+			public int warehouseId, postId;
+			public string warehouseName,postName;
+			public decimal debtBefore, paidBefore, debtBeforeOverdue, spent, paid, debtAfter, paidAfter, debtAfterOverdue;
+			public decimal spentBefore, spentAfter;
+		}
+		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="request"></param>
@@ -101,131 +111,302 @@ namespace credittrade.Modules
 			return debtDictionary;
 		}
 
-		public static MemoryStream GenReport(InOutReportModel reportModel)
-		{
-			IList<request> req = reportModel.Requests;
-			IList<request> penaltyRequests = reportModel.RequestsPenalty;
-			string start=reportModel.Start;
-			string finish = reportModel.Finish;
-			var ms = new MemoryStream();
-			ExcelPackage excelPackage = new ExcelPackage();
-			Dictionary<int, decimal> debts = GetDebtForRequests(penaltyRequests);
-			excelPackage.Workbook.Worksheets.Add("Оборотная ведомость");
-			var sheet = excelPackage.Workbook.Worksheets[1];
-			sheet.Cells[1, 1].Value = "Оборотная ведомость";
-			sheet.Cells[1, 1].Style.Font.Size = 16;
-			sheet.Cells[2, 1].Value = $"Период: {start} - {finish}";
-			sheet.Cells[2, 1].Style.Font.Size = 13;
-			sheet.Cells[3, 1].Value = "Склад"; sheet.Cells[3, 2].Value = "Отпущено на сумму"; sheet.Cells[3, 3].Value = "Из них погашено";
-			sheet.Cells[3, 4].Value = "Просроченный долг";
-			sheet.Cells[3, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-			sheet.Cells[3, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-			sheet.Cells[3, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-			sheet.Cells[3, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-			sheet.Cells[3, 1, 3, 4].Style.Font.Size = 13;
-			var groupedRequests = req.GroupBy(x => x.buyer.warehouse_id);
-			int i = 4;
-			decimal total = 0,paid=0,penalty=0;
-			foreach (IGrouping<int?, request> group in groupedRequests)
-			{
-				string warehouseName = group.ElementAt(0).buyer.warehouse.name;
-				int warehouseId = group.ElementAt(0).buyer.warehouse.id;
-				decimal totalDebt = 0, paidDebt = 0,pen=0;
-				foreach (var request in group)
-				{
-					totalDebt += request.cost.Value;
-					if (request.paid.Value)
-						paidDebt += request.cost.Value;
-				}
-				if (debts.ContainsKey(warehouseId))
-					pen = debts[warehouseId];
-				paid += paidDebt;
-				total += totalDebt;
-				penalty += pen;
-				sheet.Cells[i, 1].Value = warehouseName; sheet.Cells[i, 2].Value = totalDebt; sheet.Cells[i, 3].Value = paidDebt;
-				sheet.Cells[i, 4].Value = pen;
-				sheet.Cells[i, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-				sheet.Cells[i, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-				sheet.Cells[i, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-				sheet.Cells[i, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-				i++;
-			}
-			sheet.Cells[i, 1].Value = "Итого"; sheet.Cells[i, 2].Value = total; sheet.Cells[i, 3].Value = paid;
-			sheet.Cells[i, 4].Value = penalty;
-			sheet.Cells[i, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-			sheet.Cells[i, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-			sheet.Cells[i, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-			sheet.Cells[i, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-			sheet.Cells[i, 1, i, 4].Style.Font.Size = 13;
-			const double minWidth = 0.00;
-			const double maxWidth = 50.00;
-			sheet.Cells.AutoFitColumns(minWidth, maxWidth);
-			excelPackage.SaveAs(ms);
-			return ms;
-		}
+		//public static MemoryStream GenReport(InOutReportModel reportModel)
+		//{
+		//	IList<request> req = reportModel.RequestsCurrent;
+		//	IList<request> penaltyRequests = reportModel.RequestsPenalty;
+		//	string start=reportModel.Start;
+		//	string finish = reportModel.Finish;
+		//	var ms = new MemoryStream();
+		//	ExcelPackage excelPackage = new ExcelPackage();
+		//	Dictionary<int, decimal> debts = GetDebtForRequests(penaltyRequests);
+		//	excelPackage.Workbook.Worksheets.Add("Оборотная ведомость");
+		//	var sheet = excelPackage.Workbook.Worksheets[1];
+		//	sheet.Cells[1, 1].Value = "Оборотная ведомость";
+		//	sheet.Cells[1, 1].Style.Font.Size = 16;
+		//	sheet.Cells[2, 1].Value = $"Период: {start} - {finish}";
+		//	sheet.Cells[2, 1].Style.Font.Size = 13;
+		//	sheet.Cells[3, 1].Value = "Склад"; sheet.Cells[3, 2].Value = "Отпущено на сумму"; sheet.Cells[3, 3].Value = "Из них погашено";
+		//	sheet.Cells[3, 4].Value = "Просроченный долг";
+		//	sheet.Cells[3, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+		//	sheet.Cells[3, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+		//	sheet.Cells[3, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+		//	sheet.Cells[3, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+		//	sheet.Cells[3, 1, 3, 4].Style.Font.Size = 13;
+		//	var groupedRequests = req.GroupBy(x => x.buyer.warehouse_id);
+		//	int i = 4;
+		//	decimal total = 0,paid=0,penalty=0;
+		//	foreach (IGrouping<int?, request> group in groupedRequests)
+		//	{
+		//		string warehouseName = group.ElementAt(0).buyer.warehouse.name;
+		//		int warehouseId = group.ElementAt(0).buyer.warehouse.id;
+		//		decimal totalDebt = 0, paidDebt = 0,pen=0;
+		//		foreach (var request in group)
+		//		{
+		//			totalDebt += request.cost.Value;
+		//			if (request.paid.Value)
+		//				paidDebt += request.cost.Value;
+		//		}
+		//		if (debts.ContainsKey(warehouseId))
+		//			pen = debts[warehouseId];
+		//		paid += paidDebt;
+		//		total += totalDebt;
+		//		penalty += pen;
+		//		sheet.Cells[i, 1].Value = warehouseName; sheet.Cells[i, 2].Value = totalDebt; sheet.Cells[i, 3].Value = paidDebt;
+		//		sheet.Cells[i, 4].Value = pen;
+		//		sheet.Cells[i, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+		//		sheet.Cells[i, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+		//		sheet.Cells[i, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+		//		sheet.Cells[i, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+		//		i++;
+		//	}
+		//	sheet.Cells[i, 1].Value = "Итого"; sheet.Cells[i, 2].Value = total; sheet.Cells[i, 3].Value = paid;
+		//	sheet.Cells[i, 4].Value = penalty;
+		//	sheet.Cells[i, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+		//	sheet.Cells[i, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+		//	sheet.Cells[i, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+		//	sheet.Cells[i, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+		//	sheet.Cells[i, 1, i, 4].Style.Font.Size = 13;
+		//	const double minWidth = 0.00;
+		//	const double maxWidth = 50.00;
+		//	sheet.Cells.AutoFitColumns(minWidth, maxWidth);
+		//	excelPackage.SaveAs(ms);
+		//	return ms;
+		//}
 
 		public static MemoryStream GenReportUfps(InOutReportModel reportModel)
 		{
-			var req = reportModel.Requests;
+			var reqCurrent = reportModel.RequestsCurrent;
+			var reqBefore = reportModel.RequestsBefore;
+			var reqAfter = reportModel.RequestsAfter;
 			var start = reportModel.Start;
 			var finish = reportModel.Finish;
-			IList<request> penaltyRequests = reportModel.RequestsPenalty;
-			Dictionary<int, decimal> debts = GetDebtForRequests(penaltyRequests);
+
+			DateTime finishDate = reportModel.FinishDate.AddDays(1);
+			Dictionary<int, decimal> debts = GetDebtForRequests(reportModel.RequestsPenaltyAfter);
+			Dictionary<int, decimal> debtsBefore = GetDebtForRequests(reportModel.RequestsPenaltyBefore);
+
+			Dictionary<int, ReportRow> reportRows = new Dictionary<int, ReportRow>();
+			//обработка заявок текущего периода
+			foreach (request r in reqCurrent)
+			{
+				warehouse wh = r.buyer.warehouse;
+				ReportRow reportRow;
+				if (reportRows.ContainsKey(wh.id))
+				{
+					reportRow = reportRows[wh.id];
+					reportRow.spent += r.cost.Value;
+				}
+				else
+				{
+					reportRow = new ReportRow();
+					reportRow.warehouseId = wh.id;
+					reportRow.warehouseName = wh.name;
+					reportRow.postId = wh.postoffice.post.id;
+					reportRow.postName = wh.postoffice.post.name;
+					reportRow.spent = r.cost.Value;
+					reportRows.Add(wh.id, reportRow);
+				}
+			}
+			//обработка заявок на начало периода
+			foreach (request r in reqBefore)
+			{
+				warehouse wh = r.buyer.warehouse;
+				ReportRow reportRow;
+				if (reportRows.ContainsKey(wh.id))
+				{
+					reportRow = reportRows[wh.id];
+					reportRow.spentBefore += r.cost.Value;
+					// если заказ оплачен в пред периоде, то включить его в оплаченные
+					if (!(r.paid.Value && r.pay_date.Value < reportModel.StartDate))
+						reportRow.paidBefore += r.cost.Value;
+				}
+				else
+				{
+					reportRow = new ReportRow();
+					reportRow.warehouseId = wh.id;
+					reportRow.warehouseName = wh.name;
+					reportRow.postId = wh.postoffice.post.id;
+					reportRow.postName = wh.postoffice.post.name;
+					reportRow.spentBefore += r.cost.Value;
+					// если заказ оплачен в пред периоде, то включить его в оплаченные
+					if (!(r.paid.Value && r.pay_date.Value < reportModel.StartDate))
+						reportRow.paidBefore += r.cost.Value;
+					reportRows.Add(wh.id, reportRow);
+				}
+			}
+
+			//обработка заявок на конец периода
+			foreach (request r in reqAfter)
+			{
+				warehouse wh = r.buyer.warehouse;
+				ReportRow reportRow;
+				if (reportRows.ContainsKey(wh.id))
+				{
+					reportRow = reportRows[wh.id];
+					reportRow.spentAfter += r.cost.Value;
+					// если заказ оплачен в пред периоде, то включить его в оплаченные
+					if (!(r.paid.Value && r.pay_date.Value < reportModel.FinishDate))
+						reportRow.paidAfter += r.cost.Value;
+					// если заказ оплачен в текущем периоде, то включить его в оплаченные
+					if (r.paid.Value && r.pay_date.Value >= reportModel.StartDate && r.pay_date.Value < finishDate)
+						reportRow.paid += r.cost.Value;
+
+				}
+				else
+				{
+					reportRow = new ReportRow();
+					reportRow.warehouseId = wh.id;
+					reportRow.warehouseName = wh.name;
+					reportRow.postId = wh.postoffice.post.id;
+					reportRow.postName = wh.postoffice.post.name;
+					reportRow.spentAfter += r.cost.Value;
+					// если заказ оплачен в пред периоде, то включить его в оплаченные
+					if (!(r.paid.Value && r.pay_date.Value < reportModel.FinishDate))
+						reportRow.paidAfter= r.cost.Value;
+					// если заказ оплачен в текущем периоде, то включить его в оплаченные
+					if (r.paid.Value && r.pay_date.Value >= reportModel.StartDate && r.pay_date.Value < finishDate)
+						reportRow.paid = r.cost.Value;
+
+					reportRows.Add(wh.id, reportRow);
+				}
+			}
+			//обработка просроченных заказов на начало периода
+			foreach (var debtBefore in debtsBefore)
+			{
+				int wh = debtBefore.Key;
+				ReportRow reportRow;
+				if (reportRows.ContainsKey(wh))
+				{
+					reportRow = reportRows[wh];
+					reportRow.debtBeforeOverdue += debtBefore.Value;
+				}
+				else
+				{
+					reportRow = new ReportRow();
+					reportRow.warehouseId = wh;
+					reportRow.debtBeforeOverdue += debtBefore.Value;
+					reportRows.Add(wh, reportRow);
+				}
+			}
+
+			//обработка просроченных заказов на конец периода
+			foreach (var debt in debts)
+			{
+				int wh = debt.Key;
+				ReportRow reportRow;
+				if (reportRows.ContainsKey(wh))
+				{
+					reportRow = reportRows[wh];
+					reportRow.debtAfterOverdue += debt.Value;
+				}
+				else
+				{
+					reportRow = new ReportRow();
+					reportRow.warehouseId = wh;
+					reportRow.debtAfterOverdue += debt.Value;
+					reportRows.Add(wh, reportRow);
+				}
+			}
+
 			var ms = new MemoryStream();
 			ExcelPackage excelPackage = new ExcelPackage();
 			excelPackage.Workbook.Worksheets.Add("Оборотная ведомость");
 			var sheet = excelPackage.Workbook.Worksheets[1];
-
-			int k = 0;
-			var groupedByPost = req.GroupBy(x => x.buyer.warehouse.postoffice.post_id).OrderBy(x=>x.ElementAt(0).buyer.warehouse.postoffice.post.name);
-			foreach (IGrouping<int, request> requestsByPost in groupedByPost)
+			var reportRowsList = new List<ReportRow>();
+			foreach (var reportRow in reportRows)
 			{
-				sheet.Cells[k+1, 1].Value = $"Оборотная ведомость - {requestsByPost.ElementAt(0).buyer.warehouse.postoffice.post.name}";
+				reportRowsList.Add(reportRow.Value);
+			}
+			int k = 0;
+			var groupedByPost = reportRowsList.GroupBy(x => x.postId).OrderBy(x=>x.ElementAt(0).postName);
+			foreach (IGrouping<int, ReportRow> requestsByPost in groupedByPost)
+			{
+				sheet.Cells[k+1, 1].Value = $"Оборотная ведомость - {requestsByPost.ElementAt(0).postName}";
 				sheet.Cells[k+1, 1].Style.Font.Size = 16;
 				sheet.Cells[k+2, 1].Value = $"Период: {start} - {finish}";
 				sheet.Cells[k+2, 1].Style.Font.Size = 13;
-				sheet.Cells[k+3, 1].Value = "Склад"; sheet.Cells[k+3, 2].Value = "Отпущено на сумму"; sheet.Cells[k+3, 3].Value = "Из них погашено";
+				sheet.Cells[k+3, 1].Value = "Склад";
+				sheet.Cells[k+3, 2].Value = "Отпущено на сумму";
+				sheet.Cells[k+3, 3].Value = "Долг";
 				sheet.Cells[k+3, 4].Value = "Просроченный долг";
+				sheet.Cells[k + 3, 5].Value = "Отпущено на сумму";
+				sheet.Cells[k + 3, 6].Value = "Из них погашено";
+				sheet.Cells[k + 3, 7].Value = "Отпущено на сумму";
+				sheet.Cells[k + 3, 8].Value = "Долг";
+				sheet.Cells[k + 3, 9].Value = "Просроченный долг";
 				sheet.Cells[k+3, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 				sheet.Cells[k+3, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 				sheet.Cells[k+3, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 				sheet.Cells[k+3, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-				sheet.Cells[k+3, 1, k+3, 4].Style.Font.Size = 13;
+				sheet.Cells[k+3, 5].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[k+3, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[k+3, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[k+3, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[k+3, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[k+3, 1, k+3, 9].Style.Font.Size = 13;
 
-				var groupedRequests = requestsByPost.GroupBy(x => x.buyer.warehouse_id);
+				//var groupedRequests = requestsByPost.GroupBy(x => x.buyer.warehouse_id);
 				int i = k+4;
-				decimal total = 0, paid = 0,penalty=0;
-				foreach (IGrouping<int?, request> group in groupedRequests)
+				decimal spentBefore=0,paidBefore=0,penaltyBefore=0,spentCurrent=0,paidCurrent=0,spentAfter=0,paidAfter=0,penaltyAfter=0;
+				foreach (ReportRow reportRow in requestsByPost)
 				{
-					string warehouseName = group.ElementAt(0).buyer.warehouse.name;
-					int warehouseId = group.ElementAt(0).buyer.warehouse.id;
-					decimal totalDebt = 0, paidDebt = 0,pen=0;
-					foreach (var request in group)
-					{
-						totalDebt += request.cost.Value;
-						if (request.paid.Value)
-							paidDebt += request.cost.Value;
-						if (debts.ContainsKey(warehouseId))
-							pen = debts[warehouseId];
-					}
-					paid += paidDebt;
-					total += totalDebt;
-					penalty+= pen;
-					sheet.Cells[i, 1].Value = warehouseName; sheet.Cells[i, 2].Value = totalDebt; sheet.Cells[i, 3].Value = paidDebt;
-					sheet.Cells[i, 4].Value = pen;
+					//decimal totalDebt = 0, paidDebt = 0,pen=0,penBefore=0;
+					//foreach (var request in group)
+					//{
+					//	totalDebt += request.cost.Value;
+					//	if (request.paid.Value)
+					//		paidDebt += request.cost.Value;
+					//	if (debts.ContainsKey(warehouseId))
+					//		pen = debts[warehouseId];
+					//	if (debtsBefore.ContainsKey(warehouseId))
+					//		penBefore = debtsBefore[warehouseId];
+					//}
+					spentBefore += reportRow.spentBefore;
+					paidBefore+= reportRow.paidBefore;
+					paidCurrent += reportRow.paid;
+					spentCurrent+= reportRow.spent;
+					spentAfter += reportRow.spentAfter;
+					paidAfter += reportRow.paidAfter;
+					sheet.Cells[i, 1].Value = reportRow.warehouseName;
+					sheet.Cells[i, 2].Value = reportRow.spentBefore;
+					sheet.Cells[i, 3].Value = reportRow.paidBefore;
+					sheet.Cells[i, 4].Value = reportRow.debtBeforeOverdue;
+					sheet.Cells[i, 5].Value = reportRow.spent;
+					sheet.Cells[i, 6].Value = reportRow.paid;
+					sheet.Cells[i, 7].Value = reportRow.spentAfter;
+					sheet.Cells[i, 8].Value = reportRow.paidAfter;
+					sheet.Cells[i, 9].Value = reportRow.debtAfterOverdue;
 					sheet.Cells[i, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 					sheet.Cells[i, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 					sheet.Cells[i, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 					sheet.Cells[i, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+					sheet.Cells[i, 5].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+					sheet.Cells[i, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+					sheet.Cells[i, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+					sheet.Cells[i, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+					sheet.Cells[i, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 					i++;
 				}
-				sheet.Cells[i, 1].Value = "Итого"; sheet.Cells[i, 2].Value = total; sheet.Cells[i, 3].Value = paid;
-				sheet.Cells[i, 4].Value = penalty;
+				sheet.Cells[i, 1].Value = "Итого";
+				sheet.Cells[i, 2].Value = spentBefore;
+				sheet.Cells[i, 3].Value = paidBefore;
+				sheet.Cells[i, 4].Value = penaltyBefore;
+				sheet.Cells[i, 5].Value = spentCurrent;
+				sheet.Cells[i, 6].Value = paidCurrent;
+				sheet.Cells[i, 7].Value = spentAfter;
+				sheet.Cells[i, 8].Value = paidAfter;
+				sheet.Cells[i, 9].Value = penaltyAfter;
 				sheet.Cells[i, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 				sheet.Cells[i, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 				sheet.Cells[i, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 				sheet.Cells[i, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
-				sheet.Cells[i, 1, i, 4].Style.Font.Size = 13;
+				sheet.Cells[i, 5].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[i, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[i, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[i, 8].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[i, 9].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[i, 1, i, 9].Style.Font.Size = 13;
 				k=i+1;
 			}
 			const double minWidth = 0.00;
