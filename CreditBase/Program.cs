@@ -1,5 +1,4 @@
 ﻿using System;
-
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -41,9 +40,9 @@ namespace CreditBase
 			//Console.WriteLine(ToWarehouses());
 			List<SqlLoaderCreator> creators = new List<SqlLoaderCreator>()
 			{
-				//new SqlLoaderCreator75(),
-				//new SqlLoaderCreator03(),
-				//new SqlLoaderCreator42(),
+				new SqlLoaderCreator75(),
+				new SqlLoaderCreator03(),
+				new SqlLoaderCreator42(),
 				new SqlLoaderCreator22(),
 			};
 			foreach (var sqlLoaderCreator in creators)
@@ -82,7 +81,7 @@ namespace CreditBase
 		public static void RecalcPrices()
 		{
 			SimpleLogger.GetInstance().Write($"Начат пересчет цен");
-			string connStr = @"Data Source=.\SQL;
+			string connStr = @"Data Source=r54web02\sql;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -119,6 +118,7 @@ namespace CreditBase
 						decimal requestCostChange = 0;
 						Request request = new Request();
 						request.id = requestId;
+						request.cost=requestCost;
 						using (SqlConnection conn2 = new SqlConnection(connStr))
 						{
 							conn2.Open();
@@ -140,10 +140,9 @@ namespace CreditBase
 											{
 												RequestRow requestRow = new RequestRow();
 												requestRow.id = requestRowId;
-												requestRow.oldprice = requestRow.price;
+												requestRow.oldprice = requestRowPrice;
 												requestRow.price = leftover.price;
 												requestRow.cost = requestRow.price * amount;
-												request.costChange += requestRow.cost - requestRowPrice * amount;
 												requestRows.Add(requestRow);
 											}
 										}
@@ -152,8 +151,7 @@ namespace CreditBase
 							}
 							conn2.Close();
 						}
-						if (request.costChange != 0)
-							requests.Add(request);
+						requests.Add(request);
 					}
 				}
 			}
@@ -165,18 +163,43 @@ namespace CreditBase
 			foreach (var requestRow in requestRows)
 			{
 				SimpleLogger.GetInstance().Write($"Обновление цены request_row id:{requestRow.id} старая цена: {requestRow.oldprice}новая цена: {requestRow.price}");
-				//using (SqlCommand command = new SqlCommand())
-				//{
-				//	command.Connection = conn;
-				//	command.Transaction = transaction;
-				//	string priceStr = requestRow.price.ToString(CultureInfo.GetCultureInfo("en-US"));
-				//	command.CommandText = $"update request_rows set price={priceStr} where id={requestRow.id}";
-				//	command.ExecuteNonQuery();
-				//}
+				using (SqlCommand command = new SqlCommand())
+				{
+					command.Connection = conn;
+					command.Transaction = transaction;
+					string priceStr = requestRow.price.ToString(CultureInfo.GetCultureInfo("en-US"));
+					command.CommandText = $"update request_rows set price={priceStr} where id={requestRow.id}";
+					command.ExecuteNonQuery();
+				}
 
 			}
 			transaction.Commit();
+			transaction = conn.BeginTransaction();
+			var conn3 = new SqlConnection(connStr);
+			conn3.Open();
+			foreach (var request in requests)
+			{
+				decimal newCost = 0;
+				using (SqlCommand command = new SqlCommand($"select sum(s.cost) from(select(rr.price * rr.amount) cost from request_rows rr where request_id = {request.id}) s;",conn3))
+				{
+					newCost=(decimal)command.ExecuteScalar();
+				}
+				if (newCost != request.cost)
+				{
+					SimpleLogger.GetInstance().Write($"Обновление стоимости заказа id:{request.id} новая стоимость:{newCost} старая стоимость: {request.cost}");
+					using (SqlCommand command = new SqlCommand())
+					{
+						command.Connection = conn;
+						command.Transaction = transaction;
+						string newCostStr = newCost.ToString(CultureInfo.GetCultureInfo("en-US"));
+						command.CommandText = $"update requests set cost = {newCostStr} where id={request.id}";
+						command.ExecuteNonQuery();
+					}
+				}
+			}
+			transaction.Commit();
 			conn.Close();
+			conn3.Close();
 			//todo обновление бд
 			SimpleLogger.GetInstance().Write($"Завершен пересчет цен");
 
@@ -208,7 +231,7 @@ namespace CreditBase
 				//Console.WriteLine(TempNom.ToString());
 			}
 
-			string connStr = @"Data Source=.\SQL;
+			string connStr = @"Data Source=r54web02\sql;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -268,7 +291,7 @@ namespace CreditBase
 						string[] nomIdSplit = NomSearchBase.Id.Split('_');
 						if (NomSearchBase.Name != NomSearchNom.Name)
 							SimpleLogger.GetInstance().Write($"Изменение имени номенклатуры:старое\t{NomSearchBase.Name}\tновое\t{NomSearchNom.Name}");
-						string query = $"UPDATE [credit_trade].[dbo].[goods] SET [price] = '{price}',name='{NomSearchNom.Name.Replace("'","''")}' WHERE  nom_id='{nomIdSplit[0]}' and reg_code='{nomIdSplit[1]}'";
+						string query = $"UPDATE [credit_trade].[dbo].[goods] SET [price] = '{price}',name='{NomSearchNom.Name.Replace("'", "''")}' WHERE  nom_id='{nomIdSplit[0]}' and reg_code='{nomIdSplit[1]}'";
 
 						SqlCommand sqlQueryInsert = new SqlCommand(query, connInsUpd);
 						sqlQueryInsert.ExecuteNonQuery();
@@ -307,7 +330,7 @@ namespace CreditBase
 
 		public static string Leftovers(string reg_code, Func<string, string> whatAPost, Dictionary<string, string> warehousePriceKindDictionary, Dictionary<string, Dictionary<string, decimal>> sqlLoaderPriceKindNomPrice)
 		{
-			string connStr = @"Data Source=.\SQL;
+			string connStr = @"Data Source=r54web02\sql;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -641,7 +664,7 @@ namespace CreditBase
 
 		public static string ToPost()
 		{
-			string connStr = @"Data Source=.\SQL;
+			string connStr = @"Data Source=r54web02\sql;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 			List<string> PostsList = new List<string>() {
@@ -711,7 +734,7 @@ namespace CreditBase
 				}
 
 
-				string connStr = @"Data Source=.\SQL;
+				string connStr = @"Data Source=r54web02\sql;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -774,7 +797,7 @@ namespace CreditBase
 
 		public static string ToWarehouses()
 		{
-			string connStr = @"Data Source=.\SQL;
+			string connStr = @"Data Source=r54web02\sql;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -833,7 +856,7 @@ namespace CreditBase
 	public class Request
 	{
 		public int id { get; set; }
-		public decimal costChange { get; set; }
+		public decimal cost { get; set; }
 	}
 
 	public class RequestRow
