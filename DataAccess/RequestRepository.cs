@@ -115,6 +115,13 @@ namespace DataAccess
 			finish = finish.AddDays(1);
 			return db.requests.Include("user.warehouse.postoffice.post").Where(x => x.date >= start && x.date < finish && buyers.Contains(x.buyer_id.Value)).ToList();
 		}
+
+		public IList<request> GetRequestsWithRowsByDate(List<int> buyers, DateTime start, DateTime finish)
+		{
+			finish = finish.AddDays(1);
+			return db.requests.Include("request_rows").Include("user.warehouse.postoffice.post").Where(x => x.date >= start && x.date < finish && buyers.Contains(x.buyer_id.Value)).ToList();
+		}
+
 		public IList<request> GetPenaltyRequestsByDate(List<int> buyers, DateTime start, DateTime finish)
 		{
 			finish = finish.AddDays(1);

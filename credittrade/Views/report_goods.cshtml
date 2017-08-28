@@ -1,0 +1,46 @@
+﻿@{
+    ViewBag.Title = "Ведомость по товарам";
+    Layout = "layout_admin.cshtml";
+}
+
+<h2>@Model.Post - @ViewBag.Title</h2>
+<div class="row">
+    <form class="form-horizontal col-sm-8" method="post" action="">
+        <div class="form-group">
+            <h3>Выберите период</h3>
+            <label>С:</label>
+            <div class='input-group date col-md-5' id='date_start'>
+                <input type='text' class="form-control" name="date_start" />
+                <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>По:</label>
+            <div class='input-group date col-md-5' id='date_finish'>
+                <input type='text' class="form-control" name="date_finish" />
+                <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+            </div>
+        </div>
+            <button class="btn btn-primary" type="submit" id="get-report">Получить отчет</button>
+        <a class="btn btn-default" onclick="javascript: history.go(-1);">Назад</a>
+        <input type="hidden" id="post" name="post" value="@Model.Post_id"/>
+    </form>
+</div>
+
+<script language="javascript">
+    $("#date_start").datetimepicker({ locale: "ru", defaultDate: '@Model.StartDate', format:'L'});
+    $("#date_finish").datetimepicker({ locale: "ru", defaultDate: '@Model.FinishDate', format: 'L' });
+    @*$("#get-report").click(function() {
+        $.post(
+        {
+            url: '@Url.Content("~/admin/reports/sells")',
+            dataType:'json',
+            data: {
+                'start':$("#date_start").val(),'finish':$("#date_finish").val(),'post':$("#post").val()
+        }}).done(function(data) {});
+    });*@
+</script>

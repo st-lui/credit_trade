@@ -415,5 +415,89 @@ namespace credittrade.Modules
 			excelPackage.SaveAs(ms);
 			return ms;
 		}
+		public static MemoryStream GenReportGoods(InOutReportModel reportModel)
+		{
+			var req = reportModel.RequestsCurrent;
+			var start = reportModel.Start;
+			var finish = reportModel.Finish;
+			var ms = new MemoryStream();
+			ExcelPackage excelPackage = new ExcelPackage();
+			excelPackage.Workbook.Worksheets.Add("Ведомость по товарам");
+			List<request_rows> requestRows = new List<request_rows>();
+			foreach (request r in req)
+			{
+				foreach (var rr in r.request_rows)
+				{
+					requestRows.Add(rr);
+				}
+			}
+			var sheet = excelPackage.Workbook.Worksheets[1];
+
+			int k = 0;
+			var groupedByPost = requestRows.GroupBy(x => x.request.buyer.warehouse.postoffice.post_id).OrderBy(x => x.ElementAt(0).request.buyer.warehouse.postoffice.post.name);
+			foreach (IGrouping<int, request_rows> requestsByPost in groupedByPost)
+			{
+				sheet.Cells[k + 1, 1].Value = $"Ведомость по товарам - {requestsByPost.ElementAt(0).request.buyer.warehouse.postoffice.post.name}";
+				sheet.Cells[k + 1, 1].Style.Font.Size = 16;
+				sheet.Cells[k + 2, 1].Value = $"Период: {start} - {finish}";
+				sheet.Cells[k + 2, 1].Style.Font.Size = 13;
+				sheet.Cells[k + 3, 1].Value = "Склад";
+				sheet.Cells[k + 3, 2].Value = "Наименование товара";
+				sheet.Cells[k + 3, 3].Value = "Цена";
+				sheet.Cells[k + 3, 4].Value = "Количество";
+				sheet.Cells[k + 3, 5].Value = "Сумма";
+				sheet.Cells[k + 3, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[k + 3, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[k + 3, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[k + 3, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[k + 3, 5].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[k + 3, 1, k + 3, 5].Style.Font.Size = 13;
+
+				IEnumerable<IGrouping<int?,request_rows>> groupedRequests = requestsByPost.GroupBy(x => x.request.buyer.warehouse_id);
+				int i = k + 4;
+				foreach (IGrouping<int?, request_rows> group in groupedRequests)
+				{
+					string warehouseName = group.ElementAt(0).request.buyer.warehouse.name;
+					warehouseName += " " + group.ElementAt(0).request.buyer.warehouse.postoffice.idx;
+					int warehouseId = group.ElementAt(0).request.buyer.warehouse.id;
+					var groupedByGood = group.GroupBy(x => x.goods_id);
+					foreach (var groupbygood in groupedByGood){
+						string goodsName = groupbygood.First().name;
+						string price = groupbygood.First().price.ToString();
+						decimal amount = 0;
+						decimal cost = 0;
+						foreach (request_rows rr in groupbygood)
+						{
+							amount += rr.amount.Value;
+							cost += rr.price.Value*rr.amount.Value;
+						}
+						sheet.Cells[i, 1].Value = warehouseName;
+						sheet.Cells[i, 2].Value = goodsName;
+						sheet.Cells[i, 3].Value = price;
+						sheet.Cells[i, 4].Value = amount;
+						sheet.Cells[i, 5].Value = cost;
+						sheet.Cells[i, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+						sheet.Cells[i, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+						sheet.Cells[i, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+						sheet.Cells[i, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+						sheet.Cells[i, 5].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+						i++;
+					}
+				}
+				//sheet.Cells[i, 1].Value = "Итого"; sheet.Cells[i, 2].Value = total; sheet.Cells[i, 3].Value = paid;
+				//sheet.Cells[i, 4].Value = penalty;
+				//sheet.Cells[i, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				//sheet.Cells[i, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				//sheet.Cells[i, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				//sheet.Cells[i, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				//sheet.Cells[i, 1, i, 4].Style.Font.Size = 13;
+				k = i + 1;
+			}
+			const double minWidth = 0.00;
+			const double maxWidth = 50.00;
+			sheet.Cells.AutoFitColumns(minWidth, maxWidth);
+			excelPackage.SaveAs(ms);
+			return ms;
+		}
 	}
 }
