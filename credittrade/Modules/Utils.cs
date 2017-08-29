@@ -329,12 +329,12 @@ namespace credittrade.Modules
 				sheet.Cells[k+3, 1].Value = "Склад";
 				//sheet.Cells[k+3, 2].Value = "Отпущено на сумму";
 				sheet.Cells[k+3, 2].Value = "Долг на начало периода";
-				sheet.Cells[k+3, 3].Value = "Просроченный долг";
+				sheet.Cells[k+3, 3].Value = "Просроченный долг предыдущего периода";
 				sheet.Cells[k + 3, 4].Value = "Отпущено на сумму";
 				sheet.Cells[k + 3, 5].Value = "Погашено";
 				//sheet.Cells[k + 3, 7].Value = "Отпущено на сумму";
 				sheet.Cells[k + 3, 6].Value = "Долг на конец периода";
-				sheet.Cells[k + 3, 7].Value = "Просроченный долг";
+				sheet.Cells[k + 3, 7].Value = "Просроченный долг на конец периода";
 				sheet.Cells[k+3, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 				sheet.Cells[k+3, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
 				sheet.Cells[k+3, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
