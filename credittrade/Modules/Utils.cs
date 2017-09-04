@@ -436,7 +436,7 @@ namespace credittrade.Modules
 			int k = 0;
 			sheet.Cells[k + 1, 1].Value = $"Ведомость по товарам";// - {requestsByPost.ElementAt(0).request.buyer.warehouse.postoffice.post.name}";
 			sheet.Cells[k + 1, 1].Style.Font.Size = 16;
-			sheet.Cells[k + 1, 1, k + 1, 3].Merge = true;
+			sheet.Cells[k + 1, 1, k + 1, 4].Merge = true;
 			sheet.Cells[k + 2, 1].Value = $"Период: {start} - {finish}";
 			sheet.Cells[k + 2, 1].Style.Font.Size = 13;
 			sheet.Cells[k + 3, 1].Value = "№ п/п";
@@ -470,7 +470,7 @@ namespace credittrade.Modules
 					string warehouseName = group.ElementAt(0).request.buyer.warehouse.name;
 					warehouseName += " " + group.ElementAt(0).request.buyer.warehouse.postoffice.idx;
 					int warehouseId = group.ElementAt(0).request.buyer.warehouse.id;
-					var groupedByGood = group.GroupBy(x => x.goods_id);
+					var groupedByGood = group.GroupBy(x => x.goods_id).OrderBy(x=>x.First().name);
 					foreach (var groupbygood in groupedByGood){
 						string goodsName = groupbygood.First().name;
 						string price = groupbygood.First().price.ToString();

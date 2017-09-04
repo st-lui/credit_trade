@@ -55,5 +55,10 @@ namespace DataAccess
 		{
 			return db.requests.Where(x => x.buyer.warehouse_id == warehouse_id && x.paid==false).ToList();
 		}
+
+		public warehouse GetWithBuyers(int id)
+		{
+			return db.warehouses.Include("buyers").SingleOrDefault(x => x.id == id);
+		}
 	}
 }

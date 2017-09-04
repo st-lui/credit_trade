@@ -340,6 +340,7 @@ public class ByteArrayResponse : Response
 			using (var writer = new BinaryWriter(stream))
 			{
 				writer.Write(body);
+				writer.Close();
 			}
 		};
 	}
