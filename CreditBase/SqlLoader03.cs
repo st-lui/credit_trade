@@ -442,5 +442,9 @@ select _IDRRef,_ParentIDRRef,_Description,_Code,_Fld2247RRef from tree;", conn))
 
 		}
 
+		public override string GetName()
+		{
+			return "УФПС Бурятии";
+		}
 	}
 }

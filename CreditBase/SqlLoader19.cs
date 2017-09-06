@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
@@ -9,63 +10,38 @@ using PostReq.Util;
 
 namespace CreditBase
 {
-	public class SqlLoader22 : SqlLoader
+	/// <summary>
+	/// Загрузчик данных номенклатуры для Республики Ха
+	/// </summary>
+	class SqlLoader19 : SqlLoader
 	{
-		public SqlLoader22()
+		public SqlLoader19()
 		{
-			reg = "22";
-			srv = "r22aufsql01.main.russianpost.ru";
-			dbname = "r22-asku-work";
-			usr = "nom_reader";
-			pswd = "6LRZ{w.Y!LHXtY.";
-			priceTableName = "_InfoRg11000";
-			warehouseTableName = "_Reference163";
+			reg = "19";
+			priceTableName = "_InfoRg11044";
+			warehouseTableName = "_Reference165";
+			srv = "r19db2.main.russianpost.ru";
+			dbname = "r19-asku-work";
+			usr = "1c_credit";
+			pswd = @"a*""Dd2#ONa*""Dd2#ON";
 		}
 
 		public override void LoadNom()
 		{
-			NomLoader NL = NomLoader.Create(srv, dbname,usr,pswd, reg);
+			NomLoader NL = NomLoader.Create(srv, dbname, usr, pswd,reg);
 			NL.UpdateLocalNom();
-		}
-
-		public override string WhatAPost(string fileName)
-		{
-			string pref = "";
-			if (fileName.Contains("report_Алейский почтамт")) pref = "24";
-			if (fileName.Contains("report_Барнаульский почтамт")) pref = "25";
-			if (fileName.Contains("report_Барнаульский УКД")) pref = "26";
-			if (fileName.Contains("report_Белокурихинский УКД")) pref = "27";
-			if (fileName.Contains("report_Бийский почтамт")) pref = "28";
-			if (fileName.Contains("report_Бийский УКД")) pref = "29";
-			if (fileName.Contains("report_Благовещенский почтамт")) pref = "30";
-			if (fileName.Contains("report_Заринский почтамт")) pref = "31";
-			if (fileName.Contains("report_Каменский почтамт")) pref = "32";
-			if (fileName.Contains("report_Кулундинский почтамт")) pref = "33";
-			if (fileName.Contains("report_Мамонтовский почтамт")) pref = "34";
-			if (fileName.Contains("report_Павловский почтамт")) pref = "35";
-			if (fileName.Contains("report_Первомайский почтамт")) pref = "36";
-			if (fileName.Contains("report_Поспелихинский почтамт")) pref = "37";
-			if (fileName.Contains("report_Рубовский УКД")) pref = "39";
-			if (fileName.Contains("report_Рубцовский почтамт")) pref = "38";
-			if (fileName.Contains("report_Славгородский почтамт")) pref = "40";
-			if (fileName.Contains("report_Смоленский почтамт")) pref = "41";
-
-
-			return pref;
-
 		}
 
 		public override void LoadPricesDictionary()
 		{
-			WarehousePriceKindDictionary = new Dictionary<string, string>();
+			WarehousePriceKindDictionary= new Dictionary<string, string>();
 			PriceKindNomPrice = new Dictionary<string, Dictionary<string, decimal>>();
-			string defaultPriceKind = "A4AEF4CE46FB566011E3DC100178205B";
+			string defaultPriceKind = "8123E4115BE78ED611E26531054E5FE0";
 			using (SqlConnection conn = new SqlConnection($"data source={srv};initial catalog={dbname};user={usr};password={pswd}"))
 			{
 				conn.Open();
-				SqlCommand command = new SqlCommand($"select _Description,_Fld3233RRef from {warehouseTableName} where _marked=0x00", conn);
-				SqlDataReader whReader = command.ExecuteReader();
-
+				SqlCommand command=new SqlCommand($"select _Description,_Fld3256RRef from {warehouseTableName} where _marked=0x00",conn);
+				SqlDataReader whReader= command.ExecuteReader();
 				while (whReader.Read())
 				{
 					string warehouseName = whReader.GetString(0).Trim();
@@ -77,11 +53,11 @@ namespace CreditBase
 					if (priceId == "00000000000000000000000000000000")
 						priceId = defaultPriceKind;
 					if (!WarehousePriceKindDictionary.ContainsKey(warehouseName))
-						WarehousePriceKindDictionary.Add(warehouseName, priceId);
+						WarehousePriceKindDictionary.Add(warehouseName,priceId);
 				}
 				whReader.Close();
-
-				command = new SqlCommand($"select _Fld11001RRef nomid,_Fld11004 price,_Fld11002RRef pricekind from {priceTableName} order by _Period", conn);
+				
+				command = new SqlCommand($"select _Fld11045RRef nomid,_Fld11048 price,_Fld11046RRef pricekind from {priceTableName} order by _Period",conn);
 				var priceReader = command.ExecuteReader();
 				while (priceReader.Read())
 				{
@@ -95,8 +71,8 @@ namespace CreditBase
 					}
 					else
 					{
-						nomprice = new Dictionary<string, decimal>();
-						PriceKindNomPrice.Add(kindId, nomprice);
+						nomprice=new Dictionary<string, decimal>();
+						PriceKindNomPrice.Add(kindId,nomprice);
 					}
 					if (nomprice.ContainsKey(nomId))
 						nomprice[nomId] = price;
@@ -105,12 +81,8 @@ namespace CreditBase
 				}
 
 			}
-		}
-
-		public override string GetName()
-		{
-			return "УФПС Алтайского края";
-		}
+		
+	}
 
 		public class Node
 		{
@@ -176,22 +148,23 @@ namespace CreditBase
 				writer.Close();
 			}
 		}
+
 		public class NomLoader
 		{
 			string connectionString;
 			string filename, filenameClean;
 			FileInfo fileInfo, fileInfoClean;
-			string nomTableName = "_Reference112";
-			string edIzmTableName = "_Reference80";
-			string priceTableName = "_InfoRg11000";
-			string partnerTableName = "_Reference122";
-			string partnerNomTableName = "_Reference113";
-			string barcodeTableName = "_InfoRg11025";
-			string priceKindsTableName = "_Reference63";
+			string nomTableName = "_Reference114";
+			string edIzmTableName = "_Reference82";
+			string priceTableName = "_InfoRg11044";
+			string partnerTableName = "_Reference124";
+			string partnerNomTableName = "_Reference115";
+			string barcodeTableName = "_InfoRg11069";
+			string priceKindsTableName = "_Reference65";
 
 			public List<Nom> NomList { get; set; }
 
-			public static NomLoader Create(string srv, string dbname, string usr,string pswd,string reg)
+			public static NomLoader Create(string srv, string dbname, string usr, string pswd, string reg)
 			{
 				var nomLoader = new NomLoader();
 				//nomLoader.connectionString = "data source=r22aufsql01;initial catalog=r22-asku-work;user=nom_reader;password=6LRZ{w.Y!LHXtY.";
@@ -263,14 +236,14 @@ select count(_IDRRef)from tree; ", conn))
 						using (
 							SqlCommand comm =
 								new SqlCommand(
-									$@"select _Fld11001RRef,_Fld11004,s._Period from {priceTableName} s,(select _Fld11001RRef nomid, max(_Period) period from {priceTableName} where _Fld11002RRef = 0xA4AEF4CE46FB566011E3DC100178205B group by _Fld11001RRef) p where s._Fld11001RRef = p.nomid and s._Period = p.period and s._Fld11002RRef = 0xA4AEF4CE46FB566011E3DC100178205B",
+									$@"select _Fld11045RRef,_Fld11048,s._Period from {priceTableName} s,(select _Fld11045RRef nomid, max(_Period) period from {priceTableName} where _Fld11046RRef = 0x8123E4115BE78ED611E26531054E5FE0 group by _Fld11045RRef) p where s._Fld11045RRef = p.nomid and s._Period = p.period and s._Fld11046RRef = 0x8123E4115BE78ED611E26531054E5FE0",
 									conn))
 						{
 							var dataReader = comm.ExecuteReader();
 							while (dataReader.Read())
 							{
 								var id = dataReader.GetSqlBinary(0);
-								var price = (double)dataReader.GetDecimal(1);
+								var price = (double) dataReader.GetDecimal(1);
 								var date = dataReader.GetDateTime(2);
 								if (!priceDictionary.ContainsKey(id))
 									priceDictionary.Add(id, new Tuple<DateTime, double>(date, price));
@@ -282,7 +255,7 @@ select count(_IDRRef)from tree; ", conn))
 						using (
 							SqlCommand command =
 								new SqlCommand(
-									$"select nom._Fld2319RRef,partner._Description from {partnerNomTableName} nom,{partnerTableName} partner where nom._OwnerIDRRef=partner._IDRRef",
+									$"select nom._Fld2342RRef,partner._Description from {partnerNomTableName} nom,{partnerTableName} partner where nom._OwnerIDRRef=partner._IDRRef",
 									conn))
 						{
 							var dataReader = command.ExecuteReader();
@@ -298,7 +271,7 @@ select count(_IDRRef)from tree; ", conn))
 						Dictionary<SqlBinary, string> barcodeDictionary = new Dictionary<SqlBinary, string>();
 						using (
 							SqlCommand command =
-								new SqlCommand($"SELECT _Fld11028RRef,min(_Fld11026) FROM {barcodeTableName} group by _Fld11028RRef", conn))
+								new SqlCommand($"SELECT _Fld11072RRef,min(_Fld11070) FROM {barcodeTableName} group by _Fld11072RRef", conn))
 						{
 							var dataReader = command.ExecuteReader();
 							while (dataReader.Read())
@@ -312,12 +285,12 @@ select count(_IDRRef)from tree; ", conn))
 						// Выборка номенклатуры
 						List<Nom> list = new List<Nom>();
 						using (SqlCommand comm = new SqlCommand(
-							$@"with tree (_IDRRef,_ParentIDRRef,_Description,_Code,_Fld2258RRef,_level) as 
-(select _IDRRef,_ParentIDRRef,_Description,_Code,_Fld2258RRef,0 from [{nomTableName}] where _code='00000000001'
-union all select [{nomTableName}]._IDRRef,[{nomTableName}]._ParentIDRRef,[{nomTableName}]._Description,[{nomTableName}]._Code,[{nomTableName}]._Fld2258RRef,tree._level+1 from [{nomTableName}],tree
+							$@"with tree (_IDRRef,_ParentIDRRef,_Description,_Code,_Fld2281RRef,_level) as 
+(select _IDRRef,_ParentIDRRef,_Description,_Code,_Fld2281RRef,0 from [{nomTableName}] where _code='00000000001'
+union all select [{nomTableName}]._IDRRef,[{nomTableName}]._ParentIDRRef,[{nomTableName}]._Description,[{nomTableName}]._Code,[{nomTableName}]._Fld2281RRef,tree._level+1 from [{nomTableName}],tree
 where tree._IDRRef=[{nomTableName}]._ParentIDRRef and [{nomTableName}]._Code<>'С1-00001709' and [{nomTableName}]._Code<>'С1-00001897'
 and [{nomTableName}]._Code<>'00000000018' and [{nomTableName}]._Code<>'00000000002' and [{nomTableName}]._Code<>'00000000049' and [{nomTableName}]._Code<>'00000000052' and [{nomTableName}]._Code<>'00000000084' and [{nomTableName}]._Code<>'00000000732')
-select _IDRRef,_ParentIDRRef,_Description,_Code,_Fld2258RRef from tree;", conn))
+select _IDRRef,_ParentIDRRef,_Description,_Code,_Fld2281RRef from tree;", conn))
 						{
 							SqlDataReader dataReader = comm.ExecuteReader();
 							StreamWriter writer = new StreamWriter(new FileStream(filename, FileMode.Create), Encoding.GetEncoding(1251));
@@ -453,6 +426,20 @@ select _IDRRef,_ParentIDRRef,_Description,_Code,_Fld2258RRef from tree;", conn))
 				}
 			}
 		}
+		public override string WhatAPost(string nameFile)
+		{
+			string pref = "";
 
+			if (nameFile.Contains("report_Абаканский почтамт")) pref = "86";
+			if (nameFile.Contains("report_Бейский почтамт")) pref = "87";
+			if (nameFile.Contains("report_Ширинский почтамт")) pref = "88";
+			return pref;
+
+		}
+
+		public override string GetName()
+		{
+			return "УФПС Хакасии";
+		}
 	}
 }

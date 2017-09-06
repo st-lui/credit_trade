@@ -446,7 +446,10 @@ select _IDRRef,_ParentIDRRef,_Description,_Code,_Fld2281RRef from tree;", conn))
 
 		}
 
-		
+		public override string GetName()
+		{
+			return "УФПС Кемеровской области";
+		}
 	}
 
 }

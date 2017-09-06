@@ -41,6 +41,7 @@ namespace CreditBase
 			//Console.WriteLine(ToWarehouses());
 			List<SqlLoaderCreator> creators = new List<SqlLoaderCreator>()
 			{
+				new SqlLoaderCreator19(),
 				new SqlLoaderCreator75(),
 				new SqlLoaderCreator03(),
 				new SqlLoaderCreator42(),
@@ -49,6 +50,7 @@ namespace CreditBase
 			foreach (var sqlLoaderCreator in creators)
 			{
 				SqlLoader sqlLoader = sqlLoaderCreator.FactoryMethod();
+				SimpleLogger.GetInstance().Write($"Обработка {sqlLoader.GetName()}");
 				try
 				{
 					//LeftoversFrom1c();
@@ -542,16 +544,11 @@ namespace CreditBase
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 			List<string> PostsList = new List<string>() {
-"ОСП Агинский почтамт",
-"ОСП Борзинский почтамт",
-"ОСП Краснокаменский почтамт",
-"ОСП Могочинский почтамт",
-"ОСП Нерчинский почтамт",
-"ОСП Петровск-Забайкальский почтамт",
-"ОСП Приаргунский почтамт",
-"ОСП Улетовский почтамт",
-"ОСП Читинский почтамт",
-"ОСП Шилкинский почтамт"
+"Абаканский почтамт",
+"Бейский почтамт",
+"Ширинский почтамт",
+"Саяногорский участок курьерской доставки"
+
 };
 
 
