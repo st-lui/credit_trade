@@ -11,6 +11,6 @@ namespace credittrade.Modules
 		public post parent;
 		public string name;
 		public List<MrcReportRow> children;
-		public decimal spent, debt, debtOverdue;
+		public decimal spent, debt, debtOverdue,paid;
 	}
 }

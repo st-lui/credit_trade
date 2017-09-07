@@ -142,11 +142,25 @@ namespace credittrade.Modules
 			};
 			Get["/report_mrc"] = param =>
 			{
+				return Response.AsRedirect("~/admin/report_mrc/7");
+			};
+			Get["/report_mrc/{mon}"] = param =>
+			{
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
 					user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
 					List<MrcReportRow> reportRows = new List<MrcReportRow>();
 					var parents = unitOfWork.Posts.GetAll().Where(x => x.privilegies == 1).OrderBy(x => x.name);
+					int mon = (int)param["mon"];
+					DateTime finish = DateTime.Today;
+					DateTime start = System.Data.SqlTypes.SqlDateTime.MinValue.Value;
+					switch (mon)
+					{
+						case 6:start = new DateTime(2017, 6, 1, 0, 0, 0); finish = new DateTime(2017, 6, 30, 23, 59, 59); break;
+						case 7:start = new DateTime(2017, 7, 1, 0, 0, 0); finish = new DateTime(2017, 7, 31, 23, 59, 59); break;
+						case 8:start = new DateTime(2017, 8, 1, 0, 0, 0); finish = new DateTime(2017, 8, 31, 23, 59, 59); break;
+						case 9: start = new DateTime(2017, 9, 1, 0, 0, 0); finish = DateTime.Today; break;
+					}
 					foreach (var ufps in parents)
 					{
 						MrcReportRow reportRow = new MrcReportRow();
@@ -164,8 +178,6 @@ namespace credittrade.Modules
 							IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(post.id);
 							buyersPost.AddRange(buyers);
 							var buyerIds = buyersPost.Select(x => x.id).ToList();
-							DateTime finish = DateTime.Today;
-							DateTime start = System.Data.SqlTypes.SqlDateTime.MinValue.Value;
 							IList<request> reqs = unitOfWork.Requests.GetRequestsByDate(buyerIds, start, finish);
 							foreach (request req in reqs)
 							{
@@ -176,9 +188,12 @@ namespace credittrade.Modules
 									if (req.date.Value.AddDays(30) < finish)
 										reportRow_child.debtOverdue += req.cost.Value;
 								}
+								if (req.paid.Value && req.pay_date.Value >= start && req.pay_date <= finish)
+									reportRow_child.paid += req.cost.Value;
 							}
 							reportRow.spent += reportRow_child.spent;
 							reportRow.debt += reportRow_child.debt;
+							reportRow.paid += reportRow_child.paid;
 							reportRow.debtOverdue += reportRow_child.debtOverdue;
 							reportRow.children.Add(reportRow_child);
 						}
@@ -186,6 +201,17 @@ namespace credittrade.Modules
 					}
 
 					model.reportRows = reportRows;
+					string monStr = "";
+					switch (mon)
+					{
+						case 6:monStr = "Июнь 2017";break;
+						case 7:
+							monStr = "Июль 2017"; break;
+						case 8:
+							monStr = "Август 2017"; break;
+						case 9: monStr = "Сентябрь 2017"; break;
+					}
+					model.monStr = monStr;
 					return View["report_mrc", model];
 				}
 			};

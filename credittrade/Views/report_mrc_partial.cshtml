@@ -1,16 +1,6 @@
-﻿@{
-    ViewBag.Title = "Отчет по должникам";
-    Layout = "layout_admin.cshtml";
-}
-@using credittrade.Modules
-<link rel="stylesheet" href="~/Content/css/jquery.treegrid.css" />
-<h2>@ViewBag.Title</h2>
-<link rel="stylesheet" href="~/Content/css/jquery.treegrid.css" />
+﻿@using credittrade.Modules
+<link rel="stylesheet" href="~/Content/css/jquery.treegrid.css"/>
 <style>
-    .container {
-        margin-left: 0;
-    }
-
     table {
         width: 100%;
         border-collapse: collapse;
@@ -35,17 +25,9 @@
         max-width: 100%;
     }
 </style>
-<div>
-    <select id="mon">
-        <option id="6">Июнь 2017</option>
-        <option id="7">Июль 2017</option>
-        <option id="8">Август 2017</option>
-        <option id="9">Сентябрь 2017</option>
-    </select>
-</div>
-<div class="dataTable_div col-md-10">
+
     <table id="buyers_table" class="row-border">
-        <thead><tr><th>Подразделение</th><th>Сумма продаж</th><th>Сумма долга</th><th>Погашено</th><th>Просрочено</th></tr></thead>
+        <thead><tr><th>Подразделение</th><th>Сумма продаж</th><th>Погашено</th><th>Сумма долга</th><th>Просрочено</th></tr></thead>
         @{int p = 1;}
         @foreach (MrcReportRow reportRow in Model.reportRows)
         {
@@ -61,12 +43,13 @@
                     @reportRow.debt.ToString("C")
                 </td>
                 <td>
-                    @reportRow.paid.ToString("C")
+                    @reportRow.debt.ToString("C")
                 </td>
                 <td>
                     @reportRow.debtOverdue.ToString("C")
                 </td>
-            </tr>p++;
+            </tr>
+            p++;
             foreach (var item in reportRow.children)
             {
                 <tr class="treegrid-@p treegrid-parent-@parent">
@@ -80,26 +63,23 @@
                         @item.debt.ToString("C")
                     </td>
                     <td>
-                        @item.paid.ToString("C")
+                        @item.debt.ToString("C")
                     </td>
                     <td>
                         @item.debtOverdue.ToString("C")
                     </td>
-                </tr>p++;
+                </tr>
+                p++;
             }
         }
     </table>
-</div>
 
 <script type="text/javascript" src="~/Content/scripts/jquery.treegrid.min.js"></script>
 
 <script language="javascript">
     $(document).ready(function () {
         $("#buyers_table").treegrid({ "initialState": "collapsed" });
-        $("#mon").change(function () {
-            $(location).attr('href', '@Url.Content("~/admin/report_mrc/")' + $(this).find('option:selected').attr('id'));
-        });
-        $("select#mon").val("@Model.monStr");
+        
     });
 </script>
 
