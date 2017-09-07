@@ -7,6 +7,9 @@
 <h2>@ViewBag.Title</h2>
 <link rel="stylesheet" href="~/Content/css/jquery.treegrid.css"/>
 <style>
+    .container {
+        margin-left:0;
+    }
     table {
         width: 100%;
         border-collapse: collapse;
@@ -43,13 +46,13 @@
                     @reportRow.name
                 </td>
                 <td>
-                    @reportRow.spent
+                    @reportRow.spent.ToString("C")
                 </td>
                 <td>
-                    @reportRow.debt
+                    @reportRow.debt.ToString("C")
                 </td>
                 <td>
-                    @reportRow.debtOverdue
+                    @reportRow.debtOverdue.ToString("C")
                 </td>
             </tr>
             p++;
