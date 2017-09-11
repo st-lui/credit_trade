@@ -159,7 +159,7 @@ namespace credittrade.Modules
 						case 6:start = new DateTime(2017, 6, 1, 0, 0, 0); finish = new DateTime(2017, 6, 30, 23, 59, 59); break;
 						case 7:start = new DateTime(2017, 7, 1, 0, 0, 0); finish = new DateTime(2017, 7, 31, 23, 59, 59); break;
 						case 8:start = new DateTime(2017, 8, 1, 0, 0, 0); finish = new DateTime(2017, 8, 31, 23, 59, 59); break;
-						case 9: start = new DateTime(2017, 9, 1, 0, 0, 0); finish = DateTime.Today; break;
+						case 9: start = new DateTime(2017, 9, 1, 0, 0, 0); finish = DateTime.Today.AddDays(1).AddSeconds(-1); break;
 					}
 					foreach (var ufps in parents)
 					{
@@ -179,18 +179,19 @@ namespace credittrade.Modules
 							buyersPost.AddRange(buyers);
 							var buyerIds = buyersPost.Select(x => x.id).ToList();
 							IList<request> reqs = unitOfWork.Requests.GetRequestsByDate(buyerIds, start, finish);
+							IList<request> reqsPen = unitOfWork.Requests.GetPenaltyRequestsByDate(buyerIds, SqlDateTime.MinValue.Value, finish);
 							foreach (request req in reqs)
 							{
 								reportRow_child.spent += req.cost.Value;
 								if (!req.paid.Value || req.pay_date > finish)
 								{
 									reportRow_child.debt += req.cost.Value;
-									if (req.date.Value.AddDays(30) < finish)
-										reportRow_child.debtOverdue += req.cost.Value;
 								}
 								if (req.paid.Value && req.pay_date.Value >= start && req.pay_date <= finish)
 									reportRow_child.paid += req.cost.Value;
 							}
+							foreach (request reqPen in reqsPen)
+								reportRow_child.debtOverdue += reqPen.cost.Value;
 							reportRow.spent += reportRow_child.spent;
 							reportRow.debt += reportRow_child.debt;
 							reportRow.paid += reportRow_child.paid;

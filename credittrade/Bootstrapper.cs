@@ -141,22 +141,28 @@ namespace credittrade
 					builder.DataSource = "R54-W12R2-XX.main.russianpost.ru";
 					builder.InitialCatalog = "POSTITEMS";
 					string idx = "0";
-
-					using (SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString))
+					try
 					{
-						sqlConnection.Open();
-						SqlCommand command = new SqlCommand("select idx from ipzone where ip = @userIp",sqlConnection);
-						command.Parameters.AddWithValue("@userIp", userIp);
-						var reader = command.ExecuteReader();
-						
-						if (reader.HasRows)
+						using (SqlConnection sqlConnection = new SqlConnection(builder.ConnectionString))
 						{
-							reader.Read();
-							int idx1 = reader.GetInt32(0);
+							sqlConnection.Open();
+							SqlCommand command = new SqlCommand("select idx from ipzone where ip = @userIp", sqlConnection);
+							command.Parameters.AddWithValue("@userIp", userIp);
+							var reader = command.ExecuteReader();
 
-							idx = idx1.ToString();
+							if (reader.HasRows)
+							{
+								reader.Read();
+								int idx1 = reader.GetInt32(0);
+
+								idx = idx1.ToString();
+							}
+							sqlConnection.Close();
 						}
-						sqlConnection.Close();
+					}
+					catch (SqlException sql)
+					{
+
 					}
 					//Util.log.Info("Request from ip={0}\t PROXY={1}", userIp, proxy);
 					string hostName;
