@@ -1,6 +1,10 @@
-﻿@{
+﻿@using System.Collections.Generic;
+@{
     ViewBag.Title = "Ведомость по товарам";
-    Layout = Model.Layout??"layout_admin.cshtml";
+    if (((IDictionary<string,object>)Model).ContainsKey("Layout"))
+        Layout = Model.Layout;
+    else
+        Layout = "layout_admin.cshtml";
 }
 
 <h2>@Model.Post - @ViewBag.Title</h2>
