@@ -51,7 +51,7 @@ namespace CreditBase
 			{
 				SqlLoader sqlLoader = sqlLoaderCreator.FactoryMethod();
 				SimpleLogger.GetInstance().Write($"Обработка {sqlLoader.GetName()}");
-				try
+				//try
 				{
 					//LeftoversFrom1c();
 
@@ -67,15 +67,15 @@ namespace CreditBase
 						SimpleLogger.GetInstance().Write(ee.ToString());
 					}
 					SimpleLogger.GetInstance().Write(Goods(sqlLoader.reg));
-					//Console.ForegroundColor = ConsoleColor.Green;
+					//Console.ForegroundColor = ConsoleColor.Green;f
 					//CheckWareHouse();
 					sqlLoader.LoadPricesDictionary();
 					Leftovers(sqlLoader.reg, sqlLoader.WhatAPost, sqlLoader.WarehousePriceKindDictionary, sqlLoader.PriceKindNomPrice);
-					SimpleLogger.GetInstance().Write("Работа завершена");
+					SimpleLogger.GetInstance().Write($"Работа завершена {sqlLoader.GetName()}");
 				}
-				catch (Exception e)
+				//catch (Exception e)
 				{
-					SimpleLogger.GetInstance().Write(e.ToString());
+					//SimpleLogger.GetInstance().Write(e.ToString());
 				}
 			}
 		}
@@ -285,8 +285,10 @@ namespace CreditBase
 
 						};
 						//Console.WriteLine(TempFromBase.name_g);
-						DicGood.Add(TempFromBase.name_g, TempFromBase);
-
+						if (DicGood.ContainsKey(TempFromBase.name_g))
+							DicGood[TempFromBase.name_g] = TempFromBase;
+						else
+							DicGood.Add(TempFromBase.name_g, TempFromBase);
 					}
 				}
 				drNewGood.Close();
