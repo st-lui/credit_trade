@@ -11,6 +11,7 @@ namespace CreditBase
 		public Dictionary<string, string> WarehousePriceKindDictionary;
 		public Dictionary<string, Dictionary<string, decimal>> PriceKindNomPrice;
 		public abstract void LoadPricesDictionary();
+		public abstract string GetName();
 	}
 
 	public abstract class SqlLoaderCreator
@@ -47,6 +48,14 @@ namespace CreditBase
 		public override SqlLoader FactoryMethod()
 		{
 			return new SqlLoader75();
+		}
+	}
+
+	class SqlLoaderCreator19 : SqlLoaderCreator
+	{
+		public override SqlLoader FactoryMethod()
+		{
+			return new SqlLoader19();
 		}
 	}
 }

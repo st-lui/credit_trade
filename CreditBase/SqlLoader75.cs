@@ -97,6 +97,11 @@ namespace CreditBase
 			}
 		}
 
+		public override string GetName()
+		{
+			return "УФПС Забайкальского края";
+		}
+
 		public class Node
 		{
 			public Nom nom;
