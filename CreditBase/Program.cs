@@ -82,82 +82,84 @@ namespace CreditBase
 
 		public static void RecalcPrices()
 		{
-			SimpleLogger.GetInstance().Write($"Начат пересчет цен");
-			string connStr = @"Data Source=r54web02\sql;
+			try {
+				SimpleLogger.GetInstance().Write($"Начат пересчет цен");
+				string connStr = @"Data Source=r54web02\sql;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 
-			SqlConnection conn = new SqlConnection(connStr);
-			conn.Open();
-			Dictionary<long, Leftover> leftovers = new Dictionary<long, Leftover>();
-			using (SqlCommand command = new SqlCommand($"select l.id,l.good_id,l.warehouse_id,l.amount,l.expenditure,l.price,g.name,p.id from leftovers l,goods g,warehouses w,postoffices po,posts p where l.good_id=g.id and l.warehouse_id=w.id and po.id=w.postoffice_id and po.post_id =p.id", conn))
-			{
-				if (conn.State == ConnectionState.Closed)
-					conn.Open();
-				using (SqlDataReader dataReader = command.ExecuteReader())
+				SqlConnection conn = new SqlConnection(connStr);
+				conn.Open();
+				Dictionary<long, Leftover> leftovers = new Dictionary<long, Leftover>();
+				using (SqlCommand command = new SqlCommand($"select l.id,l.good_id,l.warehouse_id,l.amount,l.expenditure,l.price,g.name,p.id from leftovers l,goods g,warehouses w,postoffices po,posts p where l.good_id=g.id and l.warehouse_id=w.id and po.id=w.postoffice_id and po.post_id =p.id", conn))
 				{
-					while (dataReader.Read())
+					if (conn.State == ConnectionState.Closed)
+						conn.Open();
+					using (SqlDataReader dataReader = command.ExecuteReader())
 					{
-						var leftover = new Leftover(dataReader.GetInt32(0), dataReader.GetInt32(1), dataReader.GetInt32(2),
-							dataReader.GetDecimal(3), dataReader.GetDecimal(4), dataReader.GetDecimal(5), dataReader.GetString(6).Replace((char)160, ' '), dataReader.GetInt32(7).ToString());
-						long leftoverKey = (long)leftover.warehouse_id * 1000000 + leftover.good_id;
-						leftovers.Add(leftoverKey, leftover);
-					}
-					dataReader.Close();
-				}
-			}
-			List<Request> requests = new List<Request>();
-			List<RequestRow> requestRows = new List<RequestRow>();
-			using (SqlCommand reqCommand = new SqlCommand("select r.id,b.warehouse_id,cost from requests r,buyers b where b.id=r.buyer_id", conn))
-			{
-				using (SqlDataReader requestReader = reqCommand.ExecuteReader())
-				{
-					while (requestReader.Read())
-					{
-						int requestId = requestReader.GetInt32(0);
-						int warehouseId = requestReader.GetInt32(1);
-						decimal requestCost = requestReader.GetDecimal(2);
-						decimal requestCostChange = 0;
-						Request request = new Request();
-						request.id = requestId;
-						request.cost=requestCost;
-						using (SqlConnection conn2 = new SqlConnection(connStr))
+						while (dataReader.Read())
 						{
-							conn2.Open();
-							using (SqlCommand requestRowCommand = new SqlCommand($"select id, price,amount,goods_id from request_rows where request_id={requestId}", conn2))
+							var leftover = new Leftover(dataReader.GetInt32(0), dataReader.GetInt32(1), dataReader.GetInt32(2),
+								dataReader.GetDecimal(3), dataReader.GetDecimal(4), dataReader.GetDecimal(5), dataReader.GetString(6).Replace((char)160, ' '), dataReader.GetInt32(7).ToString());
+							long leftoverKey = (long)leftover.warehouse_id * 1000000 + leftover.good_id;
+							leftovers.Add(leftoverKey, leftover);
+						}
+						dataReader.Close();
+					}
+				}
+				List<Request> requests = new List<Request>();
+				List<RequestRow> requestRows = new List<RequestRow>();
+				using (SqlCommand reqCommand = new SqlCommand("select r.id,b.warehouse_id,cost from requests r,buyers b where b.id=r.buyer_id", conn))
+				{
+					using (SqlDataReader requestReader = reqCommand.ExecuteReader())
+					{
+						while (requestReader.Read())
+						{
+							int requestId = requestReader.GetInt32(0);
+							int warehouseId = requestReader.GetInt32(1);
+							decimal requestCost = requestReader.GetDecimal(2);
+							decimal requestCostChange = 0;
+							Request request = new Request();
+							request.id = requestId;
+							request.cost = requestCost;
+							using (SqlConnection conn2 = new SqlConnection(connStr))
 							{
-								using (SqlDataReader requestRowReader = requestRowCommand.ExecuteReader())
+								conn2.Open();
+								using (SqlCommand requestRowCommand = new SqlCommand($"select id, price,amount,goods_id from request_rows where request_id={requestId}", conn2))
 								{
-									while (requestRowReader.Read())
+									using (SqlDataReader requestRowReader = requestRowCommand.ExecuteReader())
 									{
-										int requestRowId = requestRowReader.GetInt32(0);
-										decimal requestRowPrice = requestRowReader.GetDecimal(1);
-										decimal amount = requestRowReader.GetDecimal(2);
-										int good_id = requestRowReader.GetInt32(3);
-										long leftoverId = (long)warehouseId * 1000000 + good_id;
-										//if (leftovers.ContainsKey(leftoverId))
+										while (requestRowReader.Read())
 										{
-											var leftover = leftovers[leftoverId];
-											if (leftover.price != requestRowPrice)
+											int requestRowId = requestRowReader.GetInt32(0);
+											decimal requestRowPrice = requestRowReader.GetDecimal(1);
+											decimal amount = requestRowReader.GetDecimal(2);
+											int good_id = requestRowReader.GetInt32(3);
+											long leftoverId = (long)warehouseId * 1000000 + good_id;
+											//if (leftovers.ContainsKey(leftoverId))
 											{
-												RequestRow requestRow = new RequestRow();
-												requestRow.id = requestRowId;
-												requestRow.oldprice = requestRowPrice;
-												requestRow.price = leftover.price;
-												requestRow.cost = requestRow.price * amount;
-												requestRows.Add(requestRow);
+												var leftover = leftovers[leftoverId];
+												if (leftover.price != requestRowPrice)
+												{
+													RequestRow requestRow = new RequestRow();
+													requestRow.id = requestRowId;
+													requestRow.oldprice = requestRowPrice;
+													requestRow.price = leftover.price;
+													requestRow.cost = Math.Round(requestRow.price * amount, 2, MidpointRounding.AwayFromZero);
+													requestRows.Add(requestRow);
+												}
 											}
 										}
 									}
 								}
+								conn2.Close();
 							}
-							conn2.Close();
+							requests.Add(request);
 						}
-						requests.Add(request);
 					}
 				}
-			}
-			conn.Close();
+				conn.Close();
+
 			if (conn.State == ConnectionState.Closed)
 				conn.Open();
 
@@ -182,9 +184,9 @@ namespace CreditBase
 			foreach (var request in requests)
 			{
 				decimal newCost = 0;
-				using (SqlCommand command = new SqlCommand($"select sum(s.cost) from(select(rr.price * rr.amount) cost from request_rows rr where request_id = {request.id}) s;",conn3))
+				using (SqlCommand command = new SqlCommand($"select sum(s.cost) from(select (round(rr.price * rr.amount,2)) cost from request_rows rr where request_id = {request.id}) s;", conn3))
 				{
-					newCost=(decimal)command.ExecuteScalar();
+					newCost = (decimal)command.ExecuteScalar();
 				}
 				if (newCost != request.cost)
 				{
@@ -203,8 +205,15 @@ namespace CreditBase
 			conn.Close();
 			conn3.Close();
 			//todo обновление бд
-			SimpleLogger.GetInstance().Write($"Завершен пересчет цен");
-
+			
+			}
+			catch (Exception e)
+			{
+				SimpleLogger.GetInstance().Write(e.ToString());
+			}
+			finally{
+				SimpleLogger.GetInstance().Write($"Завершен пересчет цен");
+			}
 		}
 		public static void LeftoversFrom1c()
 		{
