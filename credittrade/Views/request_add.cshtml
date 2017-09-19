@@ -53,7 +53,7 @@
                         <tr>
                             <th>Итого:</th>
                             <th></th>
-                            <th id="result_amount">0</th>
+                            <th id="result_amount"></th>
                             <th id="result_cost">0</th>
                             <th></th>
                         </tr>
@@ -97,6 +97,10 @@
 
 <script language="javascript">
     $(document).ready(function () {
+        accounting.settings.currency.format = "%v";
+        accounting.settings.currency.symbol = "₽";
+        accounting.settings.currency.decimal = ",";
+        accounting.settings.currency.thousand = " ";
         var leftovers_to_post = {};
         var $result_cost = 0;
         $("#leftovers_table").DataTable({
@@ -161,7 +165,7 @@
                 var $cost = $price * $amount;
                 $result_cost += $cost;
                 var column = $("#current_request_table").DataTable().column(3);
-                $(column.footer()).html($result_cost);
+                $(column.footer()).html(accounting.formatMoney($result_cost));
                 leftover["cost"] = $cost;
                 leftovers_to_post[$leftover_id] = leftover;
                 $("#request_info").val(JSON.stringify(leftovers_to_post));
@@ -178,7 +182,7 @@
                 var $cost = $price * $amount;
                 $result_cost += $cost;
                 var column = $("#current_request_table").DataTable().column(3);
-                $(column.footer()).html($result_cost);
+                $(column.footer()).html(accounting.formatMoney($result_cost));
                 leftovers_to_post[$leftover_id]["cost"] += $cost;
                 $("#request_info").val(JSON.stringify(leftovers_to_post));
                 var $new_amount = leftovers_to_post[$leftover_id]["amount"].toFixed(3).replace('.', ',');
@@ -197,7 +201,7 @@
                 var $cost = leftovers_to_post[$leftover_id]["cost"];
                 $result_cost -= $cost;
                 var column = $("#current_request_table").DataTable().column(3);
-                $(column.footer()).html($result_cost);
+                $(column.footer()).html(accounting.formatMoney($result_cost));
                 delete leftovers_to_post[$leftover_id];
                 $("#request_info").val(JSON.stringify(leftovers_to_post));
             });
