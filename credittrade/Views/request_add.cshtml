@@ -49,6 +49,16 @@
                         </tr>
                     </thead>
                     <tbody id="current_request_body"></tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Итого:</th>
+                            <th></th>
+                            <th id="result_amount"></th>
+                            <th id="result_cost">0</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+
                 </table>
             </div>
         </div>
@@ -87,7 +97,12 @@
 
 <script language="javascript">
     $(document).ready(function () {
+        accounting.settings.currency.format = "%v";
+        accounting.settings.currency.symbol = "₽";
+        accounting.settings.currency.decimal = ",";
+        accounting.settings.currency.thousand = " ";
         var leftovers_to_post = {};
+        var $result_cost = 0;
         $("#leftovers_table").DataTable({
             "language": {
                 "url": "@Url.Content("~/content/dataTables.ru.lang.json")"
@@ -148,6 +163,9 @@
                 leftover["price"] = $price;
                 leftover["amount"] = $amount;
                 var $cost = $price * $amount;
+                $result_cost += $cost;
+                var column = $("#current_request_table").DataTable().column(3);
+                $(column.footer()).html(accounting.formatMoney($result_cost));
                 leftover["cost"] = $cost;
                 leftovers_to_post[$leftover_id] = leftover;
                 $("#request_info").val(JSON.stringify(leftovers_to_post));
@@ -158,15 +176,20 @@
                         $name, $price.toFixed(2).replace('.', ','), $amount.toFixed(3).replace('.', ','), $cost.toFixed(2).replace('.', ','), $delbutton])
                     .draw(false).node();
                 $node.id = "curr" + leftover["id"];
+                
             } else {
                 leftovers_to_post[$leftover_id]["amount"] += $amount;
                 var $cost = $price * $amount;
+                $result_cost += $cost;
+                var column = $("#current_request_table").DataTable().column(3);
+                $(column.footer()).html(accounting.formatMoney($result_cost));
                 leftovers_to_post[$leftover_id]["cost"] += $cost;
                 $("#request_info").val(JSON.stringify(leftovers_to_post));
                 var $new_amount = leftovers_to_post[$leftover_id]["amount"].toFixed(3).replace('.', ',');
                 var $new_cost = leftovers_to_post[$leftover_id]["cost"].toFixed(2).replace('.', ',');
                 $("#current_request_table").DataTable().cell("[id='curr" + $leftover_id + "']", 2).data($new_amount);
                 $("#current_request_table").DataTable().cell("[id='curr" + $leftover_id + "']", 3).data($new_cost);
+                
             }
         });
         $('#current_request_table').on('click', 'a.delbutton',
@@ -175,6 +198,10 @@
                     return;
                 var $leftover_id = this.id.split('_')[1];
                 $("#current_request_table").DataTable().row("[id='curr" + $leftover_id + "']").remove().draw(false);
+                var $cost = leftovers_to_post[$leftover_id]["cost"];
+                $result_cost -= $cost;
+                var column = $("#current_request_table").DataTable().column(3);
+                $(column.footer()).html(accounting.formatMoney($result_cost));
                 delete leftovers_to_post[$leftover_id];
                 $("#request_info").val(JSON.stringify(leftovers_to_post));
             });
