@@ -58,4 +58,11 @@ namespace CreditBase
 			return new SqlLoader19();
 		}
 	}
+	class SqlLoaderCreator17 : SqlLoaderCreator
+	{
+		public override SqlLoader FactoryMethod()
+		{
+			return new SqlLoader17();
+		}
+	}
 }

@@ -38,46 +38,47 @@ namespace CreditBase
 			//Console.WriteLine(ToPost());
 			//Console.WriteLine(ToPostOffice());
 			//Console.WriteLine(ToWarehouses());
-			List<SqlLoaderCreator> creators = new List<SqlLoaderCreator>()
-			{
-				new SqlLoaderCreator19(),
-				new SqlLoaderCreator75(),
-				new SqlLoaderCreator03(),
-				new SqlLoaderCreator42(),
-				new SqlLoaderCreator22(),
-			};
-			foreach (var sqlLoaderCreator in creators)
-			{
-				SqlLoader sqlLoader = sqlLoaderCreator.FactoryMethod();
-				SimpleLogger.GetInstance().Write($"Обработка {sqlLoader.GetName()}");
-				try
+				List<SqlLoaderCreator> creators = new List<SqlLoaderCreator>()
 				{
-					//LeftoversFrom1c();
-
+					new SqlLoaderCreator17(),
+					new SqlLoaderCreator19(),
+					new SqlLoaderCreator75(),
+					new SqlLoaderCreator03(),
+					new SqlLoaderCreator42(),
+					new SqlLoaderCreator22(),
+				};
+				foreach (var sqlLoaderCreator in creators)
+				{
+					SqlLoader sqlLoader = sqlLoaderCreator.FactoryMethod();
+					SimpleLogger.GetInstance().Write($"Обработка {sqlLoader.GetName()}");
 					try
 					{
-						//nomLoader.connectionString = "data source=r22aufsql01;initial catalog=r22-asku-work;user=nom_reader;password=6LRZ{w.Y!LHXtY.";
-						sqlLoader.LoadNom();
+						//LeftoversFrom1c();
+
+						try
+						{
+							//nomLoader.connectionString = "data source=r22aufsql01;initial catalog=r22-asku-work;user=nom_reader;password=6LRZ{w.Y!LHXtY.";
+							sqlLoader.LoadNom();
 
 
+						}
+						catch (Exception ee)
+						{
+							SimpleLogger.GetInstance().Write(ee.ToString());
+						}
+						SimpleLogger.GetInstance().Write(Goods(sqlLoader.reg));
+						//Console.ForegroundColor = ConsoleColor.Green;f
+						//CheckWareHouse();
+						sqlLoader.LoadPricesDictionary();
+						Leftovers(sqlLoader.reg, sqlLoader.WhatAPost, sqlLoader.WarehousePriceKindDictionary, sqlLoader.PriceKindNomPrice);
+						SimpleLogger.GetInstance().Write($"Работа завершена {sqlLoader.GetName()}");
 					}
-					catch (Exception ee)
+					catch (Exception e)
 					{
-						SimpleLogger.GetInstance().Write(ee.ToString());
+						SimpleLogger.GetInstance().Write(e.ToString());
 					}
-					SimpleLogger.GetInstance().Write(Goods(sqlLoader.reg));
-					//Console.ForegroundColor = ConsoleColor.Green;f
-					//CheckWareHouse();
-					sqlLoader.LoadPricesDictionary();
-					Leftovers(sqlLoader.reg, sqlLoader.WhatAPost, sqlLoader.WarehousePriceKindDictionary, sqlLoader.PriceKindNomPrice);
-					SimpleLogger.GetInstance().Write($"Работа завершена {sqlLoader.GetName()}");
 				}
-				catch (Exception e)
-				{
-					SimpleLogger.GetInstance().Write(e.ToString());
-				}
-			}
-			RecalcPrices();
+				RecalcPrices();
 		}
 
 		public static void RecalcPrices()
@@ -681,10 +682,10 @@ namespace CreditBase
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 			List<string> PostsList = new List<string>() {
-"Абаканский почтамт",
-"Бейский почтамт",
-"Ширинский почтамт",
-"Саяногорский участок курьерской доставки"
+"Кызылский почтамт",
+"Чаданский почтамт",
+"Бай-Хаакский почтамт",
+"УФПС Республики Тыва"
 
 };
 
