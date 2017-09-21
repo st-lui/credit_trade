@@ -470,25 +470,29 @@ namespace CreditBase
 
 				string WarehouseName = "";
 				string GoodName = "";
+				int nomCol = 1;
 				int startCol = 1;
 				for (int col = 1; col <= colCnt - 1; col++)
 				{
 					string colVal = Null(listOffices.Cells[8, col].Value);
 					if (colVal == "Номенклатура, Ед. изм.")
 					{
+						nomCol = col;
+					}
+					if (colVal == "Характеристика")
+					{
 						startCol = col;
-						break;
 					}
 				}
 				HashSet<string> excelGoodsSet = new HashSet<string>();
 				for (int row = 10; row <= rowCnt - 1; row++)
 				{
-					GoodName = Null(listOffices.Cells[row, startCol].Value);
+					GoodName = Null(listOffices.Cells[row, nomCol].Value);
 					GoodName = GoodName.Substring(0, GoodName.LastIndexOf(','));
 					GoodName = GoodName.Replace("\n", "");
 					excelGoodsSet.Add(GoodName);
 				}
-				for (int col = startCol + 5; col <= colCnt - 1; col++)
+				for (int col = startCol + 1; col <= colCnt - 1; col++)
 				{
 					WarehouseName = Null(listOffices.Cells[8, col].Value).Trim();
 					string wh_name = WarehouseName;
@@ -516,7 +520,7 @@ namespace CreditBase
 						//g++;
 						//Console.WriteLine("Строка в файле - " + g);
 
-						GoodName = Null(listOffices.Cells[row, startCol].Value);
+						GoodName = Null(listOffices.Cells[row, nomCol].Value);
 						GoodName = GoodName.Substring(0, GoodName.LastIndexOf(','));
 						GoodName = GoodName.Replace("\n", "");
 						if (Null(listOffices.Cells[row, col].Value) != "")

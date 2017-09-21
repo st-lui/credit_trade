@@ -53,6 +53,7 @@ namespace PostReq.Model
 			else
 				stringRep += "null";
 			stringRep = stringRep.Replace("\n", "");
+			stringRep = stringRep.Replace("\r", "");
 			return stringRep;
 		}
 
