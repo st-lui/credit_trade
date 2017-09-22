@@ -312,6 +312,14 @@ namespace CreditBase
 				else
 				{
 					string price = NomSearchNom.Price.ToString(CultureInfo.GetCultureInfo("en-US"));
+					string barcode = NomSearchNom.Barcode;
+					if (barcode != null)
+					{
+						barcode = barcode.Replace("\r", "");
+						barcode = barcode.Replace("\n", "");
+						if (barcode.Length > 18)
+							barcode = barcode.Substring(0, 18);
+					}
 					string query = string.Format(@"INSERT INTO [credit_trade].[dbo].[goods] ([nom_id],[parent_id],[name],[edizm],[price],[barcode],reg_code)
 	 VALUES ('{0}','{1}','{2}','{3}', {4} ,'{5}','{6}')",
 		   NomSearchNom.Id,
@@ -319,7 +327,7 @@ namespace CreditBase
 		   NomSearchNom.Name.Replace("'", "''"),
 		   NomSearchNom.EdIzm,
 		   price,
-		   NomSearchNom.Barcode, reg_code);
+		   barcode, reg_code);
 
 					SqlCommand sqlQueryInsert = new SqlCommand(query, connInsUpd);
 					sqlQueryInsert.ExecuteNonQuery();

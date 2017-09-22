@@ -36,7 +36,7 @@ namespace CreditBase
 		{
 			WarehousePriceKindDictionary= new Dictionary<string, string>();
 			PriceKindNomPrice = new Dictionary<string, Dictionary<string, decimal>>();
-			string defaultPriceKind = "8123E4115BE78ED611E26531054E5FE0";
+			string defaultPriceKind = "93FFE4115BE7DEE011E262BF9429E0B6";
 			using (SqlConnection conn = new SqlConnection($"data source={srv};initial catalog={dbname};user={usr};password={pswd}"))
 			{
 				conn.Open();
@@ -236,7 +236,7 @@ select count(_IDRRef)from tree; ", conn))
 						using (
 							SqlCommand comm =
 								new SqlCommand(
-									$@"select _Fld11045RRef,_Fld11048,s._Period from {priceTableName} s,(select _Fld11045RRef nomid, max(_Period) period from {priceTableName} where _Fld11046RRef = 0x8123E4115BE78ED611E26531054E5FE0 group by _Fld11045RRef) p where s._Fld11045RRef = p.nomid and s._Period = p.period and s._Fld11046RRef = 0x8123E4115BE78ED611E26531054E5FE0",
+									$@"select _Fld11045RRef,_Fld11048,s._Period from {priceTableName} s,(select _Fld11045RRef nomid, max(_Period) period from {priceTableName} where _Fld11046RRef = 0x93FFE4115BE7DEE011E262BF9429E0B6 group by _Fld11045RRef) p where s._Fld11045RRef = p.nomid and s._Period = p.period and s._Fld11046RRef = 0x93FFE4115BE7DEE011E262BF9429E0B6",
 									conn))
 						{
 							var dataReader = comm.ExecuteReader();
@@ -429,9 +429,9 @@ select _IDRRef,_ParentIDRRef,_Description,_Code,_Fld2281RRef from tree;", conn))
 		public override string WhatAPost(string nameFile)
 		{
 			string pref = "";
-			if (nameFile.Contains("Кызылский почтамт")) pref = "92";
-			if (nameFile.Contains("Чаданский почтамт")) pref = "93";
-			if (nameFile.Contains("Бай-Хаакский почтамт")) pref = "94";
+			if (nameFile.Contains("report_ОПС Кызылского почтамта")) pref = "92";
+			if (nameFile.Contains("report_ОПС Чаданского почтамта")) pref = "93";
+			if (nameFile.Contains("report_ОПС Бай-Хаакского почтамта")) pref = "94";
 			return pref;
 
 		}
