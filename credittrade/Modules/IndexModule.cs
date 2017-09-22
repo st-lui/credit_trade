@@ -177,7 +177,52 @@ namespace credittrade.Modules
 					reportModel.Start = Request.Form["date_start"];
 					reportModel.Finish = Request.Form["date_finish"];
 					reportModel.RequestsCurrent = reqs;
-					ms = Utils.GenReportGoods(reportModel);
+					ms = Utils.GenReportGoods(reportModel," выданным в кредит");
+					//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+
+					return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+				}
+			};
+
+			Get["/report_goods_paid"] = p =>
+			{
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
+					warehouse warehouse = currentUser.warehouse;
+					model.Post = warehouse.name;
+					model.Post_id = warehouse.id;
+					var today = DateTime.Today;
+					string StartDate = new DateTime(today.Year, today.Month, 1).ToString("d", CultureInfo.InvariantCulture);
+					string FinishDate = new DateTime(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month)).ToString("d", CultureInfo.InvariantCulture);
+					model.StartDate = StartDate;
+					model.FinishDate = FinishDate;
+					model.Layout = "layout.cshtml";
+
+				}
+				return View["report_goods_paid", model];
+			};
+
+			Post["/report_goods_paid"] = param =>
+			{
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					DateTime start = DateTime.Parse(Request.Form["date_start"]);
+					DateTime finish = DateTime.Parse(Request.Form["date_finish"]);
+					int warehouseId = int.Parse(Request.Form["post"]);
+					MemoryStream ms = new MemoryStream();
+					warehouse warehouse = unitOfWork.Warehouses.GetWithBuyers(warehouseId);
+
+					List<buyer> buyersPost = warehouse.buyers.ToList();
+					var buyerIds = buyersPost.Select(x => x.id).ToList();
+					IList<request> reqs = unitOfWork.Requests.GetPaidRequestsWithRowsByDate(buyerIds, start, finish);
+					InOutReportModel reportModel = new InOutReportModel();
+					reportModel.Start = Request.Form["date_start"];
+					reportModel.Finish = Request.Form["date_finish"];
+					reportModel.RequestsCurrent = reqs;
+					ms = Utils.GenReportGoods(reportModel, " оплаченным");
 					//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 					//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 

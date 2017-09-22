@@ -415,14 +415,14 @@ namespace credittrade.Modules
 			excelPackage.SaveAs(ms);
 			return ms;
 		}
-		public static MemoryStream GenReportGoods(InOutReportModel reportModel)
+		public static MemoryStream GenReportGoods(InOutReportModel reportModel,string reportTitle)
 		{
 			var req = reportModel.RequestsCurrent;
 			var start = reportModel.Start;
 			var finish = reportModel.Finish;
 			var ms = new MemoryStream();
 			ExcelPackage excelPackage = new ExcelPackage();
-			excelPackage.Workbook.Worksheets.Add("Ведомость по товарам");
+			excelPackage.Workbook.Worksheets.Add("Ведомость по товарам"+reportTitle);
 			List<request_rows> requestRows = new List<request_rows>();
 			foreach (request r in req)
 			{
@@ -434,7 +434,7 @@ namespace credittrade.Modules
 			var sheet = excelPackage.Workbook.Worksheets[1];
 
 			int k = 0;
-			sheet.Cells[k + 1, 1].Value = $"Ведомость по товарам";// - {requestsByPost.ElementAt(0).request.buyer.warehouse.postoffice.post.name}";
+			sheet.Cells[k + 1, 1].Value = $"Ведомость по товарам"+reportTitle;// - {requestsByPost.ElementAt(0).request.buyer.warehouse.postoffice.post.name}";
 			sheet.Cells[k + 1, 1].Style.Font.Size = 16;
 			sheet.Cells[k + 1, 1, k + 1, 4].Merge = true;
 			sheet.Cells[k + 2, 1].Value = $"Период: {start} - {finish}";
