@@ -160,7 +160,7 @@ namespace credittrade.Modules
 				return View["report_goods", model];
 			};
 
-			Post["/report_goods"] = param =>
+			Post["/report_goods.xlsx"] = param =>
 			{
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
@@ -178,11 +178,8 @@ namespace credittrade.Modules
 					reportModel.Finish = Request.Form["date_finish"];
 					reportModel.RequestsCurrent = reqs;
 					ms = Utils.GenReportGoods(reportModel," выданным в кредит");
-					//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-					//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-
-					return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					ms.Position = 0;
+					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 				}
 			};
 
@@ -205,7 +202,7 @@ namespace credittrade.Modules
 				return View["report_goods_paid", model];
 			};
 
-			Post["/report_goods_paid"] = param =>
+			Post["/report_goods_paid.xlsx"] = param =>
 			{
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
@@ -223,14 +220,11 @@ namespace credittrade.Modules
 					reportModel.Finish = Request.Form["date_finish"];
 					reportModel.RequestsCurrent = reqs;
 					ms = Utils.GenReportGoods(reportModel, " оплаченным");
-					//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-					//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-
-					return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					ms.Position = 0;
+					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 				}
 			};
-			Get["/report_goods_leftovers"] = p =>
+			Get["/report_leftovers"] = p =>
 			{
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
@@ -246,32 +240,20 @@ namespace credittrade.Modules
 					model.Layout = "layout.cshtml";
 
 				}
-				return View["report_goods_leftovers", model];
+				return View["report_leftovers", model];
 			};
 
-			Post["/report_goods_leftovers"] = param =>
+			Post["/report_leftovers.xlsx"] = param =>
 			{
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
-					DateTime start = DateTime.Parse(Request.Form["date_start"]);
-					DateTime finish = DateTime.Parse(Request.Form["date_finish"]);
 					int warehouseId = int.Parse(Request.Form["post"]);
-					MemoryStream ms = new MemoryStream();
-					warehouse warehouse = unitOfWork.Warehouses.GetWithBuyers(warehouseId);
-
-					List<buyer> buyersPost = warehouse.buyers.ToList();
-					var buyerIds = buyersPost.Select(x => x.id).ToList();
-					IList<request> reqs = unitOfWork.Requests.GetPaidRequestsWithRowsByDate(buyerIds, start, finish);
-					InOutReportModel reportModel = new InOutReportModel();
-					reportModel.Start = Request.Form["date_start"];
-					reportModel.Finish = Request.Form["date_finish"];
-					reportModel.RequestsCurrent = reqs;
-					ms = Utils.GenReportGoods(reportModel, " оплаченным");
-					//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-					//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-
-					return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					IList<leftover> lefts = unitOfWork.Leftovers.GetWithGoodsForWareHouse(warehouseId);
+					LeftoversReportModel reportModel = new LeftoversReportModel();
+					reportModel.leftovers = lefts;
+					var ms = Utils.GenReportLeftovers(reportModel,"");
+					ms.Position = 0;
+					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 				}
 			};
 		}

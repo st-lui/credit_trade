@@ -1,0 +1,34 @@
+﻿@using System.Collections.Generic;
+@{
+    ViewBag.Title = "Ведомость по остаткам товаров";
+    if (((IDictionary<string, object>)Model).ContainsKey("Layout"))
+    {
+        Layout = Model.Layout;
+    }
+    else
+    {
+        Layout = "layout_admin.cshtml";
+    }
+}
+
+<div class="row">
+    <h2>@Model.Post - @ViewBag.Title</h2>
+    <form class="form-horizontal col-sm-8" method="post" action="@Url.Content("~/report_leftovers.xlsx")">
+        <div class="form-group">
+            <button class="btn btn-primary" type="submit" id="get-report">Получить отчет</button>
+        <a class="btn btn-default" onclick="javascript: history.go(-1);">Назад</a>
+        <input type="hidden" id="post" name="post" value="@Model.Post_id"/>
+    </form>
+</div>
+
+<script language="javascript">
+    @*$("#get-report").click(function() {
+        $.post(
+        {
+            url: '@Url.Content("~/admin/reports/sells")',
+            dataType:'json',
+            data: {
+                'start':$("#date_start").val(),'finish':$("#date_finish").val(),'post':$("#post").val()
+        }}).done(function(data) {});
+    });*@
+</script>

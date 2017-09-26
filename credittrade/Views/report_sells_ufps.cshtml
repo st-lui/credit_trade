@@ -3,8 +3,8 @@
     Layout = "layout_admin.cshtml";
 }
 
-<h2>@Model.Post - @ViewBag.Title</h2>
 <div class="row">
+    <h2>@Model.Post - @ViewBag.Title</h2>
     <form class="form-horizontal col-sm-8" method="post" action="">
         <div class="form-group">
             <h3>Выберите период</h3>
@@ -25,9 +25,9 @@
                 </span>
             </div>
         </div>
-            <button class="btn btn-primary" type="submit" id="get-report">Получить отчет</button>
+        <button class="btn btn-primary" type="submit" id="get-report">Получить отчет</button>
         <a class="btn btn-default" onclick="javascript: history.go(-1);">Назад</a>
-        <input type="hidden" id="post" name="post" value="@Model.Post_id"/>
+        <input type="hidden" id="post" name="post" value="@Model.Post_id" />
     </form>
 </div>
 

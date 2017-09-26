@@ -233,7 +233,7 @@ namespace credittrade.Modules
 				}
 				return View["report2", model];
 			};
-			Post["/report_sells"] = param =>
+			Post["/report_sells.xlsx"] = param =>
 			{
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
@@ -308,7 +308,7 @@ namespace credittrade.Modules
 				return View["report_goods", model];
 			};
 
-			Post["/report_goods"] = param =>
+			Post["/report_goods.xlsx"] = param =>
 			{
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
@@ -366,7 +366,7 @@ namespace credittrade.Modules
 				return View["report_goods_paid", model];
 			};
 
-			Post["/report_goods_paid"] = param =>
+			Post["/report_goods_paid.xlsx"] = param =>
 			{
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
@@ -436,6 +436,14 @@ public static class Extensions
 {
 	public static Response FromByteArray(this IResponseFormatter formatter, byte[] body, string contentType = null)
 	{
-		return new ByteArrayResponse(body, contentType);
+		int zeros = 0;	
+		for (int i = body.Length - 1; body[i] == 0; i--)
+		{
+			zeros++;
+		}
+		byte[] newBody = new byte[body.Length - zeros];
+		for (int i = 0; i < body.Length - zeros; i++)
+			newBody[i] = body[i];
+		return new ByteArrayResponse(newBody, contentType);
 	}
 }

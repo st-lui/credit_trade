@@ -310,7 +310,7 @@ namespace credittrade.Modules
 			}
 
 			var ms = new MemoryStream();
-			ExcelPackage excelPackage = new ExcelPackage();
+			ExcelPackage excelPackage = new ExcelPackage(ms);
 			excelPackage.Workbook.Worksheets.Add("Оборотная ведомость");
 			var sheet = excelPackage.Workbook.Worksheets[1];
 			var reportRowsList = new List<ReportRow>();
@@ -412,7 +412,7 @@ namespace credittrade.Modules
 			const double minWidth = 0.00;
 			const double maxWidth = 50.00;
 			sheet.Cells.AutoFitColumns(minWidth, maxWidth);
-			excelPackage.SaveAs(ms);
+			excelPackage.Save();
 			return ms;
 		}
 		public static MemoryStream GenReportGoods(InOutReportModel reportModel,string reportTitle)
@@ -421,7 +421,7 @@ namespace credittrade.Modules
 			var start = reportModel.Start;
 			var finish = reportModel.Finish;
 			var ms = new MemoryStream();
-			ExcelPackage excelPackage = new ExcelPackage();
+			ExcelPackage excelPackage = new ExcelPackage(ms);
 			excelPackage.Workbook.Worksheets.Add("Ведомость по товарам"+reportTitle);
 			List<request_rows> requestRows = new List<request_rows>();
 			foreach (request r in req)
@@ -527,7 +527,76 @@ namespace credittrade.Modules
 			//если ОПС в отчете одно, то прячем колонку Склад
 			if (postofficeCount == 1)
 				sheet.Column(3).Hidden = true;
-			excelPackage.SaveAs(ms);
+			excelPackage.Save();
+			return ms;
+		}
+
+		public static MemoryStream GenReportLeftovers(LeftoversReportModel reportModel, string reportTitle)
+		{
+			var leftovers = reportModel.leftovers.OrderBy(x=>x.good.name);
+			var ms = new MemoryStream();
+			ExcelPackage excelPackage = new ExcelPackage(ms);
+			excelPackage.Workbook.Worksheets.Add("Ведомость по остаткам товаров" + reportTitle);
+			var sheet = excelPackage.Workbook.Worksheets[1];
+
+			int k = 0;
+			sheet.Cells[k + 1, 1].Value = $"Остатки товаров" + reportTitle;// - {requestsByPost.ElementAt(0).request.buyer.warehouse.postoffice.post.name}";
+			sheet.Cells[k + 1, 1].Style.Font.Size = 16;
+			sheet.Cells[k + 1, 1, k + 1, 4].Merge = true;
+			sheet.Cells[k + 3, 1].Value = "№ п/п";
+			sheet.Cells[k + 3, 2].Value = "Наименование товара";
+			sheet.Cells[k + 3, 3].Value = "Цена";
+			sheet.Cells[k + 3, 4].Value = "Остаток";
+			sheet.Cells[k + 3, 5].Value = "Расход в кредит";
+			sheet.Cells[k + 3, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[k + 3, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[k + 3, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[k + 3, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[k + 3, 5].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[k + 3, 1, k + 3, 5].Style.Font.Size = 13;
+
+			int i = k + 4;
+			// для подсчета количества ОПС
+			int postofficeCount = 0;
+			decimal totalAmount = 0,totalExp=0;
+			int count = 1;
+			foreach (var leftover in leftovers)
+			{
+				string goodsName = leftover.good.name;
+				string price = leftover.price.ToString();
+				decimal amount = leftover.amount-leftover.expenditure.Value;
+				decimal exp = -leftover.expenditure.Value;
+				decimal cost = 0;
+				
+				totalAmount+= amount;
+				totalExp += exp;
+				sheet.Cells[i, 1].Value = count++;
+				sheet.Cells[i, 2].Value = goodsName;
+				sheet.Cells[i, 3].Value = price;
+				sheet.Cells[i, 4].Value = amount;
+				sheet.Cells[i, 5].Value = exp;
+				sheet.Cells[i, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[i, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[i, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[i, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				sheet.Cells[i, 5].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				i++;
+			}
+				
+			sheet.Cells[i, 2].Value = "Итого";
+			sheet.Cells[i, 4].Value = totalAmount;
+			sheet.Cells[i, 5].Value = totalExp;
+
+			const double minWidth = 0.00;
+			const double maxWidth = 100.00;
+			sheet.Cells.AutoFitColumns(minWidth, maxWidth);
+
+			sheet.Cells[i, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[i, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[i, 5].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[i, 2, i, 5].Style.Font.Size = 13;
+			sheet.Column(1).Width = 8;
+			excelPackage.Save();
 			return ms;
 		}
 	}
