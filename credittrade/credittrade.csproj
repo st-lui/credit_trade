@@ -429,6 +429,7 @@
     <Compile Include="Modules\AdminModule.cs" />
     <Compile Include="Modules\IndexModule.cs" />
     <Compile Include="Modules\InOutReportModel.cs" />
+    <Compile Include="Modules\LeftoversReportModel.cs" />
     <Compile Include="Modules\MrcReportRow.cs" />
     <Compile Include="Modules\RuDataAndMoneyConverter.cs" />
     <Compile Include="Modules\Utils.cs" />
@@ -463,6 +464,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Views\reports.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\report_goods_paid.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Views\report_leftovers.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="Web.Debug.config">

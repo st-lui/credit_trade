@@ -281,11 +281,7 @@ namespace credittrade.Modules
 					reportModel.RequestsPenaltyAfter = reqsPenalty;
 					reportModel.RequestsPenaltyBefore = reqsPenaltyBefore;
 					ms = Utils.GenReportUfps(reportModel);
-					//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-					//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-
-					return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "attachment; filename=report_sells.xlsx");
 				}
 			};
 
@@ -339,12 +335,62 @@ namespace credittrade.Modules
 					reportModel.Start = Request.Form["date_start"];
 					reportModel.Finish = Request.Form["date_finish"];
 					reportModel.RequestsCurrent = reqs;
-					ms = Utils.GenReportGoods(reportModel);
-					//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-					//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					ms = Utils.GenReportGoods(reportModel," выданным в кредит");
+					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "attachment; filename=report_goods.xlsx");
+				}
+			};
 
+			Get["/report_goods_paid"] = param =>
+			{
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
+					post post = currentUser.warehouse.postoffice.post;
+					model.Post = post.name;
+					model.Post_id = post.id;
+					var today = DateTime.Today;
+					string StartDate = new DateTime(today.Year, today.Month, 1).ToString("d", CultureInfo.InvariantCulture);
+					string FinishDate = new DateTime(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month)).ToString("d", CultureInfo.InvariantCulture);
+					model.StartDate = StartDate;
+					model.FinishDate = FinishDate;
 
-					return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+				}
+				return View["report_goods_paid", model];
+			};
+
+			Post["/report_goods_paid"] = param =>
+			{
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					DateTime start = DateTime.Parse(Request.Form["date_start"]);
+					DateTime finish = DateTime.Parse(Request.Form["date_finish"]);
+					int postId = int.Parse(Request.Form["post"]);
+					MemoryStream ms = new MemoryStream();
+					post post = unitOfWork.Posts.Get(postId);
+
+					List<buyer> buyersPost = new List<buyer>();
+					if (post.privilegies == 1)
+					{
+						foreach (post p in post.children)
+						{
+							IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(p.id);
+							buyersPost.AddRange(buyers);
+						}
+					}
+					// иначе почтамт
+					else
+					{
+						IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(post.id);
+						buyersPost.AddRange(buyers);
+					}
+					var buyerIds = buyersPost.Select(x => x.id).ToList();
+					IList<request> reqs = unitOfWork.Requests.GetPaidRequestsWithRowsByDate(buyerIds, start, finish);
+					InOutReportModel reportModel = new InOutReportModel();
+					reportModel.Start = Request.Form["date_start"];
+					reportModel.Finish = Request.Form["date_finish"];
+					reportModel.RequestsCurrent = reqs;
+					ms = Utils.GenReportGoods(reportModel, " оплаченным");
+					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "attachment; filename=report_paid.xlsx");
 				}
 			};
 
@@ -378,6 +424,21 @@ public static class Extensions
 {
 	public static Response FromByteArray(this IResponseFormatter formatter, byte[] body, string contentType = null)
 	{
-		return new ByteArrayResponse(body, contentType);
+		int zeros = 0;	
+		for (int i = body.Length - 1; body[i] == 0; i--)
+		{
+			zeros++;
+		}
+		byte[] newBody = new byte[body.Length - zeros];
+		for (int i = 0; i < body.Length - zeros; i++)
+			newBody[i] = body[i];
+		return new ByteArrayResponse(newBody, contentType);
+	}
+	public static Response FromStream(this IResponseFormatter formatter, Stream sourceStream, string contentType,string contentDisposition)
+	{
+		sourceStream.Position = 0;
+		Response r = formatter.FromStream(sourceStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+		r.Headers.Add("content-disposition",contentDisposition);
+		return r;
 	}
 }

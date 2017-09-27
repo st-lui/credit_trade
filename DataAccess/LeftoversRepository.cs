@@ -43,5 +43,10 @@ namespace DataAccess
 		{
 			return db.leftovers.Include("good").SingleOrDefault(x => x.id == id);
 		}
+
+		public IList<leftover> GetWithGoodsForWareHouse(int warehouse_id)
+		{
+			return db.leftovers.Where(x=>x.warehouse_id==warehouse_id).Include("good").ToList();
+		}
 	}
 }
