@@ -233,7 +233,7 @@ namespace credittrade.Modules
 				}
 				return View["report2", model];
 			};
-			Post["/report_sells.xlsx"] = param =>
+			Post["/report_sells"] = param =>
 			{
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
@@ -281,11 +281,7 @@ namespace credittrade.Modules
 					reportModel.RequestsPenaltyAfter = reqsPenalty;
 					reportModel.RequestsPenaltyBefore = reqsPenaltyBefore;
 					ms = Utils.GenReportUfps(reportModel);
-					//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-					//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-
-					return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "attachment; filename=report_sells.xlsx");
 				}
 			};
 
@@ -308,7 +304,7 @@ namespace credittrade.Modules
 				return View["report_goods", model];
 			};
 
-			Post["/report_goods.xlsx"] = param =>
+			Post["/report_goods"] = param =>
 			{
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
@@ -340,11 +336,7 @@ namespace credittrade.Modules
 					reportModel.Finish = Request.Form["date_finish"];
 					reportModel.RequestsCurrent = reqs;
 					ms = Utils.GenReportGoods(reportModel," выданным в кредит");
-					//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-					//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-
-					return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "attachment; filename=report_goods.xlsx");
 				}
 			};
 
@@ -366,7 +358,7 @@ namespace credittrade.Modules
 				return View["report_goods_paid", model];
 			};
 
-			Post["/report_goods_paid.xlsx"] = param =>
+			Post["/report_goods_paid"] = param =>
 			{
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
@@ -398,11 +390,7 @@ namespace credittrade.Modules
 					reportModel.Finish = Request.Form["date_finish"];
 					reportModel.RequestsCurrent = reqs;
 					ms = Utils.GenReportGoods(reportModel, " оплаченным");
-					//return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-					//return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-
-					return Response.FromByteArray(ms.GetBuffer(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "attachment; filename=report_paid.xlsx");
 				}
 			};
 
@@ -445,5 +433,12 @@ public static class Extensions
 		for (int i = 0; i < body.Length - zeros; i++)
 			newBody[i] = body[i];
 		return new ByteArrayResponse(newBody, contentType);
+	}
+	public static Response FromStream(this IResponseFormatter formatter, Stream sourceStream, string contentType,string contentDisposition)
+	{
+		sourceStream.Position = 0;
+		Response r = formatter.FromStream(sourceStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+		r.Headers.Add("content-disposition",contentDisposition);
+		return r;
 	}
 }

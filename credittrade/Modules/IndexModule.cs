@@ -160,7 +160,7 @@ namespace credittrade.Modules
 				return View["report_goods", model];
 			};
 
-			Post["/report_goods.xlsx"] = param =>
+			Post["/report_goods"] = param =>
 			{
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
@@ -178,8 +178,7 @@ namespace credittrade.Modules
 					reportModel.Finish = Request.Form["date_finish"];
 					reportModel.RequestsCurrent = reqs;
 					ms = Utils.GenReportGoods(reportModel," выданным в кредит");
-					ms.Position = 0;
-					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "attachment; filename=report_goods.xlsx");
 				}
 			};
 
@@ -202,7 +201,7 @@ namespace credittrade.Modules
 				return View["report_goods_paid", model];
 			};
 
-			Post["/report_goods_paid.xlsx"] = param =>
+			Post["/report_goods_paid"] = param =>
 			{
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
@@ -220,8 +219,7 @@ namespace credittrade.Modules
 					reportModel.Finish = Request.Form["date_finish"];
 					reportModel.RequestsCurrent = reqs;
 					ms = Utils.GenReportGoods(reportModel, " оплаченным");
-					ms.Position = 0;
-					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "attachment; filename=report_goods_paid.xlsx");
 				}
 			};
 			Get["/report_leftovers"] = p =>
@@ -243,7 +241,7 @@ namespace credittrade.Modules
 				return View["report_leftovers", model];
 			};
 
-			Post["/report_leftovers.xlsx"] = param =>
+			Post["/report_leftovers"] = param =>
 			{
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
@@ -252,8 +250,7 @@ namespace credittrade.Modules
 					LeftoversReportModel reportModel = new LeftoversReportModel();
 					reportModel.leftovers = lefts;
 					var ms = Utils.GenReportLeftovers(reportModel,"");
-					ms.Position = 0;
-					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","attachment; filename=report_leftovers.xlsx");
 				}
 			};
 		}
