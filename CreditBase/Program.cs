@@ -85,7 +85,7 @@ namespace CreditBase
 		{
 			try {
 				SimpleLogger.GetInstance().Write($"Начат пересчет цен");
-				string connStr = @"Data Source=r54web02\sql;
+				string connStr = @"Data Source=.\sql;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -243,7 +243,7 @@ namespace CreditBase
 				//Console.WriteLine(TempNom.ToString());
 			}
 
-			string connStr = @"Data Source=r54web02\sql;
+			string connStr = @"Data Source=.\sql;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -350,7 +350,7 @@ namespace CreditBase
 
 		public static string Leftovers(string reg_code, Func<string, string> whatAPost, Dictionary<string, string> warehousePriceKindDictionary, Dictionary<string, Dictionary<string, decimal>> sqlLoaderPriceKindNomPrice)
 		{
-			string connStr = @"Data Source=r54web02\sql;
+			string connStr = @"Data Source=.\sql;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -690,7 +690,7 @@ namespace CreditBase
 
 		public static string ToPost()
 		{
-			string connStr = @"Data Source=r54web02\sql;
+			string connStr = @"Data Source=.\sql;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 			List<string> PostsList = new List<string>() {
@@ -755,7 +755,7 @@ namespace CreditBase
 				}
 
 
-				string connStr = @"Data Source=r54web02\sql;
+				string connStr = @"Data Source=.\sql;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 
@@ -818,7 +818,7 @@ namespace CreditBase
 
 		public static string ToWarehouses()
 		{
-			string connStr = @"Data Source=r54web02\sql;
+			string connStr = @"Data Source=.\sql;
 							Initial Catalog=credit_trade;
 							Integrated Security=False;User ID=credit;Password=123456;";
 

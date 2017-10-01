@@ -26,6 +26,7 @@ namespace DbModel
         public Nullable<System.DateTime> contract_date { get; set; }
         public string contract_number { get; set; }
         public Nullable<decimal> limit { get; set; }
+        public bool postman { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<request> requests { get; set; }

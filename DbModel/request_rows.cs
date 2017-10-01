@@ -14,6 +14,12 @@ namespace DbModel
     
     public partial class request_rows
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public request_rows()
+        {
+            this.payments = new HashSet<payment>();
+        }
+    
         public int id { get; set; }
         public Nullable<decimal> amount { get; set; }
         public string name { get; set; }
@@ -22,7 +28,11 @@ namespace DbModel
         public Nullable<int> request_id { get; set; }
         public Nullable<decimal> price { get; set; }
         public string barcode { get; set; }
+        public decimal paid_amount { get; set; }
+        public decimal return_amount { get; set; }
     
         public virtual request request { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<payment> payments { get; set; }
     }
 }

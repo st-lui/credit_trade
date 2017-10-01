@@ -26,6 +26,8 @@
         <AssociationConnector Association="DbModel.FK_users_warehouses" />
         <AssociationConnector Association="DbModel.FK_buyers_warehouses" />
         <AssociationConnector Association="DbModel.FK_posts_posts" />
+        <EntityTypeShape EntityType="DbModel.payment" Width="1.5" PointX="14.25" PointY="8.125" />
+        <AssociationConnector Association="DbModel.FK_payments_request_rows" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
