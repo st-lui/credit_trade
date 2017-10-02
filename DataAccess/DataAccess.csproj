@@ -57,6 +57,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GoodsRepository.cs" />
     <Compile Include="RequestRepository.cs" />
+    <Compile Include="PaymentsRepository.cs" />
     <Compile Include="RequestRowRepository.cs" />
     <Compile Include="StatesRepository.cs" />
     <Compile Include="UnitOfWork.cs" />

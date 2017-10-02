@@ -49,6 +49,7 @@
           <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="request_row_id" Type="int" Nullable="false" />
           <Property Name="amount" Type="decimal" Precision="10" Scale="3" Nullable="false" />
+          <Property Name="date" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="postoffices">
           <Key>
@@ -644,6 +645,7 @@
           <Property Name="request_row_id" Type="Int32" Nullable="false" />
           <Property Name="amount" Type="Decimal" Nullable="false" Precision="10" Scale="3" />
           <NavigationProperty Name="request_rows" Relationship="DbModel.FK_payments_request_rows" FromRole="payment" ToRole="request_rows" />
+          <Property Name="date" Type="DateTime" Nullable="false" Precision="3" />
         </EntityType>
         <Association Name="FK_payments_request_rows">
           <End Type="DbModel.request_rows" Role="request_rows" Multiplicity="1" />
@@ -790,6 +792,7 @@
           <EntitySetMapping Name="payments">
             <EntityTypeMapping TypeName="DbModel.payment">
               <MappingFragment StoreEntitySet="payments">
+                <ScalarProperty Name="date" ColumnName="date" />
                 <ScalarProperty Name="amount" ColumnName="amount" />
                 <ScalarProperty Name="request_row_id" ColumnName="request_row_id" />
                 <ScalarProperty Name="id" ColumnName="id" />

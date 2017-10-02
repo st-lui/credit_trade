@@ -17,6 +17,7 @@ namespace DbModel
         public int id { get; set; }
         public int request_row_id { get; set; }
         public decimal amount { get; set; }
+        public System.DateTime date { get; set; }
     
         public virtual request_rows request_rows { get; set; }
     }

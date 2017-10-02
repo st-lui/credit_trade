@@ -1,4 +1,4 @@
- using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.SqlServer;
@@ -79,6 +79,7 @@ namespace DataAccess
 
 		public void MakePay(request request, DateTime date)
 		{
+			///TODO: предусмотреть полную оплату при существующей частичной
 			request.paid = true;
 			request.pay_date = date;
 			warehouse warehouse = request.user.warehouse;
@@ -90,8 +91,87 @@ namespace DataAccess
 				if (foundLeftover != null)
 				{
 					foundLeftover.expenditure -= request_row.amount;
-					db.Entry(foundLeftover).State=EntityState.Modified;
+					db.Entry(foundLeftover).State = EntityState.Modified;
 				}
+			}
+		}
+		/// <summary>
+		///  Оплата остатка товара по заказу
+		/// </summary>
+		/// <param name="request">Заказ</param>
+		/// <param name="date">Дата оплаты</param>
+		/// <param name="payments">Репозиторий платежей</param>
+		public void MakePay(request request, DateTime date, PaymentsRepository payments)
+		{
+			foreach (var request_row in request.request_rows)
+			{
+				decimal amount = request_row.amount.Value - request_row.paid_amount - request_row.return_amount;
+				MakePartialPay(request, request_row,amount, date, payments);
+			}
+		}
+
+		/// <summary>
+		///  Возврат остатка товара по заказу
+		/// </summary>
+		/// <param name="request">Заказ</param>
+		/// <param name="date">Дата оплаты</param>
+		/// <param name="payments">Репозиторий платежей</param>
+		public void MakePayWithReturn(request request,DateTime date,PaymentsRepository payments)
+		{
+			foreach (var request_row in request.request_rows)
+			{
+				decimal amount = request_row.amount.Value - request_row.paid_amount - request_row.return_amount;
+				amount *= -1;
+				MakePartialPay(request, request_row, amount, date, payments);
+			}
+		}
+		/// <summary>
+		/// Создание частичного платежа или возврата
+		/// </summary>
+		/// <param name="request">Заказ</param>
+		/// <param name="request_row">Строка заказа</param>
+		/// <param name="amount">Количество товара, если положительное, то продажа, если отрицательное, то возврат</param>
+		/// <param name="date">Дата частичного платежа</param>
+		/// <param name="payments">Репозиторий частичных платежей</param>
+		public void MakePartialPay(request request, request_rows request_row, decimal amount, DateTime date, PaymentsRepository payments)
+		{
+			payment payment = payments.CreatePayment(request_row, amount, date);
+			payments.Add(payment);
+			if (payment.amount > 0)
+				request_row.paid_amount += payment.amount;
+			else
+			if (payment.amount < 0)
+				request_row.return_amount += -payment.amount;
+			warehouse warehouse = request.user.warehouse;
+			if (!db.Entry(warehouse).Collection(x => x.leftovers).IsLoaded)
+				db.Entry(warehouse).Collection(x => x.leftovers).Load();
+			leftover foundLeftover = warehouse.leftovers.SingleOrDefault(x => x.good_id == request_row.goods_id.Value);
+			if (foundLeftover != null)
+			{
+				foundLeftover.expenditure -= payment.amount;
+				db.Entry(foundLeftover).State = EntityState.Modified;
+			}
+			MakePayIfPaid(request, date);
+		}
+
+		/// <summary>
+		/// Проверка полной оплаты заказа по количеству в частичных платежах
+		/// </summary>
+		/// <param name="request"></param>
+		/// <param name="date"></param>
+		public void MakePayIfPaid(request request, DateTime date)
+		{
+			bool paid = true;
+			foreach (request_rows rr in request.request_rows)
+				if (rr.paid_amount + rr.return_amount != rr.amount)
+				{
+					paid = false;
+					break;
+				}
+			if (paid)
+			{
+				request.paid = true;
+				request.pay_date = date;
 			}
 		}
 
@@ -125,13 +205,13 @@ namespace DataAccess
 		public IList<request> GetPaidRequestsWithRowsByDate(List<int> buyers, DateTime start, DateTime finish)
 		{
 			finish = finish.AddDays(1);
-			return db.requests.Include("request_rows").Include("user.warehouse.postoffice.post").Where(x =>x.paid.Value && x.pay_date >= start && x.pay_date < finish && buyers.Contains(x.buyer_id.Value)).ToList();
+			return db.requests.Include("request_rows").Include("user.warehouse.postoffice.post").Where(x => x.paid.Value && x.pay_date >= start && x.pay_date < finish && buyers.Contains(x.buyer_id.Value)).ToList();
 		}
 
 		public IList<request> GetPenaltyRequestsByDate(List<int> buyers, DateTime start, DateTime finish)
 		{
 			finish = finish.AddDays(1);
-			return db.requests.Include("user.warehouse.postoffice.post").Where(x => x.date.Value>=start && x.date<finish && (!x.paid.Value || x.paid.Value && x.pay_date.Value>=finish) && SqlFunctions.DateAdd("day",30,x.date)<finish && buyers.Contains(x.buyer_id.Value)).ToList();
+			return db.requests.Include("user.warehouse.postoffice.post").Where(x => x.date.Value >= start && x.date < finish && (!x.paid.Value || x.paid.Value && x.pay_date.Value >= finish) && SqlFunctions.DateAdd("day", 30, x.date) < finish && buyers.Contains(x.buyer_id.Value)).ToList();
 		}
 	}
 }
