@@ -3,7 +3,7 @@
     Layout = "layout.cshtml";
 }
 
-<form class="form-horizontal col-sm-8" action="@Url.Content("~/requests/makepay/"+Model.request.id)" method="post">
+<form class="form-horizontal col-sm-8" id="pay_form" action="@Url.Content("~/requests/makepay/"+Model.request.id)" method="post">
     @Html.AntiForgeryToken()
     <h3>Заказ № @Model.request.id от @Model.request.date.ToString("dd.MM.yyyy HH:mm")</h3>
     <h3>@Model.request.user.warehouse.postoffice.idx @Model.request.user.warehouse.name @Model.request.user.warehouse.postoffice.post.name</h3>
@@ -32,7 +32,7 @@
 
     <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">
-            <button type="submit" class="btn btn-primary">Подтвердить оплату</button>
+            <button type="submit" id="submit" class="btn btn-primary">Подтвердить оплату</button>
         </div>
     </div>
 
@@ -75,6 +75,7 @@
 
 
 <script>
+    var mutex = true;
     $("#current_request_table_pay").DataTable({
         "language": {
             "url": "@Url.Content("~/content/dataTables.ru.lang.json")"
@@ -86,5 +87,11 @@
         locale: 'ru',
         defaultDate: moment(),
         allowInputToggle:true
+    });
+    $("#submit").click(function () {
+        if (!mutex) {
+            mutex = true;
+            $("#pay_form").submit();
+        }
     });
 </script>

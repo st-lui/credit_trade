@@ -32,7 +32,7 @@
             </div>
         </div>
         <script type="text/javascript">
-
+            var mutex = false;
         </script>
         <div>
             <h3>Текущий заказ</h3>
@@ -212,8 +212,13 @@
             allowInputToggle: true
         });
         $("#submit").click(function() {
-            if (Object.keys(leftovers_to_post).length > 0)
-                $("#create-form").submit();
+            if (Object.keys(leftovers_to_post).length > 0){
+                if (!mutex)
+                {
+                    mutex = true;
+                    $("#create-form").submit();
+                }
+            }
             else {
                 alert("Невозможно создать пустой заказ");
                 return;
