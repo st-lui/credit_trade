@@ -63,8 +63,10 @@
     <script>
         $(document).ready(function() {
             $('#datetimepicker2').datetimepicker({
+                format:'L',
                 locale: 'ru',
-                defaultDate: moment()
+                defaultDate: moment(),
+                allowInputToggle: true
             });
         });
     </script>

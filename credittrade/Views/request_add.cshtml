@@ -208,7 +208,8 @@
             });
         $('#datetimepicker2').datetimepicker({
             locale: 'ru',
-            defaultDate: moment()
+            defaultDate: moment(),
+            allowInputToggle: true
         });
         $("#submit").click(function() {
             if (Object.keys(leftovers_to_post).length > 0)

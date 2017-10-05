@@ -32,8 +32,8 @@
 </div>
 
 <script language="javascript">
-    $("#date_start").datetimepicker({ locale: "ru", defaultDate: '@Model.StartDate', format:'L'});
-    $("#date_finish").datetimepicker({ locale: "ru", defaultDate: '@Model.FinishDate', format: 'L' });
+    $("#date_start").datetimepicker({ locale: "ru", defaultDate: '@Model.StartDate', format: 'L', allowInputToggle: true});
+    $("#date_finish").datetimepicker({ locale: "ru", defaultDate: '@Model.FinishDate', format: 'L', allowInputToggle: true});
     @*$("#get-report").click(function() {
         $.post(
         {
