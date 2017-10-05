@@ -56,7 +56,7 @@
                             <td>@rr.name</td>
                             <td>@rr.price</td>
                             <td>@rr.amount @rr.ed_izm</td>
-                            <td>@(Math.Round(rr.price * rr.amount, 2))</td>
+                            <td>@(Math.Round(rr.price * rr.amount, 2,MidpointRounding.AwayFromZero))</td>
                             @if (rr.barcode == "")
                             {
                                 <td>-</td>

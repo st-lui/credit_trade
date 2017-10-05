@@ -16,6 +16,7 @@ namespace DataAccess
 		private PostofficeRepository postofficeRepository;
 		private WarehousesRepository warehousesRepository;
 		private PaymentsRepository paymentsRepository;
+		private PaysRepository paysRepository;
 
 		private DataContext db;
 		private bool disposed = false;
@@ -142,6 +143,16 @@ namespace DataAccess
 				if (paymentsRepository == null)
 					paymentsRepository = new PaymentsRepository(db);
 				return paymentsRepository;
+			}
+		}
+
+		public PaysRepository Pays
+		{
+			get
+			{
+				if (paysRepository== null)
+					paysRepository = new PaysRepository(db);
+				return paysRepository;
 			}
 		}
 

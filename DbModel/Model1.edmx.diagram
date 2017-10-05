@@ -28,6 +28,9 @@
         <AssociationConnector Association="DbModel.FK_posts_posts" />
         <EntityTypeShape EntityType="DbModel.payment" Width="1.5" PointX="14.25" PointY="8.125" />
         <AssociationConnector Association="DbModel.FK_payments_request_rows" />
+        <EntityTypeShape EntityType="DbModel.pay" Width="1.5" PointX="12" PointY="12.25" />
+        <AssociationConnector Association="DbModel.FK_payments_pays" />
+        <AssociationConnector Association="DbModel.FK_pays_requests" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

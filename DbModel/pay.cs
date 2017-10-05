@@ -12,15 +12,21 @@ namespace DbModel
     using System;
     using System.Collections.Generic;
     
-    public partial class payment
+    public partial class pay
     {
-        public int id { get; set; }
-        public int request_row_id { get; set; }
-        public decimal amount { get; set; }
-        public System.DateTime date { get; set; }
-        public int pay_id { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public pay()
+        {
+            this.payments = new HashSet<payment>();
+        }
     
-        public virtual request_rows request_rows { get; set; }
-        public virtual pay pay { get; set; }
+        public int id { get; set; }
+        public System.DateTime date { get; set; }
+        public decimal cost { get; set; }
+        public int request_id { get; set; }
+    
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<payment> payments { get; set; }
+        public virtual request request { get; set; }
     }
 }

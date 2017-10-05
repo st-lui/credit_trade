@@ -33,7 +33,7 @@ namespace DataAccess
 
 		public request Get(int id)
 		{
-			return db.requests.Include("buyer").Include("request_rows").Include("user.warehouse.postoffice.post").SingleOrDefault(x => x.id == id);
+			return db.requests.Include("buyer").Include("request_rows.payments").Include("user.warehouse.postoffice.post").SingleOrDefault(x => x.id == id);
 		}
 
 		public void Change(request item)
@@ -101,13 +101,16 @@ namespace DataAccess
 		/// <param name="request">Заказ</param>
 		/// <param name="date">Дата оплаты</param>
 		/// <param name="payments">Репозиторий платежей</param>
-		public void MakePay(request request, DateTime date, PaymentsRepository payments)
+		/// <param name="pays">Репозиторий оплат</param>
+		public void MakePay(request request, DateTime date, PaymentsRepository payments, PaysRepository pays)
 		{
+			pay pay = pays.CreatePay(request, date);
 			foreach (var request_row in request.request_rows)
 			{
 				decimal amount = request_row.amount.Value - request_row.paid_amount - request_row.return_amount;
-				MakePartialPay(request, request_row,amount, date, payments);
+				MakePartialPay(request, request_row, amount, date, payments, pay);
 			}
+			pays.Add(pay);
 		}
 
 		/// <summary>
@@ -116,14 +119,17 @@ namespace DataAccess
 		/// <param name="request">Заказ</param>
 		/// <param name="date">Дата оплаты</param>
 		/// <param name="payments">Репозиторий платежей</param>
-		public void MakePayWithReturn(request request,DateTime date,PaymentsRepository payments)
+		/// <param name="pays">Репозиторий оплат</param>
+		public void MakePayWithReturn(request request, DateTime date, PaymentsRepository payments, PaysRepository pays)
 		{
+			pay pay = pays.CreatePay(request, date);
 			foreach (var request_row in request.request_rows)
 			{
 				decimal amount = request_row.amount.Value - request_row.paid_amount - request_row.return_amount;
 				amount *= -1;
-				MakePartialPay(request, request_row, amount, date, payments);
+				MakePartialPay(request, request_row, amount, date, payments,pay);
 			}
+			pays.Add(pay);
 		}
 		/// <summary>
 		/// Создание частичного платежа или возврата
@@ -133,15 +139,17 @@ namespace DataAccess
 		/// <param name="amount">Количество товара, если положительное, то продажа, если отрицательное, то возврат</param>
 		/// <param name="date">Дата частичного платежа</param>
 		/// <param name="payments">Репозиторий частичных платежей</param>
-		public void MakePartialPay(request request, request_rows request_row, decimal amount, DateTime date, PaymentsRepository payments)
+		/// <param name="pay">Оплата</param>
+		public void MakePartialPay(request request, request_rows request_row, decimal amount, DateTime date, PaymentsRepository payments, pay pay)
 		{
-			payment payment = payments.CreatePayment(request_row, amount, date);
+			payment payment = payments.CreatePayment(request_row, amount, date,pay);
 			payments.Add(payment);
 			if (payment.amount > 0)
 				request_row.paid_amount += payment.amount;
 			else
 			if (payment.amount < 0)
 				request_row.return_amount += -payment.amount;
+			db.Entry(request_row).State = EntityState.Modified;
 			warehouse warehouse = request.user.warehouse;
 			if (!db.Entry(warehouse).Collection(x => x.leftovers).IsLoaded)
 				db.Entry(warehouse).Collection(x => x.leftovers).Load();

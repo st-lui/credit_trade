@@ -36,5 +36,6 @@ namespace DbModel
         public virtual DbSet<user> users { get; set; }
         public virtual DbSet<warehouse> warehouses { get; set; }
         public virtual DbSet<payment> payments { get; set; }
+        public virtual DbSet<pay> pays { get; set; }
     }
 }

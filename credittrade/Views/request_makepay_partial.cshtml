@@ -1,5 +1,6 @@
-﻿@{
-    ViewBag.Title = "Новый заказ";
+﻿@using DbModel
+@{
+    ViewBag.Title = "Частичная оплата заказа";
     Layout = "layout.cshtml";
 }
 
@@ -10,18 +11,10 @@
 </style>
 <h2>@ViewBag.Title</h2>
 <div class="row">
-    <form id="create-form" action="@Url.Content("~/requests/add")" method="post" class="form-horizontal col-md-8">
-        <div class="form-group">
-            <h3>Выберите покупателя</h3>
-            <div class="col-md-6">
-                <select class="form-control" name="buyer" size="1">
-                    @foreach (var buyer in Model.buyers)
-                    {
-                        <option value="@buyer.id">@buyer.fio</option>}
-                </select>
-            </div>
-        </div>
-
+    <form id="create-form" action="@Url.Content("~/requests/makepay_partial/"+Model.request.id)" method="post" class="form-horizontal col-md-8">
+        @Html.AntiForgeryToken()
+        <h3>Заказ № @Model.request.id от @Model.request.date.ToString("dd.MM.yyyy HH:mm")</h3>
+        <h3>@Model.request.user.warehouse.postoffice.idx @Model.request.user.warehouse.name @Model.request.user.warehouse.postoffice.post.name</h3>
         <div class="form-group">
             <h3>Введите дату</h3>
             <div class='input-group date col-md-6' id='datetimepicker2'>
@@ -33,9 +26,10 @@
         </div>
         <script type="text/javascript">
 
+
         </script>
         <div>
-            <h3>Текущий заказ</h3>
+            <h3>К оплате</h3>
             @Html.AntiForgeryToken()
             <div class="dataTable_div">
                 <table id="current_request_table" class="row-border">
@@ -44,7 +38,7 @@
                             <th>Товар</th>
                             <th>Цена</th>
                             <th>Количество</th>
-                            <th>Стоимость</th>
+                            <th>Сумма</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -63,7 +57,7 @@
             </div>
         </div>
         <input hidden id="request_info" name="request_info" />
-        <a id="submit" href='#' class="btn btn-primary">Создать заказ</a>
+        <a id="submit" href='#' class="btn btn-primary">Создать</a>
     </form>
 </div>
 <div class="dataTable_div row">
@@ -72,24 +66,27 @@
         <thead>
             <tr>
                 <th>Товар</th>
-                <th>Единица</th>
                 <th>Цена</th>
-                <th>Остаток</th>
-                <th>Расход по торговле в кредит</th>
+                <th>Количество</th>
+                <th>Единица</th>
+                <th>Сумма</th>
+                <th>Оплачено</th>
+                <th>Возврат</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var leftover in Model.leftovers)
+            @foreach (var request_row in Model.request.request_rows)
             {
-                <tr id="tr_@leftover.id">
-                    <td id="name">@leftover.good.name</td>
-                    <td id="edizm">@leftover.good.edizm</td>
-                    @*<td id="price">@leftover.good.price</td>*@
-                    <td id="price">@leftover.price</td>
-                    <td id="amount">@(leftover.amount - leftover.expenditure)</td>
-                    <td id="expense">@(-leftover.expenditure)</td>
-                    <td><a id="leftover_@leftover.id" class="add_good btn btn-sm btn-primary" title="Добавить в заказ">+</a><span style="display: none" id="leftoveradd_@leftover.id"><input id="leftoveramount_@leftover.id" type="text" /><a class="btn btn-sm btn-primary" id="leftoverconfirm_@leftover.id">Подтвердить</a></span></td>
+                <tr id="tr_@request_row.id">
+                    <td id="name">@request_row.name</td>
+                    <td id="price">@request_row.price</td>
+                    <td id="amount">@request_row.amount</td>
+                    <td id="edizm">@request_row.ed_izm</td>
+                    <td id="cost">@Math.Round(request_row.amount * request_row.price, 2, MidpointRounding.AwayFromZero)</td>
+                    <td id="paid">@request_row.paid_amount</td>
+                    <td id="return">@request_row.return_amount</td>
+                    <td><a id="payment_@request_row.id" class="add_good btn btn-sm btn-primary" title="Добавить к оплате">+</a><span style="display: none" id="paymentadd_@request_row.id"><input id="paymentamount_@request_row.id" type=" text" /><a class="btn btn-sm btn-primary" id="paymentconfirm_@request_row.id">Подтвердить</a></span></td>
                 </tr>}
         </tbody>
     </table>
@@ -101,7 +98,7 @@
         accounting.settings.currency.symbol = "₽";
         accounting.settings.currency.decimal = ",";
         accounting.settings.currency.thousand = " ";
-        var leftovers_to_post = {};
+        var payments_to_post = {};
         var $result_cost = 0;
         $("#leftovers_table").DataTable({
             "language": {
@@ -121,24 +118,26 @@
             filter: false
         });
 
-        $('a[id*="leftover_"]').click(function () {
+        $('a[id*="payment_"]').click(function () {
             var $span = $(this).next();
             $span.show(true);
         });
 
-        $('a[id*="leftoverconfirm_"]').click(function () {
+        $('a[id*="paymentconfirm_"]').click(function () {
             var $inp = $(this).prev();
             var $amount = $inp.val();
-            var $leftover_id = this.id.split('_')[1];
-            var $tr = $("tr[id='tr_" + $leftover_id + "']");
+            var $request_row_id = this.id.split('_')[1];
+            var $tr = $("tr[id='tr_" + $request_row_id + "']");
             var $name = $tr.children("[id='name']").text();
             var $price = $tr.children("[id='price']").text();
             var $leftover = $tr.children("[id='amount']").text();
-            var $expense = $tr.children("[id='expense']").text();
+            var $paid = $tr.children("[id='paid']").text();
+            var $return= $tr.children("[id='return']").text();
             $amount = parseFloat($amount.replace(',', '.'));
             $price = parseFloat($price.replace(',', '.'));
             $leftover = parseFloat($leftover.replace(',', '.'));
-            $expense = -parseFloat($expense.replace(',', '.'));
+            $paid = parseFloat($paid.replace(',', '.'));
+            $return = parseFloat($return.replace(',', '.'));
             //validation
             if (isNaN($amount) || $amount < 0) {
                 alert("Введите корректное значение в поле количество");
@@ -149,47 +148,47 @@
                 return;
             }
             var $current_amount = 0;
-            if (leftovers_to_post[$leftover_id] != undefined) {
-                $current_amount += leftovers_to_post[$leftover_id]["amount"];
+            if (payments_to_post[$request_row_id] != undefined) {
+                $current_amount += payments_to_post[$request_row_id]["amount"];
             }
-            if ($amount > $leftover - $current_amount) {
-                alert("Введенное количество превышает доступный остаток");
+            if ($amount > $leftover - $paid - $return - $current_amount) {
+                alert("Введенное количество превышает доступное для оплаты");
                 return;
             }
             if ($current_amount == 0) {
-                var leftover = {};
-                leftover["id"] = $leftover_id;
-                leftover["name"] = $name;
-                leftover["price"] = $price;
-                leftover["amount"] = $amount;
-                var $cost = accounting.unformat(accounting.toFixed($price * $amount,2));
+                var payment = {};
+                payment["id"] = $request_row_id;
+                payment["name"] = $name;
+                payment["price"] = $price;
+                payment["amount"] = $amount;
+                var $cost = accounting.unformat(accounting.toFixed($price * $amount, 2));
                 $result_cost += $cost;
                 var column = $("#current_request_table").DataTable().column(3);
                 $(column.footer()).html(accounting.formatMoney($result_cost));
-                leftover["cost"] = $cost;
-                leftovers_to_post[$leftover_id] = leftover;
-                $("#request_info").val(JSON.stringify(leftovers_to_post));
+                payment["cost"] = $cost;
+                payments_to_post[$request_row_id] = payment;
+                $("#request_info").val(JSON.stringify(payments_to_post));
                 //$("#current_request_body:last-child").append("<tr><td>" + $name + "</td><td>" + $price + "</td><td>" + $amount + "</td><td>" + $cost + "</td></tr>");
-                var $delbutton = '<a class="delbutton btn" id="delbutton_' + $leftover_id+ '"><img src="@Url.Content("~/Content/img/button_delete.gif")"/></a>';
+                var $delbutton = '<a class="delbutton btn" id="delbutton_' + $request_row_id+ '"><img src="@Url.Content("~/Content/img/button_delete.gif")"/></a>';
                 var $node = $("#current_request_table").DataTable().row
                     .add([
-                        $name, $price.toFixed(2).replace('.', ','), $amount.toFixed(3).replace('.', ','), accounting.toFixed($cost,2).replace('.', ','), $delbutton])
+                        $name, $price.toFixed(2).replace('.', ','), $amount.toFixed(3).replace('.', ','), $cost.toFixed(2).replace('.', ','), $delbutton])
                     .draw(false).node();
-                $node.id = "curr" + leftover["id"];
+                $node.id = "curr" + payment["id"];
 
             } else {
-                leftovers_to_post[$leftover_id]["amount"] += $amount;
-                var $oldcost = leftovers_to_post[$leftover_id]["cost"];
-                var $cost = accounting.unformat(accounting.toFixed($price * leftovers_to_post[$leftover_id]["amount"], 2));
+                payments_to_post[$request_row_id]["amount"] += $amount;
+                var $oldcost = payments_to_post[$request_row_id]["cost"];
+                var $cost = accounting.unformat(accounting.toFixed($price * payments_to_post[$request_row_id]["amount"],2));
                 $result_cost += $cost-$oldcost;
                 var column = $("#current_request_table").DataTable().column(3);
                 $(column.footer()).html(accounting.formatMoney($result_cost));
-                leftovers_to_post[$leftover_id]["cost"] = $cost;
-                $("#request_info").val(JSON.stringify(leftovers_to_post));
-                var $new_amount = leftovers_to_post[$leftover_id]["amount"].toFixed(3).replace('.', ',');
-                var $new_cost = leftovers_to_post[$leftover_id]["cost"].toFixed(2).replace('.', ',');
-                $("#current_request_table").DataTable().cell("[id='curr" + $leftover_id + "']", 2).data($new_amount);
-                $("#current_request_table").DataTable().cell("[id='curr" + $leftover_id + "']", 3).data($new_cost);
+                payments_to_post[$request_row_id]["cost"] = $cost;
+                $("#request_info").val(JSON.stringify(payments_to_post));
+                var $new_amount = payments_to_post[$request_row_id]["amount"].toFixed(3).replace('.', ',');
+                var $new_cost = payments_to_post[$request_row_id]["cost"].toFixed(2).replace('.', ',');
+                $("#current_request_table").DataTable().cell("[id='curr" + $request_row_id + "']", 2).data($new_amount);
+                $("#current_request_table").DataTable().cell("[id='curr" + $request_row_id + "']", 3).data($new_cost);
 
             }
         });
@@ -197,21 +196,21 @@
             function(parameters) {
                 if (confirm("Удалить строку заказа?") === false)
                     return;
-                var $leftover_id = this.id.split('_')[1];
-                $("#current_request_table").DataTable().row("[id='curr" + $leftover_id + "']").remove().draw(false);
-                var $cost = leftovers_to_post[$leftover_id]["cost"];
+                var $request_row_id = this.id.split('_')[1];
+                $("#current_request_table").DataTable().row("[id='curr" + $request_row_id + "']").remove().draw(false);
+                var $cost = payments_to_post[$request_row_id]["cost"];
                 $result_cost -= $cost;
                 var column = $("#current_request_table").DataTable().column(3);
                 $(column.footer()).html(accounting.formatMoney($result_cost));
-                delete leftovers_to_post[$leftover_id];
-                $("#request_info").val(JSON.stringify(leftovers_to_post));
+                delete payments_to_post[$request_row_id];
+                $("#request_info").val(JSON.stringify(payments_to_post));
             });
         $('#datetimepicker2').datetimepicker({
             locale: 'ru',
             defaultDate: moment()
         });
         $("#submit").click(function() {
-            if (Object.keys(leftovers_to_post).length > 0)
+            if (Object.keys(payments_to_post).length > 0)
                 $("#create-form").submit();
             else {
                 alert("Невозможно создать пустой заказ");

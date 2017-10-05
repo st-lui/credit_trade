@@ -131,12 +131,44 @@ namespace credittrade.Modules
 				{
 					DateTime pay_date = Request.Form.pay_date;
 					var request = unitOfWork.Requests.Get(p.request_id);
-					unitOfWork.Requests.MakePay(request, pay_date);
+					unitOfWork.Requests.MakePay(request, pay_date,unitOfWork.Payments,unitOfWork.Pays);
 					unitOfWork.Requests.Change(request);
 					unitOfWork.SaveChanges();
 					return Response.AsRedirect("~/");
 				}
 			};
+
+			Get["/requests/makepay_partial/{request_id}"] = p =>
+			{
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					model.request = unitOfWork.Requests.Get(p.request_id);
+
+					return View["request_makepay_partial", model];
+				}
+			};
+
+			Post["/requests/makepay_partial/{request_id}"] = p =>
+			{
+				//this.ValidateCsrfToken();
+				user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					var request_info = Request.Form.request_info;
+					DateTime datecreated = Request.Form.datecreated;
+					dynamic request_data = Json.Decode(request_info);
+					decimal cost = 0;
+					request request = unitOfWork.Requests.Get(p.request_id);
+					pay pay = unitOfWork.Pays.CreatePay(request, datecreated);
+					foreach (KeyValuePair<string, dynamic> payment in request_data)
+					{
+						unitOfWork.Requests.MakePartialPay(request, request.request_rows.First(x => x.id ==int.Parse(payment.Value["id"])), payment.Value["amount"], datecreated, unitOfWork.Payments, pay);
+					}
+					unitOfWork.SaveChanges();
+					return Response.AsRedirect("~/");
+				}
+			};
+
 			Get["/reports"] = p =>
 			{
 				return View["reports"];
@@ -177,7 +209,7 @@ namespace credittrade.Modules
 					reportModel.Start = Request.Form["date_start"];
 					reportModel.Finish = Request.Form["date_finish"];
 					reportModel.RequestsCurrent = reqs;
-					ms = Utils.GenReportGoods(reportModel," выданным в кредит");
+					ms = Utils.GenReportGoods(reportModel, " выданным в кредит");
 					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "attachment; filename=report_goods.xlsx");
 				}
 			};
@@ -249,8 +281,8 @@ namespace credittrade.Modules
 					IList<leftover> lefts = unitOfWork.Leftovers.GetWithGoodsForWareHouse(warehouseId);
 					LeftoversReportModel reportModel = new LeftoversReportModel();
 					reportModel.leftovers = lefts;
-					var ms = Utils.GenReportLeftovers(reportModel,"");
-					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","attachment; filename=report_leftovers.xlsx");
+					var ms = Utils.GenReportLeftovers(reportModel, "");
+					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "attachment; filename=report_leftovers.xlsx");
 				}
 			};
 		}

@@ -18,6 +18,7 @@ namespace DbModel
         public request()
         {
             this.request_rows = new HashSet<request_rows>();
+            this.pays = new HashSet<pay>();
         }
     
         public int id { get; set; }
@@ -37,5 +38,7 @@ namespace DbModel
         public virtual ICollection<request_rows> request_rows { get; set; }
         public virtual state state { get; set; }
         public virtual user user { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<pay> pays { get; set; }
     }
 }

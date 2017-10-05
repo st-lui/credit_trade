@@ -46,23 +46,49 @@ namespace DataAccess
 			if (requestRow == null)
 				return null;
 			int request_row_id = requestRow.id;
-			return new payment()
+			payment p =new payment()
 			{
 				amount = amount,
 				request_row_id = request_row_id,
 				date=date
 			};
+			requestRow.payments.Add(p);
+			return p;
 		}
 
 		public payment CreatePayment(request_rows rr, decimal amount, DateTime date)
 		{
 			int request_row_id = rr.id;
-			return new payment()
+			payment p=new payment()
 			{
 				amount = amount,
 				request_row_id = request_row_id,
 				date = date
 			};
+			rr.payments.Add(p);
+			return p;
+		}
+		/// <summary>
+		/// Создает объект частиный платеж, устанавливает связь с объектами строка заказа и оплата
+		/// </summary>
+		/// <param name="rr"></param>
+		/// <param name="amount"></param>
+		/// <param name="date"></param>
+		/// <param name="pay"></param>
+		/// <returns></returns>
+		public payment CreatePayment(request_rows rr, decimal amount, DateTime date,pay pay)
+		{
+			int request_row_id = rr.id;
+			payment p = new payment()
+			{
+				amount = amount,
+				request_row_id = request_row_id,
+				date = date,
+				pay_id=pay.id
+			};
+			rr.payments.Add(p);
+			pay.payments.Add(p);
+			return p;
 		}
 	}
 }

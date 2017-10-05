@@ -18,6 +18,7 @@
                 <th>Дата оплаты</th>
                 <th></th>
                 <th></th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -34,11 +35,14 @@
                     @*<td>@request.pay_date</td>*@
                     @if (request.paid)
                     {
-                        <td></td> }
+                        <td></td>
+                        <td></td>
+                    }
                     else
                     {
                         <td><a class="btn btn-primary" href="@Url.Content("~/requests/makepay/" + request.id)">Внести оплату</a></td>
-                    }
+                        <td><a class="btn btn-primary" href="@Url.Content("~/requests/makepay_partial/" + request.id)">Частичная оплата</a></td>
+}
                     <td><a class="btn btn-primary" href="@Url.Content("~/requests/view/" + request.id)">Подробности</a></td>
                 </tr>}
         </tbody>
@@ -50,6 +54,7 @@
             "url": "@Url.Content("~/content/dataTables.ru.lang.json")"
         },
         paging: false,
-        columnDefs:[{orderable:false,targets:[6,7]}]
+        columnDefs: [{ orderable: false, targets: [6, 7] }],
+        order: [[0, "desc"]]
     });
 </script>

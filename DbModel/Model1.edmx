@@ -50,6 +50,16 @@
           <Property Name="request_row_id" Type="int" Nullable="false" />
           <Property Name="amount" Type="decimal" Precision="10" Scale="3" Nullable="false" />
           <Property Name="date" Type="datetime" Nullable="false" />
+          <Property Name="pay_id" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="pays">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="date" Type="datetime" Nullable="false" />
+          <Property Name="cost" Type="numeric" Precision="7" Scale="2" Nullable="false" />
+          <Property Name="request_id" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="postoffices">
           <Key>
@@ -140,6 +150,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_payments_pays">
+          <End Role="pays" Type="Self.pays" Multiplicity="1" />
+          <End Role="payments" Type="Self.payments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="pays">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="payments">
+              <PropertyRef Name="pay_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_payments_request_rows">
           <End Role="request_rows" Type="Self.request_rows" Multiplicity="1" />
           <End Role="payments" Type="Self.payments" Multiplicity="*" />
@@ -149,6 +171,18 @@
             </Principal>
             <Dependent Role="payments">
               <PropertyRef Name="request_row_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_pays_requests">
+          <End Role="requests" Type="Self.requests" Multiplicity="1" />
+          <End Role="pays" Type="Self.pays" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="requests">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="pays">
+              <PropertyRef Name="request_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -255,6 +289,7 @@
           <EntitySet Name="goods" EntityType="Self.goods" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="leftovers" EntityType="Self.leftovers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="payments" EntityType="Self.payments" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="pays" EntityType="Self.pays" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="postoffices" EntityType="Self.postoffices" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="posts" EntityType="Self.posts" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="request_rows" EntityType="Self.request_rows" Schema="dbo" store:Type="Tables" />
@@ -266,9 +301,17 @@
             <End Role="warehouses" EntitySet="warehouses" />
             <End Role="buyers" EntitySet="buyers" />
           </AssociationSet>
+          <AssociationSet Name="FK_payments_pays" Association="Self.FK_payments_pays">
+            <End Role="pays" EntitySet="pays" />
+            <End Role="payments" EntitySet="payments" />
+          </AssociationSet>
           <AssociationSet Name="FK_payments_request_rows" Association="Self.FK_payments_request_rows">
             <End Role="request_rows" EntitySet="request_rows" />
             <End Role="payments" EntitySet="payments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_pays_requests" Association="Self.FK_pays_requests">
+            <End Role="requests" EntitySet="requests" />
+            <End Role="pays" EntitySet="pays" />
           </AssociationSet>
           <AssociationSet Name="FK_postoffices_posts" Association="Self.FK_postoffices_posts">
             <End Role="posts" EntitySet="posts" />
@@ -366,6 +409,15 @@
           <AssociationSet Name="FK_payments_request_rows" Association="DbModel.FK_payments_request_rows">
             <End Role="request_rows" EntitySet="request_rows" />
             <End Role="payment" EntitySet="payments" />
+          </AssociationSet>
+          <EntitySet Name="pays" EntityType="DbModel.pay" />
+          <AssociationSet Name="FK_payments_pays" Association="DbModel.FK_payments_pays">
+            <End Role="pay" EntitySet="pays" />
+            <End Role="payment" EntitySet="payments" />
+          </AssociationSet>
+          <AssociationSet Name="FK_pays_requests" Association="DbModel.FK_pays_requests">
+            <End Role="request" EntitySet="requests" />
+            <End Role="pay" EntitySet="pays" />
           </AssociationSet>
         </EntityContainer>
         <EntityType Name="buyer">
@@ -469,6 +521,7 @@
           <NavigationProperty Name="state" Relationship="DbModel.FK_requests_State" FromRole="request" ToRole="state" />
           <NavigationProperty Name="user" Relationship="DbModel.FK_requests_User" FromRole="request" ToRole="user" />
           <Property Name="cost" Type="Decimal" Precision="7" Scale="2" />
+          <NavigationProperty Name="pays" Relationship="DbModel.FK_pays_requests" FromRole="request" ToRole="pay" />
         </EntityType>
         <EntityType Name="state">
           <Key>
@@ -646,6 +699,8 @@
           <Property Name="amount" Type="Decimal" Nullable="false" Precision="10" Scale="3" />
           <NavigationProperty Name="request_rows" Relationship="DbModel.FK_payments_request_rows" FromRole="payment" ToRole="request_rows" />
           <Property Name="date" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="pay_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="pay" Relationship="DbModel.FK_payments_pays" FromRole="payment" ToRole="pay" />
         </EntityType>
         <Association Name="FK_payments_request_rows">
           <End Type="DbModel.request_rows" Role="request_rows" Multiplicity="1" />
@@ -656,6 +711,41 @@
             </Principal>
             <Dependent Role="payment">
               <PropertyRef Name="request_row_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="pay">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="date" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="cost" Type="Decimal" Nullable="false" Precision="7" Scale="2" />
+          <Property Name="request_id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="payments" Relationship="DbModel.FK_payments_pays" FromRole="pay" ToRole="payment" />
+          <NavigationProperty Name="request" Relationship="DbModel.FK_pays_requests" FromRole="pay" ToRole="request" />
+        </EntityType>
+        <Association Name="FK_payments_pays">
+          <End Type="DbModel.pay" Role="pay" Multiplicity="1" />
+          <End Type="DbModel.payment" Role="payment" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="pay">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="payment">
+              <PropertyRef Name="pay_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_pays_requests">
+          <End Type="DbModel.request" Role="request" Multiplicity="1" />
+          <End Type="DbModel.pay" Role="pay" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="request">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="pay">
+              <PropertyRef Name="request_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -792,9 +882,20 @@
           <EntitySetMapping Name="payments">
             <EntityTypeMapping TypeName="DbModel.payment">
               <MappingFragment StoreEntitySet="payments">
+                <ScalarProperty Name="pay_id" ColumnName="pay_id" />
                 <ScalarProperty Name="date" ColumnName="date" />
                 <ScalarProperty Name="amount" ColumnName="amount" />
                 <ScalarProperty Name="request_row_id" ColumnName="request_row_id" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="pays">
+            <EntityTypeMapping TypeName="DbModel.pay">
+              <MappingFragment StoreEntitySet="pays">
+                <ScalarProperty Name="request_id" ColumnName="request_id" />
+                <ScalarProperty Name="cost" ColumnName="cost" />
+                <ScalarProperty Name="date" ColumnName="date" />
                 <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>

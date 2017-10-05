@@ -52,6 +52,7 @@
     <Compile Include="BuyersRepository.cs" />
     <Compile Include="IRepository.cs" />
     <Compile Include="LeftoversRepository.cs" />
+    <Compile Include="PaysRepository.cs" />
     <Compile Include="PostofficeRepository.cs" />
     <Compile Include="PostsRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

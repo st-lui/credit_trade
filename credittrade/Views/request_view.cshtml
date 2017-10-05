@@ -16,9 +16,12 @@
             <div class="col-sm-3 ">
                 <a class="btn btn-primary form-control" href="@Url.Content("~/requests/makepay/" + @Model.request.id)">Внести оплату</a>
             </div>
+            <div class="col-sm-4 ">
+                <a class="btn btn-primary form-control" href="@Url.Content("~/requests/makepay_partial/" + @Model.request.id)">Частичное погашение</a>
+            </div>
         }
         
-            <div class="col-sm-5">
+            <div class="col-sm-1">
                 <a class="btn btn-default" onclick="javascript: history.go(-1);">Назад</a>
             </div>
     </div>
@@ -69,7 +72,7 @@
                             <td>@rr.name</td>
                             <td>@rr.price</td>
                             <td>@rr.amount @rr.ed_izm</td>
-                            <td>@(Math.Round(rr.price * rr.amount, 2))</td>
+                            <td>@(Math.Round(rr.price * rr.amount, 2,MidpointRounding.AwayFromZero))</td>
                         </tr>}
                 </tbody>
             </table>
