@@ -531,6 +531,145 @@ namespace credittrade.Modules
 			return ms;
 		}
 
+		public static MemoryStream GenReportGoodsWithBuyers(InOutReportModel reportModel, string reportTitle)
+		{
+			var req = reportModel.RequestsCurrent;
+			var start = reportModel.Start;
+			var finish = reportModel.Finish;
+			var ms = new MemoryStream();
+			ExcelPackage excelPackage = new ExcelPackage(ms);
+			excelPackage.Workbook.Worksheets.Add("Ведомость по товарам" + reportTitle);
+			List<request_rows> requestRows = new List<request_rows>();
+			foreach (request r in req)
+			{
+				foreach (var rr in r.request_rows)
+				{
+					requestRows.Add(rr);
+				}
+			}
+			var sheet = excelPackage.Workbook.Worksheets[1];
+
+			int k = 0;
+			sheet.Cells[k + 1, 1].Value = $"Ведомость по товарам" + reportTitle;// - {requestsByPost.ElementAt(0).request.buyer.warehouse.postoffice.post.name}";
+			sheet.Cells[k + 1, 1].Style.Font.Size = 16;
+			sheet.Cells[k + 1, 1, k + 1, 4].Merge = true;
+			sheet.Cells[k + 2, 1].Value = $"Период: {start} - {finish}";
+			sheet.Cells[k + 2, 1].Style.Font.Size = 13;
+			sheet.Cells[k + 3, 1].Value = "№ п/п";
+			sheet.Cells[k + 3, 2].Value = "Почтамт";
+			sheet.Cells[k + 3, 3].Value = "Склад";
+			sheet.Cells[k + 3, 4].Value = "Наименование товара";
+			sheet.Cells[k + 3, 5].Value = "Цена";
+			sheet.Cells[k + 3, 6].Value = "Количество";
+			sheet.Cells[k + 3, 7].Value = "Сумма";
+			sheet.Cells[k + 3, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[k + 3, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[k + 3, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[k + 3, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[k + 3, 5].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[k + 3, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[k + 3, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[k + 3, 1, k + 3, 7].Style.Font.Size = 13;
+			var groupedByPost = requestRows.GroupBy(x => x.request.buyer.warehouse.postoffice.post_id).OrderBy(x => x.ElementAt(0).request.buyer.warehouse.postoffice.post.name);
+			int i = k + 4;
+			// для подсчета количества ОПС
+			int postofficeCount = 0;
+			decimal totalCost = 0;
+			int count = 1;
+			foreach (IGrouping<int, request_rows> requestsByPost in groupedByPost)
+			{
+				string postName = requestsByPost.First().request.buyer.warehouse.postoffice.post.name;
+				IEnumerable<IGrouping<int?, request_rows>> groupedRequests = requestsByPost.GroupBy(x => x.request.buyer.warehouse_id);
+				postofficeCount += groupedRequests.Count();
+				foreach (IGrouping<int?, request_rows> group in groupedRequests)
+				{
+					string warehouseName = group.ElementAt(0).request.buyer.warehouse.name;
+					warehouseName += " " + group.ElementAt(0).request.buyer.warehouse.postoffice.idx;
+					int warehouseId = group.ElementAt(0).request.buyer.warehouse.id;
+					var groupedByBuyer = group.GroupBy(x => x.request.buyer_id).OrderBy(x => x.First().request.buyer.fio);
+					foreach (IGrouping<int?, request_rows> buyerGroup in groupedByBuyer)
+					{
+						string buyerName = buyerGroup.First().request.buyer.fio;
+						int buyerRowStart = i;
+						sheet.Cells[i, 1].Value = count++;
+						sheet.Cells[i, 2].Value = postName;
+						sheet.Cells[i, 3].Value = warehouseName;
+						sheet.Cells[i, 4].Value = buyerName;
+						i++;
+						decimal buyersCost = 0, buyersAmount = 0;
+						var groupedByGood = buyerGroup.GroupBy(x => x.goods_id).OrderBy(x => x.First().name);
+						foreach (var groupbygood in groupedByGood)
+						{
+							string goodsName = groupbygood.First().name;
+							string price = groupbygood.First().price.ToString();
+							decimal amount = 0;
+							decimal cost = 0;
+							foreach (request_rows rr in groupbygood)
+							{
+								amount += rr.amount.Value;
+								cost += rr.price.Value * rr.amount.Value;
+							}
+							totalCost += cost;
+							buyersAmount += amount;
+							buyersCost += cost;
+							sheet.Cells[i, 4].Value = goodsName;
+							sheet.Cells[i, 5].Value = price;
+							sheet.Cells[i, 6].Value = amount;
+							sheet.Cells[i, 7].Value = cost;
+							sheet.Cells[i, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+							sheet.Cells[i, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+							sheet.Cells[i, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+							sheet.Cells[i, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+							sheet.Cells[i, 5].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+							sheet.Cells[i, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+							sheet.Cells[i, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+							i++;
+						}
+						//итог по количеству
+						sheet.Cells[buyerRowStart, 6].Value = buyersAmount;
+						//итог по количеству
+						sheet.Cells[buyerRowStart, 7].Value = buyersCost;
+						sheet.Cells[buyerRowStart, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+						sheet.Cells[buyerRowStart, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+						sheet.Cells[buyerRowStart, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+						sheet.Cells[buyerRowStart, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+						sheet.Cells[buyerRowStart, 5].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+						sheet.Cells[buyerRowStart, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+						sheet.Cells[buyerRowStart, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+					}
+				}
+				//sheet.Cells[i, 1].Value = "Итого"; sheet.Cells[i, 2].Value = total; sheet.Cells[i, 3].Value = paid;
+				//sheet.Cells[i, 4].Value = penalty;
+				//sheet.Cells[i, 1].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				//sheet.Cells[i, 2].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				//sheet.Cells[i, 3].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				//sheet.Cells[i, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+				//sheet.Cells[i, 1, i, 4].Style.Font.Size = 13;
+				k = i + 1;
+			}
+			sheet.Cells[i, 4].Value = "Итого";
+			sheet.Cells[i, 7].Value = totalCost;
+
+			const double minWidth = 0.00;
+			const double maxWidth = 100.00;
+			sheet.Cells.AutoFitColumns(minWidth, maxWidth);
+
+			sheet.Cells[i, 4].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[i, 5].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[i, 6].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[i, 7].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+			sheet.Cells[i, 4, i, 7].Style.Font.Size = 13;
+			sheet.Column(1).Width = 8;
+			//если почтамт в отчете один, то прячем колонку Почтамт
+			if (groupedByPost.Count() == 1)
+				sheet.Column(2).Hidden = true;
+			//если ОПС в отчете одно, то прячем колонку Склад
+			if (postofficeCount == 1)
+				sheet.Column(3).Hidden = true;
+			excelPackage.Save();
+			return ms;
+		}
+
 		public static MemoryStream GenReportLeftovers(LeftoversReportModel reportModel, string reportTitle)
 		{
 			var leftovers = reportModel.leftovers.OrderBy(x=>x.good.name);

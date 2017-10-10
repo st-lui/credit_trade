@@ -396,6 +396,60 @@ namespace credittrade.Modules
 				}
 			};
 
+			Get["/report_goods_by_buyer"] = param =>
+			{
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
+					post post = currentUser.warehouse.postoffice.post;
+					model.Post = post.name;
+					model.Post_id = post.id;
+					var today = DateTime.Today;
+					string StartDate = new DateTime(today.Year, today.Month, 1).ToString("d", CultureInfo.InvariantCulture);
+					string FinishDate = new DateTime(today.Year, today.Month, DateTime.DaysInMonth(today.Year, today.Month)).ToString("d", CultureInfo.InvariantCulture);
+					model.StartDate = StartDate;
+					model.FinishDate = FinishDate;
+
+				}
+				return View["report_goods_by_buyer", model];
+			};
+
+			Post["/report_goods_by_buyer"] = param =>
+			{
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					DateTime start = DateTime.Parse(Request.Form["date_start"]);
+					DateTime finish = DateTime.Parse(Request.Form["date_finish"]);
+					int postId = int.Parse(Request.Form["post"]);
+					MemoryStream ms = new MemoryStream();
+					post post = unitOfWork.Posts.Get(postId);
+
+					List<buyer> buyersPost = new List<buyer>();
+					if (post.privilegies == 1)
+					{
+						foreach (post p in post.children)
+						{
+							IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(p.id);
+							buyersPost.AddRange(buyers);
+						}
+					}
+					// иначе почтамт
+					else
+					{
+						IEnumerable<buyer> buyers = unitOfWork.Posts.GetBuyers(post.id);
+						buyersPost.AddRange(buyers);
+					}
+					var buyerIds = buyersPost.Select(x => x.id).ToList();
+					IList<request> reqs = unitOfWork.Requests.GetRequestsWithRowsByDate(buyerIds, start, finish);
+					InOutReportModel reportModel = new InOutReportModel();
+					reportModel.Start = Request.Form["date_start"];
+					reportModel.Finish = Request.Form["date_finish"];
+					reportModel.RequestsCurrent = reqs;
+					ms = Utils.GenReportGoodsWithBuyers(reportModel, " выданным в кредит по покупателям");
+					return Response.FromStream(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "attachment; filename=report_goods.xlsx");
+				}
+			};
+
 		}
 	}
 }
