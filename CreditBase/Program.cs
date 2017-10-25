@@ -137,7 +137,7 @@ namespace CreditBase
 											decimal amount = requestRowReader.GetDecimal(2);
 											int good_id = requestRowReader.GetInt32(3);
 											long leftoverId = (long)warehouseId * 1000000 + good_id;
-											//if (leftovers.ContainsKey(leftoverId))
+											if (leftovers.ContainsKey(leftoverId))
 											{
 												var leftover = leftovers[leftoverId];
 												if (leftover.price != requestRowPrice)
@@ -150,6 +150,8 @@ namespace CreditBase
 													requestRows.Add(requestRow);
 												}
 											}
+											else
+												SimpleLogger.GetInstance().Write($"Не найден остаток код товара \t{good_id}\tкод склада\t{warehouseId}");
 										}
 									}
 								}
@@ -461,11 +463,10 @@ namespace CreditBase
 			{
 				i++;
 				g = 0;
-				SimpleLogger.GetInstance().Write("Файл - " + OneFileLeftovers);
-
 				string preffix = whatAPost(OneFileLeftovers);
 				if (string.IsNullOrEmpty(preffix))
 					continue;
+				SimpleLogger.GetInstance().Write("Файл - " + OneFileLeftovers);
 				var ExcelOffices = new ExcelPackage(new FileInfo(OneFileLeftovers));
 				var listOffices = ExcelOffices.Workbook.Worksheets[1];
 
