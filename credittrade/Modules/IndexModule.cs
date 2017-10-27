@@ -131,7 +131,7 @@ namespace credittrade.Modules
 				{
 					DateTime pay_date = Request.Form.pay_date;
 					var request = unitOfWork.Requests.Get(p.request_id);
-					unitOfWork.Requests.MakePay(request, pay_date,unitOfWork.Payments,unitOfWork.Pays);
+					unitOfWork.Requests.MakePay(request, pay_date, unitOfWork.Payments, unitOfWork.Pays);
 					unitOfWork.Requests.Change(request);
 					unitOfWork.SaveChanges();
 					return Response.AsRedirect("~/");
@@ -162,12 +162,26 @@ namespace credittrade.Modules
 					pay pay = unitOfWork.Pays.CreatePay(request, datecreated);
 					foreach (KeyValuePair<string, dynamic> payment in request_data)
 					{
-						unitOfWork.Requests.MakePartialPay(request, request.request_rows.First(x => x.id ==int.Parse(payment.Value["id"])), payment.Value["amount"], datecreated, unitOfWork.Payments, pay);
+						unitOfWork.Requests.MakePartialPay(request, request.request_rows.First(x => x.id == int.Parse(payment.Value["id"])), payment.Value["amount"], datecreated, unitOfWork.Payments, pay);
 					}
 					unitOfWork.SaveChanges();
 					return Response.AsRedirect("~/");
 				}
 			};
+
+			Get["/requests/print_partial/{pay_id}"] = p =>
+			{
+				user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
+				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+				{
+					pay pay = unitOfWork.Pays.GetWithData(p.pay_id);
+					if (pay.request.user.warehouse_id != currentUser.warehouse_id)
+						return HttpStatusCode.Unauthorized;
+					model.pay = pay;
+					return View["request_print_partial", model];
+				}
+			};
+
 
 			Get["/reports"] = p =>
 			{

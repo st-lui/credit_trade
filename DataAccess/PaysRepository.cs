@@ -40,6 +40,11 @@ namespace DataAccess
 			return db.pays.SingleOrDefault(x => x.id == id);
 		}
 
+		public pay GetWithData(int id)
+		{
+			return db.pays.Include("request.buyer").Include("request.user.warehouse.postoffice.post").SingleOrDefault(x => x.id == id);
+		}
+
 		public pay CreatePay(request request, DateTime date)
 		{
 			int request_id = request.id;
