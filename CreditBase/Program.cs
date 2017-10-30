@@ -110,7 +110,7 @@ namespace CreditBase
 				}
 				List<Request> requests = new List<Request>();
 				List<RequestRow> requestRows = new List<RequestRow>();
-				using (SqlCommand reqCommand = new SqlCommand("select r.id,b.warehouse_id,cost from requests r,buyers b where b.id=r.buyer_id", conn))
+				using (SqlCommand reqCommand = new SqlCommand("select r.id,b.warehouse_id,cost from requests r,buyers b where b.id=r.buyer_id and (r.paid is null or r.paid=0)", conn))
 				{
 					using (SqlDataReader requestReader = reqCommand.ExecuteReader())
 					{
