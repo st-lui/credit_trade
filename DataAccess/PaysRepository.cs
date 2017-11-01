@@ -42,7 +42,7 @@ namespace DataAccess
 
 		public pay GetWithData(int id)
 		{
-			return db.pays.Include("request.buyer").Include("request.user.warehouse.postoffice.post").SingleOrDefault(x => x.id == id);
+			return db.pays.Include("payments.request_rows").Include("request.buyer").Include("request.user.warehouse.postoffice.post").SingleOrDefault(x => x.id == id);
 		}
 
 		public pay CreatePay(request request, DateTime date)
@@ -62,6 +62,19 @@ namespace DataAccess
 		{
 			pay.payments.Add(payment);
 			payment.pay = pay;
+		}
+
+		/// <summary>
+		/// Расчет стоимости частичного платежа
+		/// </summary>
+		/// <param name="pay">Частичнный платеж для расчета стоимости</param>
+		public void CalculateCost(pay pay)
+		{
+			pay.cost = 0;
+			foreach (var payment in pay.payments)
+			{
+				pay.cost += Math.Round(payment.amount* payment.request_rows.price.Value, 2, MidpointRounding.AwayFromZero);
+			}
 		}
 
 	}

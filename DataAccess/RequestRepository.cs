@@ -110,6 +110,7 @@ namespace DataAccess
 				decimal amount = request_row.amount.Value - request_row.paid_amount - request_row.return_amount;
 				MakePartialPay(request, request_row, amount, date, payments, pay);
 			}
+			pays.CalculateCost(pay);
 			pays.Add(pay);
 		}
 
@@ -129,6 +130,7 @@ namespace DataAccess
 				amount *= -1;
 				MakePartialPay(request, request_row, amount, date, payments,pay);
 			}
+			pays.CalculateCost(pay);
 			pays.Add(pay);
 		}
 		/// <summary>
@@ -194,7 +196,7 @@ namespace DataAccess
 			request.cost = 0;
 			foreach (var requestRow in request.request_rows)
 			{
-				request.cost += requestRow.amount * requestRow.price;
+				request.cost += Math.Round(requestRow.amount.Value * requestRow.price.Value,2,MidpointRounding.AwayFromZero);
 			}
 		}
 

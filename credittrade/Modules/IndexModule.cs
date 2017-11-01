@@ -164,8 +164,9 @@ namespace credittrade.Modules
 					{
 						unitOfWork.Requests.MakePartialPay(request, request.request_rows.First(x => x.id == int.Parse(payment.Value["id"])), payment.Value["amount"], datecreated, unitOfWork.Payments, pay);
 					}
+					unitOfWork.Pays.CalculateCost(pay);
 					unitOfWork.SaveChanges();
-					return Response.AsRedirect("~/");
+					return pay.id.ToString();
 				}
 			};
 

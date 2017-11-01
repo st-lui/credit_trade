@@ -1,4 +1,5 @@
-﻿@{
+﻿@using DbModel
+@{
     Layout = null;
 }
 
@@ -8,7 +9,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Накладная - Продажа товаров в кредит</title>
+    <title>Частичная оплата - Продажа товаров в кредит</title>
+    <link href="~/content/fonts.css" rel="Stylesheet" />
     <style type="text/css">
         .print {
             width: 50%;
@@ -51,12 +53,14 @@
             .footer p {
                 margin-top: 40px;
             }
+
         .col {
             width: 40%;
             float: left;
         }
+
         .fl_left {
-            margin-left:20px;
+            margin-left: 20px;
         }
     </style>
     <script language="javascript">
@@ -69,37 +73,47 @@
             <h3>@Model.pay.request.user.warehouse.postoffice.idx @Model.pay.request.user.warehouse.name @Model.pay.request.user.warehouse.postoffice.post.name</h3>
             <h3>Заказ №@(Model.pay.request.id == 0 ? "" : Model.pay.request.id.ToString()) от @Model.pay.request.date.ToString("dd.MM.yyyy")</h3>
             <h3>ФИО покупателя: @Model.pay.request.buyer.fio</h3>
+            <h3>Частичная оплата от @Model.pay.date.ToString("dd.MM.yyyy hh:mm")</h3>
         </div>
-        @*<div class="body">
+        <div class="body">
             <table>
                 <tr>
                     <th>&nbsp;</th>
                     <th>Наменование</th>
                     <th>Количество</th>
-                    <th>Цена*</th>
-                    <th>Сумма*</th>
+                    <th>Цена</th>
+                    <th>Сумма</th>
+                    <th>Штрих-код</th>
                 </tr>
                 <tbody>
 
                     @{  int positionNumber = 1;
-                        foreach (var requestRow in Model.request.request_rows)
+                        foreach (payment payment in Model.pay.payments)
                         {
                             <tr>
                                 <td>
                                     @(positionNumber++)
                                 </td>
                                 <td>
-                                    @requestRow.name
+                                    @payment.request_rows.name
                                 </td>
                                 <td>
-                                    @requestRow.amount
+                                    @payment.amount
                                 </td>
                                 <td>
-                                    @(((double)requestRow.price).ToString("F2"))
+                                    @(((double)payment.request_rows.price).ToString("F2"))
                                 </td>
                                 <td>
-                                    @(((double)(requestRow.price * requestRow.amount)).ToString("F2"))
+                                    @(((double)(payment.request_rows.price * payment.amount)).ToString("F2"))
                                 </td>
+
+                                @if (payment.request_rows.barcode == "")
+                                {
+                                    <td>-</td>}
+                                else
+                                {
+                                    <td style="font-size: 16pt; font-family: IDAutomationHC39M">(@payment.request_rows.barcode.Replace(" ", "").Replace("\n", "").Replace("\r", ""))</td>
+                                }
                             </tr>}
                     }
                 </tbody>
@@ -108,26 +122,11 @@
                         <td colspan="2"><b>Итого:</b></td>
                         <td>&nbsp;</td>
                         <td>&nbsp;</td>
-                        <td><b>@Model.request.cost</b></td>
+                        <td><b>@Model.pay.cost</b></td>
+                        <td></td>
                     </tr>
                 </tfoot>
             </table>
-        </div>*@
-        <div class="footer">
-            <p>
-                Выдал  _________________________________
-            <p>
-                Принял _________________________________
-            <p>
-                Оттиск КПШ
-            <p>
-                <div class="col">
-                    *Cумма в заказе является предварительной, расчет по заказу будет произведен согласно ценам, установленным на момент погашения долга
-                </div>
-                <div class="col fl_left">
-                    Ознакомлен __________
-                </div>
-            </p>
         </div>
     </div>
 </body>

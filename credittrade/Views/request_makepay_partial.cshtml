@@ -18,7 +18,7 @@
         <div class="form-group">
             <h3>Введите дату</h3>
             <div class='input-group date col-md-6' id='datetimepicker2'>
-                <input type='text' class="form-control" name="datecreated" />
+                <input type='text' class="form-control" name="datecreated" id="datecreated" />
                 <span class="input-group-addon">
                     <span class="glyphicon glyphicon-calendar"></span>
                 </span>
@@ -214,11 +214,27 @@
             if (Object.keys(payments_to_post).length > 0) {
                 if (!mutex) {
                     mutex = true;
-                    $("#create-form").submit();
+                    //$("#create-form").submit();
+                    $.post({
+                        url: "@Url.Content("~/requests/makepay_partial/"+Model.request.id)",
+                        data: {
+                            datecreated: $("#datecreated").val(),
+                            request_info: $("#request_info").val()
+                        },
+                        //success: function () {
+                        //    alert("Nice work!")
+                        //},
+                        //error: function () {
+                        //    alert("Fucked up!");
+                        //}
+                    }).done(function (data) {
+                        window.open("@Url.Content("~/requests/print_partial/")"+data);
+                        window.location = "@Url.Content("~/")";
+                    });
                 }
             }
             else {
-                alert("Невозможно создать пустой заказ");
+                alert("Невозможно создать пустую оплату");
                 return;
             }
         });
