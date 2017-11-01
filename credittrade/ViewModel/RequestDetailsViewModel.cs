@@ -13,9 +13,9 @@ namespace credittrade.ViewModel
 		public string buyerFio;
 		public string date;
 		public string cost;
-		public bool fullpaid;
-		public string fullpaidmessage;
-		public string pay_date;
-		public string paidsum;
+		public bool partial_paid;
+		public string paid_cost;
+		public string returned_cost;
+		public List<request_rows> request_rows;
 	}
 }

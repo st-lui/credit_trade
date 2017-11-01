@@ -142,9 +142,33 @@ namespace credittrade.Modules
 				user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
-					model.request = unitOfWork.Requests.Get(p.request_id);
-					if (model.request.user.warehouse_id != currentUser.warehouse_id)
+					request request = unitOfWork.Requests.Get(p.request_id);
+					if (request.user.warehouse_id != currentUser.warehouse_id)
 						return View["access_denied"];
+					RequestDetailsViewModel rdvm = new RequestDetailsViewModel();
+					rdvm.user = request.user;
+					rdvm.buyerFio = request.buyer.fio;
+					rdvm.date = request.date.Value.ToString("dd.MM.yyyy HH:mm");
+					decimal cost = 0;
+					rdvm.request_rows = new List<request_rows>();
+					foreach (request_rows rr in request.request_rows)
+					{
+						if (rr.amount-rr.paid_amount-rr.return_amount>0)
+						{
+							request_rows new_rr = new request_rows();
+							new_rr.id = rr.id;
+							new_rr.amount = rr.amount - rr.paid_amount - rr.return_amount;
+							new_rr.barcode = rr.barcode;
+							new_rr.ed_izm = rr.ed_izm;
+							new_rr.goods_id = rr.goods_id;
+							new_rr.name = rr.name;
+							new_rr.price = rr.price;
+							cost += Math.Round(new_rr.price.Value * new_rr.amount.Value, 2, MidpointRounding.AwayFromZero);
+							rdvm.request_rows.Add(new_rr);
+						}
+					}
+					rdvm.cost = cost.ToString("f2");
+					model.request = rdvm;
 					return View["request_makepay", model];
 				}
 			};
