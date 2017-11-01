@@ -177,7 +177,7 @@ namespace DataAccess
 
 		public IEnumerable<request> GetRequests(user user)
 		{
-			return db.requests.Include("buyer").Include("request_rows").Where(x => x.user_id == user.id).ToList();
+			return db.requests.Include("buyer").Include("request_rows").Include("pays").Where(x => x.user_id == user.id).ToList();
 		}
 
 	}

@@ -10,6 +10,7 @@ using Nancy.Security;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using credittrade.ViewModel;
 
 namespace credittrade.Modules
 {
@@ -25,24 +26,45 @@ namespace credittrade.Modules
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
 					model.username = currentUser.username;
-					model.requests = unitOfWork.Users.GetRequests(currentUser);
+					var requests = unitOfWork.Users.GetRequests(currentUser);
+					List<RequestViewModel> list = new List<RequestViewModel>();
+					foreach (request req in requests)
+					{
+						RequestViewModel rvm = new RequestViewModel();
+						rvm.id = req.id.ToString();
+						rvm.buyerFio = req.buyer.fio;
+						rvm.date = req.date.Value.ToString("dd.MM.yyyy");
+						rvm.cost = req.cost.ToString();
+						rvm.fullpaid = req.paid.Value;
+						rvm.fullpaidmessage = rvm.fullpaid ? "Да" : "Нет";
+						rvm.pay_date = req.pay_date.HasValue ? req.pay_date.Value.ToString("dd.MM.yyyy HH:mm") : "-";
+						rvm.paidsum = req.pays.Sum(x => x.cost).ToString("f2");
+						list.Add(rvm);
+					}
+					
+					model.requests = list;
 					return View["index", model];
 				}
 			};
 			Get["/requests/view/{request_id}"] = p =>
 			{
+				user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
 					model.request = unitOfWork.Requests.Get(p.request_id);
-
+					if (model.request.user.warehouse_id != currentUser.warehouse_id)
+						return View["access_denied"];
 					return View["request_view", model];
 				}
 			};
 			Get["/requests/print/{request_id}"] = p =>
 			{
+				user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
 					request request = unitOfWork.Requests.Get(p.request_id);
+					if (request.user.warehouse_id != currentUser.warehouse_id)
+						return View["access_denied"];
 					model.request = request;
 					return View["request_print", model];
 				}
@@ -117,20 +139,25 @@ namespace credittrade.Modules
 			};
 			Get["/requests/makepay/{request_id}"] = p =>
 			{
+				user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
 					model.request = unitOfWork.Requests.Get(p.request_id);
-
+					if (model.request.user.warehouse_id != currentUser.warehouse_id)
+						return View["access_denied"];
 					return View["request_makepay", model];
 				}
 			};
 			Post["/requests/makepay/{request_id}"] = p =>
 			{
 				this.ValidateCsrfToken();
+				user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
 					DateTime pay_date = Request.Form.pay_date;
 					var request = unitOfWork.Requests.Get(p.request_id);
+					if (request.user.warehouse_id != currentUser.warehouse_id)
+						return View["access_denied"];
 					unitOfWork.Requests.MakePay(request, pay_date, unitOfWork.Payments, unitOfWork.Pays);
 					unitOfWork.Requests.Change(request);
 					unitOfWork.SaveChanges();
@@ -140,10 +167,12 @@ namespace credittrade.Modules
 
 			Get["/requests/makepay_partial/{request_id}"] = p =>
 			{
+				user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
 					model.request = unitOfWork.Requests.Get(p.request_id);
-
+					if (model.request.user.warehouse_id != currentUser.warehouse_id)
+						return View["access_denied"];
 					return View["request_makepay_partial", model];
 				}
 			};
@@ -159,6 +188,8 @@ namespace credittrade.Modules
 					dynamic request_data = Json.Decode(request_info);
 					decimal cost = 0;
 					request request = unitOfWork.Requests.Get(p.request_id);
+					if (request.user.warehouse_id != currentUser.warehouse_id)
+						return View["access_denied"];
 					pay pay = unitOfWork.Pays.CreatePay(request, datecreated);
 					foreach (KeyValuePair<string, dynamic> payment in request_data)
 					{
@@ -177,7 +208,7 @@ namespace credittrade.Modules
 				{
 					pay pay = unitOfWork.Pays.GetWithData(p.pay_id);
 					if (pay.request.user.warehouse_id != currentUser.warehouse_id)
-						return HttpStatusCode.Unauthorized;
+						return View["access_denied"];
 					model.pay = pay;
 					return View["request_print_partial", model];
 				}
