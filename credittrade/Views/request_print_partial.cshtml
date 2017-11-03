@@ -73,7 +73,7 @@
             <h3>@Model.pay.request.user.warehouse.postoffice.idx @Model.pay.request.user.warehouse.name @Model.pay.request.user.warehouse.postoffice.post.name</h3>
             <h3>Заказ №@(Model.pay.request.id == 0 ? "" : Model.pay.request.id.ToString()) от @Model.pay.request.date.ToString("dd.MM.yyyy")</h3>
             <h3>ФИО покупателя: @Model.pay.request.buyer.fio</h3>
-            <h3>Частичная оплата от @Model.pay.date.ToString("dd.MM.yyyy HH:mm")</h3>
+            <h3>Частичная оплата №@Model.pay.id от @Model.pay.date.ToString("dd.MM.yyyy HH:mm")</h3>
         </div>
         <div class="body">
             <table>
@@ -81,6 +81,7 @@
                     <th>&nbsp;</th>
                     <th>Наменование</th>
                     <th>Количество</th>
+                    <th>Ед.изм.</th>
                     <th>Цена</th>
                     <th>Сумма</th>
                     <th>Штрих-код</th>
@@ -100,6 +101,7 @@
                                 <td>
                                     @payment.amount
                                 </td>
+                                <td>@payment.request_rows.ed_izm</td>
                                 <td>
                                     @(((double)payment.request_rows.price).ToString("F2"))
                                 </td>
@@ -113,7 +115,7 @@
                                 else
                                 {
                                     <td style="font-size: 16pt; font-family: IDAutomationHC39M">(@payment.request_rows.barcode.Replace(" ", "").Replace("\n", "").Replace("\r", ""))</td>
-                                }
+}
                             </tr>}
                     }
                 </tbody>

@@ -38,10 +38,11 @@ namespace credittrade.Modules
 						rvm.fullpaid = req.paid.Value;
 						rvm.fullpaidmessage = rvm.fullpaid ? "Да" : "Нет";
 						rvm.pay_date = req.pay_date.HasValue ? req.pay_date.Value.ToString("dd.MM.yyyy HH:mm") : "-";
-						rvm.paidsum = req.pays.Sum(x => x.cost).ToString("f2");
+						rvm.paidsum = req.pays.Where(x => x.cost > 0).Sum(x => x.cost).ToString("f2");
+						string returned = req.pays.Where(x => x.cost > 0).Sum(x => x.cost).ToString("f2");
 						list.Add(rvm);
 					}
-					
+
 					model.requests = list;
 					return View["index", model];
 				}
@@ -146,6 +147,7 @@ namespace credittrade.Modules
 					if (request.user.warehouse_id != currentUser.warehouse_id)
 						return View["access_denied"];
 					RequestDetailsViewModel rdvm = new RequestDetailsViewModel();
+					rdvm.id = request.id.ToString();
 					rdvm.user = request.user;
 					rdvm.buyerFio = request.buyer.fio;
 					rdvm.date = request.date.Value.ToString("dd.MM.yyyy HH:mm");
@@ -153,7 +155,7 @@ namespace credittrade.Modules
 					rdvm.request_rows = new List<request_rows>();
 					foreach (request_rows rr in request.request_rows)
 					{
-						if (rr.amount-rr.paid_amount-rr.return_amount>0)
+						if (rr.amount - rr.paid_amount - rr.return_amount > 0)
 						{
 							request_rows new_rr = new request_rows();
 							new_rr.id = rr.id;
@@ -168,6 +170,10 @@ namespace credittrade.Modules
 						}
 					}
 					rdvm.cost = cost.ToString("f2");
+					rdvm.paid_cost = request.pays.Where(x => x.cost > 0).Sum(x => x.cost).ToString("f2");
+					rdvm.returned_cost = request.pays.Where(x => x.cost < 0).Sum(x => x.cost).ToString("f2");
+					if (rdvm.paid_cost != "")
+						rdvm.partial_paid = true;
 					model.request = rdvm;
 					return View["request_makepay", model];
 				}
