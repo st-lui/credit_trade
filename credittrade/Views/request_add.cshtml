@@ -124,6 +124,7 @@
         $('a[id*="leftover_"]').click(function () {
             var $span = $(this).next();
             $span.show(true);
+            $span.children(0).focus();
         });
 
         $('a[id*="leftoverconfirm_"]').click(function () {
@@ -170,12 +171,14 @@
                 leftovers_to_post[$leftover_id] = leftover;
                 $("#request_info").val(JSON.stringify(leftovers_to_post));
                 //$("#current_request_body:last-child").append("<tr><td>" + $name + "</td><td>" + $price + "</td><td>" + $amount + "</td><td>" + $cost + "</td></tr>");
-                var $delbutton = '<a class="delbutton btn" id="delbutton_' + $leftover_id+ '"><img src="@Url.Content("~/Content/img/button_delete.gif")"/></a>';
+                //var $current_vertical = $(document).scrollTop();
+                var $delbutton = '<a class="delbutton btn" id="delbutton_' + $leftover_id + '"><img src="@Url.Content("~/Content/img/button_delete.gif")"/></a>';
                 var $node = $("#current_request_table").DataTable().row
                     .add([
                         $name, $price.toFixed(2).replace('.', ','), $amount.toFixed(3).replace('.', ','), accounting.toFixed($cost,2).replace('.', ','), $delbutton])
                     .draw(false).node();
                 $node.id = "curr" + leftover["id"];
+                //$(document).scrollTop($current_vertical+$node.scrollHeight);
 
             } else {
                 leftovers_to_post[$leftover_id]["amount"] += $amount;
