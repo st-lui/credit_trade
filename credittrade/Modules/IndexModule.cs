@@ -62,6 +62,7 @@ namespace credittrade.Modules
                     bool partial_paid = false;
                     if (paid_cost >0)
                         partial_paid = true;
+                    partial_paid = !request.paid.Value && partial_paid;
                     model.partial_paid = partial_paid;
                     model.paid_cost = paid_cost.ToString("f2");
                     model.returned_cost= returned_cost.ToString("f2");
