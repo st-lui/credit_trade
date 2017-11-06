@@ -54,10 +54,19 @@ namespace credittrade.Modules
 				user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
 				using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
 				{
-					model.request = unitOfWork.Requests.Get(p.request_id);
-					if (model.request.user.warehouse_id != currentUser.warehouse_id)
+					request request = unitOfWork.Requests.Get(p.request_id);
+                    if (request.user.warehouse_id != currentUser.warehouse_id)
 						return View["access_denied"];
-					return View["request_view", model];
+                    decimal paid_cost = request.pays.Where(x => x.cost > 0).Sum(x => x.cost);
+                    decimal returned_cost = request.pays.Where(x => x.cost < 0).Sum(x => x.cost);
+                    bool partial_paid = false;
+                    if (paid_cost >0)
+                        partial_paid = true;
+                    model.partial_paid = partial_paid;
+                    model.paid_cost = paid_cost.ToString("f2");
+                    model.returned_cost= returned_cost.ToString("f2");
+                    model.request = request;
+                    return View["request_view", model];
 				}
 			};
 			Get["/requests/print/{request_id}"] = p =>
@@ -172,11 +181,15 @@ namespace credittrade.Modules
 						}
 					}
 					rdvm.cost = cost.ToString("f2");
-					rdvm.paid_cost = request.pays.Where(x => x.cost > 0).Sum(x => x.cost).ToString("f2");
-					rdvm.returned_cost = request.pays.Where(x => x.cost < 0).Sum(x => x.cost).ToString("f2");
-					if (rdvm.paid_cost != "")
-						rdvm.partial_paid = true;
-					model.request = rdvm;
+                    decimal paid_cost = request.pays.Where(x => x.cost > 0).Sum(x => x.cost);
+                    decimal returned_cost = request.pays.Where(x => x.cost < 0).Sum(x => x.cost);
+                    bool partial_paid = false;
+                    if (paid_cost > 0)
+                        partial_paid = true;
+                    rdvm.partial_paid = partial_paid;
+                    rdvm.paid_cost = paid_cost.ToString("f2");
+                    rdvm.returned_cost = returned_cost.ToString("f2");
+                    model.request = rdvm;
 					return View["request_makepay", model];
 				}
 			};
@@ -245,6 +258,48 @@ namespace credittrade.Modules
 					return View["request_print_partial", model];
 				}
 			};
+
+            Get["/requests/partials/{request_id}"] = param =>
+            {
+                user currentUser = ((Bootstrapper.User)Context.CurrentUser).DbUser;
+                using (UnitOfWork unitOfWork = (UnitOfWork)Context.Items["unitofwork"])
+                {
+                    request request = unitOfWork.Requests.Get(param.request_id);
+                    if (request.user.warehouse_id != currentUser.warehouse_id)
+                        return View["access_denied"];
+                    RequestPartialsViewModel rpvm = new RequestPartialsViewModel();
+                    rpvm.id = request.id.ToString();
+                    rpvm.buyerFio = request.buyer.fio;
+                    rpvm.user = request.user;
+                    rpvm.date = request.date.Value.ToString("dd.MM.yyyy HH:mm");
+                    rpvm.paid_cost = request.pays.Where(x => x.cost > 0).Sum(x => x.cost).ToString("f2");
+                    rpvm.returned_cost= request.pays.Where(x => x.cost < 0).Sum(x => x.cost).ToString("f2");
+                    rpvm.cost = request.cost.Value.ToString("f2");
+                    rpvm.pays = new List<PayViewModel>();
+                    foreach (pay pay in request.pays)
+                    {
+                        PayViewModel payViewModel = new PayViewModel();
+                        payViewModel.id = pay.id.ToString();
+                        payViewModel.date = pay.date.ToString("dd.MM.yyyy");
+                        payViewModel.cost = pay.cost.ToString("f2");
+                        payViewModel.type = pay.cost > 0 ? "Погашение" : "Возврат";
+                        payViewModel.payments = new List<PaymentViewModel>();
+                        foreach (payment payment in pay.payments)
+                        {
+                            PaymentViewModel pvm = new PaymentViewModel();
+                            pvm.amount = Math.Abs(payment.amount).ToString("f3");
+                            pvm.name = payment.request_rows.name;
+                            pvm.edizm = payment.request_rows.ed_izm;
+                            pvm.price = payment.request_rows.price.Value.ToString("f2");
+                            pvm.cost = Math.Round(payment.request_rows.price.Value * Math.Abs(payment.amount),2,MidpointRounding.AwayFromZero).ToString("f2");
+                            payViewModel.payments.Add(pvm);
+                        }
+                        rpvm.pays.Add(payViewModel);
+                    }
+                    model.request = rpvm;
+                    return View["request_partials_view",model];
+                }
+            };
 
 
 			Get["/reports"] = p =>

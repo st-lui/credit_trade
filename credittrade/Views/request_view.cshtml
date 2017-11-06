@@ -7,6 +7,13 @@
 <form class="form-horizontal col-sm-8">
     <h3>Заказ № @Model.request.id от @Model.request.date.ToString("dd.MM.yyyy HH:mm")</h3>
     <h3>@Model.request.user.warehouse.postoffice.idx @Model.request.user.warehouse.name @Model.request.user.warehouse.postoffice.post.name</h3>
+    @if (Model.partial_paid)
+    {
+        <div class="form-group">
+            <label class="col-sm-9">По данному заказу есть частичные погашения на сумму @Model.paid_cost.</label>
+            <a class="btn btn-sm btn-primary" href="@Url.Content("~/requests/partials/"+Model.request.id)">Список погашений</a>
+        </div>
+    }
     <div class="form-group">
         <div class="col-sm-4 ">
             <a class="btn btn-primary form-control" onclick='javascript:window.open("@Url.Content("~/requests/print/"+@Model.request.id)");'>Вывод печатной формы</a>

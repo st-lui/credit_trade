@@ -1,19 +1,13 @@
-﻿@{
-    ViewBag.Title = "Внесение оплаты";
+﻿@using credittrade.ViewModel
+@{
+    ViewBag.Title = "Список погашений";
     Layout = "layout.cshtml";
 }
 
-<form class="form-horizontal col-sm-8" id="pay_form" action="@Url.Content("~/requests/makepay/"+Model.request.id)" method="post">
+<form class="form-horizontal col-sm-8" id="pay_form">
     @Html.AntiForgeryToken()
     <h3>Заказ № @Model.request.id от @Model.request.date</h3>
     <h3>@Model.request.user.warehouse.postoffice.idx @Model.request.user.warehouse.name @Model.request.user.warehouse.postoffice.post.name</h3>
-    @if (Model.request.partial_paid)
-    {
-        <div class="form-group">
-            <label class="col-sm-9">По данному заказу есть частичные погашения на сумму @Model.request.paid_cost. Оплаченные позиции не отображаются.</label>
-            <a class="btn btn-sm btn-primary" href="@Url.Content("~/requests/partials_list/"+Model.request.id)">Список погашений</a>
-        </div>
-    }
     <input type="hidden" name="request_id" value="@Model.request.id" />
     <div class="form-group">
         <label class="control-label col-sm-3" for="fio">ФИО покупателя:</label>
@@ -27,78 +21,44 @@
             <label class="form-control" id="cost">@Model.request.cost</label>
         </div>
     </div>
-    <div class="form-group">
-        <label class="control-label col-sm-3" for="pay_date">Ввести дату оплаты:</label>
-        <div class='input-group date col-md-6' id='datetimepicker2'>
-            <input type='text' class="form-control" id="pay_date" name="pay_date" />
-            <span class="input-group-addon">
-                <span class="glyphicon glyphicon-calendar"></span>
-            </span>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <div class="col-sm-offset-3 col-sm-10">
-            <button type="submit" id="submit" class="btn btn-primary">Подтвердить оплату</button>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <h3 class="col-sm-offset-0">Состав заказа</h3>
-        <div class="dataTable_div">
-            <table id="current_request_table_pay" class="row-border">
-                <thead>
-                    <tr>
-                        <th>Товар</th>
-                        <th>Цена</th>
-                        <th>Количество</th>
-                        <th>Стоимость</th>
-                        <th>Штрих-код</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var rr in Model.request.request_rows)
-                    {
+    @foreach (PayViewModel payViewModel in Model.request.pays)
+    {
+        <div class="">
+            <h3 class="col-sm-offset-0">@payViewModel.type №@payViewModel.id от @payViewModel.date на сумму @payViewModel.cost</h3>
+            <div class="dataTable_div">
+                <table class="partials_table">
+                    <thead>
                         <tr>
-                            <td>@rr.name</td>
-                            <td>@rr.price</td>
-                            <td>@rr.amount @rr.ed_izm</td>
-                            <td>@(Math.Round(rr.price * rr.amount, 2, MidpointRounding.AwayFromZero))</td>
-                            @if (rr.barcode == "")
-                            {
-                                <td>-</td>
-}
-                            else
-                            {
-                                <td style="font-size: 16pt; font-family: IDAutomationHC39M">(@rr.barcode.Replace(" ", "").Replace("\n", "").Replace("\r", ""))</td>
-}
-                        </tr>}
-                </tbody>
-            </table>
+                            <th>Товар</th>
+                            <th>Цена</th>
+                            <th>Количество</th>
+                            <th>Стоимость</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var rr in payViewModel.payments)
+                        {
+                            <tr>
+                                <td>@rr.name</td>
+                                <td>@rr.price</td>
+                                <td>@rr.amount @rr.edizm</td>
+                                <td>@rr.cost</td>
+                            </tr>}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-
+    }
 </form>
 
 
 <script>
     var mutex = true;
-    $("#current_request_table_pay").DataTable({
+    $(".partials_table").DataTable({
         "language": {
             "url": "@Url.Content("~/content/dataTables.ru.lang.json")"
         },
         paging: false,
         filter: false
-    });
-    $('#datetimepicker2').datetimepicker({
-        locale: 'ru',
-        defaultDate: moment(),
-        allowInputToggle:true
-    });
-    $("#submit").click(function () {
-        if (!mutex) {
-            mutex = true;
-            $("#pay_form").submit();
-        }
     });
 </script>

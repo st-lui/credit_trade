@@ -81,9 +81,9 @@
                 <tr id="tr_@request_row.id">
                     <td id="name">@request_row.name</td>
                     <td id="price">@request_row.price</td>
-                    <td id="amount">@request_row.amount</td>
+                    <td id="amount">@(request_row.amount-request_row.paid_amount-request_row.return_amount)</td>
                     <td id="edizm">@request_row.ed_izm</td>
-                    <td id="cost">@Math.Round(request_row.amount * request_row.price, 2, MidpointRounding.AwayFromZero)</td>
+                    <td id="cost">@Math.Round((request_row.amount- request_row.paid_amount - request_row.return_amount) * request_row.price, 2, MidpointRounding.AwayFromZero)</td>
                     <td id="paid">@request_row.paid_amount</td>
                     <td id="return">@request_row.return_amount</td>
                     <td><a id="payment_@request_row.id" class="add_good btn btn-sm btn-primary" title="Добавить к оплате">+</a><span style="display: none" id="paymentadd_@request_row.id"><input id="paymentamount_@request_row.id" type=" text" /><a class="btn btn-sm btn-primary" id="paymentconfirm_@request_row.id">Подтвердить</a></span></td>
@@ -121,6 +121,7 @@
         $('a[id*="payment_"]').click(function () {
             var $span = $(this).next();
             $span.show(true);
+            $span.children(0).focus();
         });
 
         $('a[id*="paymentconfirm_"]').click(function () {

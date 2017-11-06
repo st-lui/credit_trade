@@ -11,7 +11,7 @@
     {
         <div class="form-group">
             <label class="col-sm-9">По данному заказу есть частичные погашения на сумму @Model.request.paid_cost. Оплаченные позиции не отображаются.</label>
-            <a class="btn btn-sm btn-primary" href="@Url.Content("~/requests/partials_list/"+Model.request.id)">Список погашений</a>
+            <a class="btn btn-sm btn-primary" href="@Url.Content("~/requests/partials/"+Model.request.id)">Список погашений</a>
         </div>
     }
     <input type="hidden" name="request_id" value="@Model.request.id" />
