@@ -38,7 +38,9 @@ namespace credittrade.Modules
 						rvm.fullpaid = req.paid.Value;
 						rvm.fullpaidmessage = rvm.fullpaid ? "Да" : "Нет";
 						rvm.pay_date = req.pay_date.HasValue ? req.pay_date.Value.ToString("dd.MM.yyyy HH:mm") : "-";
-						rvm.paidsum = req.pays.Where(x => x.cost > 0).Sum(x => x.cost).ToString("f2");
+                        rvm.paidsum= "-";
+                        if (!rvm.fullpaid)
+                            rvm.paidsum = req.pays.Where(x => x.cost > 0).Sum(x => x.cost).ToString("f2");
 						string returned = req.pays.Where(x => x.cost > 0).Sum(x => x.cost).ToString("f2");
 						list.Add(rvm);
 					}

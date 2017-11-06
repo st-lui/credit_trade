@@ -160,7 +160,8 @@ namespace credittrade.Modules
 						case 7:start = new DateTime(2017, 7, 1, 0, 0, 0); finish = new DateTime(2017, 7, 31, 23, 59, 59); break;
 						case 8:start = new DateTime(2017, 8, 1, 0, 0, 0); finish = new DateTime(2017, 8, 31, 23, 59, 59); break;
 						case 9: start = new DateTime(2017, 9, 1, 0, 0, 0); finish = new DateTime(2017, 9, 30, 23, 59, 59); break;
-						case 10: start = new DateTime(2017, 10, 1, 0, 0, 0); finish = DateTime.Today.AddDays(1).AddSeconds(-1); break;
+                        case 10: start = new DateTime(2017, 10, 1, 0, 0, 0); finish = new DateTime(2017, 10, 31, 23, 59, 59); break;
+                        case 11: start = new DateTime(2017, 11, 1, 0, 0, 0); finish = DateTime.Today.AddDays(1).AddSeconds(-1); break;
 					}
 					foreach (var ufps in parents)
 					{
@@ -213,7 +214,8 @@ namespace credittrade.Modules
 							monStr = "Август 2017"; break;
 						case 9: monStr = "Сентябрь 2017"; break;
 						case 10: monStr = "Октябрь 2017"; break;
-					}
+                        case 11: monStr = "Ноябрь 2017"; break;
+                    }
 					model.monStr = monStr;
 					return View["report_mrc", model];
 				}
